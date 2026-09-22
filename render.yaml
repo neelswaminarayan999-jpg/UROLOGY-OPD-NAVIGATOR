@@ -8,10 +8,10 @@ services:
     startCommand: npm start
     healthCheckPath: /health
     envVars:
-      - key: OPENAI_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-      - key: URO_AI_MODEL
-        value: gpt-5.6-sol
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
       - key: ALLOWED_ORIGIN
         value: "*"
       - key: RATE_LIMIT_PER_10MIN
