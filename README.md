@@ -1,6 +1,6 @@
-# Urology Oracle V12 — GitHub + Online AI deployment package
+# Urology Oracle V12.1 — GitHub + Online AI deployment package
 
-This repository package preserves the V12 offline Clinical Oracle and adds a clean Online AI route without exposing endpoint/model/API-key controls in the clinical UI.
+This repository package preserves the V12.1 offline Clinical Oracle and adds a clean Online AI route without exposing endpoint/model/API-key controls in the clinical UI.
 
 ## Recommended live setup
 Use GitHub as the source repository and Render as the full-stack web host. Render serves `frontend/index.html` and the `/api/urology-ai` backend from the same origin, so the online AI requires no CORS or browser endpoint configuration.
