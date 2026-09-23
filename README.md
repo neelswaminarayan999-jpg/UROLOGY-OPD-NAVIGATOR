@@ -52,3 +52,8 @@ Set `GEMINI_API_KEY` server-side. Do not place a Gemini key in frontend files. `
 - No silent model fallback is performed. A persistent failure is surfaced to the clinician.
 
 V13.3 is the final engineering package in this revision cycle. Future clinical-content changes should be versioned as a new rules release rather than silently modifying this release.
+## V13.4 Gemini resilience
+
+The online investigation AI keeps `gemini-3.8-flash` as the primary model. For transient capacity failures (HTTP 502/503/504) only, the backend retries the primary and then transparently attempts configured fallback models in order: `gemini-3.7-flash`, then `gemini-2.5-flash`. Authentication, permission, invalid-request, and quota errors are not hidden by fallback. The response reports the model actually used and whether fallback was used. Gemini 2.5 uses its supported `thinkingBudget` parameter rather than Gemini 3's `thinkingLevel`.
+
+The deterministic offline Oracle remains unchanged and Gemini remains online-only.
