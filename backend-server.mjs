@@ -163,7 +163,43 @@ function outputSchema() {
 }
 
 function extractOpenAIText(data) {
-  return data?.choices?.[0]?.message?.content || data?.choices?.[0]?.text || data?.output_text || '';
+  const c = data?.choices?.[0]?.message?.content;
+  if (Array.isArray(c)) return c.map(x => typeof x === 'string' ? x : String(x?.text || '')).join('\n').trim();
+  return c || data?.choices?.[0]?.text || data?.output_text || '';
+}
+
+const ORACLE_KEYS = [
+  'technical_adequacy','observations','interpretation','differential','urgent_flags',
+  'missing_data','uncertainty','suggested_disease','suggested_oracle_values','pathway_link','teaching'
+];
+function stripJsonFences(text) {
+  return String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+}
+function validateOracleOutput(text) {
+  const cleaned = stripJsonFences(text);
+  // Never accept provider safety-classification/refusal text as a successful Oracle answer.
+  if (/^user\s+safety\s*:/i.test(cleaned) || /safety\s+categories\s*:/i.test(cleaned)) {
+    const e = new Error('Provider returned a safety-classification response instead of Oracle JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e;
+  }
+  let obj;
+  try { obj = JSON.parse(cleaned); }
+  catch { const e = new Error('Provider returned non-JSON content; expected Oracle JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) { const e = new Error('Provider returned an invalid Oracle JSON object.'); e.code='INVALID_ORACLE_RESPONSE'; throw e; }
+  const keys = Object.keys(obj);
+  const missing = ORACLE_KEYS.filter(k => !(k in obj));
+  const extra = keys.filter(k => !ORACLE_KEYS.includes(k));
+  if (missing.length || extra.length) {
+    const e = new Error(`Invalid Oracle schema: missing=${missing.join(',') || 'none'}; extra=${extra.join(',') || 'none'}`);
+    e.code = 'INVALID_ORACLE_RESPONSE'; throw e;
+  }
+  if (!Array.isArray(obj.observations) || !Array.isArray(obj.differential) || !Array.isArray(obj.urgent_flags) ||
+      !Array.isArray(obj.missing_data) || !Array.isArray(obj.uncertainty) || !Array.isArray(obj.teaching)) {
+    const e = new Error('Invalid Oracle schema: list fields must be arrays.'); e.code='INVALID_ORACLE_RESPONSE'; throw e;
+  }
+  if (!obj.pathway_link || obj.pathway_link.requires_clinician_confirmation !== true) {
+    const e = new Error('Invalid Oracle schema: clinician-confirmation gate is missing or false.'); e.code='INVALID_ORACLE_RESPONSE'; throw e;
+  }
+  return { cleaned, obj };
 }
 
 function extractInputMessages(body) {
@@ -231,7 +267,8 @@ async function callGemini(body) {
   const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
   if (!r.ok) { const err = new Error(`Gemini HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
   const output_text = extractGeminiText(data); if (!output_text) throw new Error('Gemini returned an empty response.');
-  return { output_text, model: MODEL, provider: 'Gemini' };
+  const valid = validateOracleOutput(output_text);
+  return { output_text: valid.cleaned, model: MODEL, provider: 'Gemini' };
 }
 
 async function callOpenAICompatible(body, cfg) {
@@ -261,7 +298,8 @@ async function callOpenAICompatible(body, cfg) {
   const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
   if (!r.ok) { const err = new Error(`${cfg.name} HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
   const output_text = extractOpenAIText(data); if (!output_text) throw new Error(`${cfg.name} returned an empty response.`);
-  return { output_text, model: data.model || model, provider: cfg.name };
+  const valid = validateOracleOutput(output_text);
+  return { output_text: valid.cleaned, model: data.model || model, provider: cfg.name };
 }
 
 const PROVIDERS = [
@@ -294,7 +332,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.7.0', fallbackOrder: PROVIDERS.map(p => p.name), configured: Object.fromEntries(PROVIDERS.map(p => [p.name, Boolean(p.apiKey)])), offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.9.0', fallbackOrder: PROVIDERS.map(p => p.name), configured: Object.fromEntries(PROVIDERS.map(p => [p.name, Boolean(p.apiKey)])), offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);

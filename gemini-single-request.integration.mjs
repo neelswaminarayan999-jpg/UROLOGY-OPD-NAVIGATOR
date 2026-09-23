@@ -17,7 +17,8 @@ const mock = http.createServer((req, res) => {
     seenThinking = parsed.generationConfig?.thinkingConfig?.thinkingLevel ?? null;
     seenMaxTokens = parsed.generationConfig?.maxOutputTokens ?? null;
     res.writeHead(200, {'Content-Type':'application/json'});
-    res.end(JSON.stringify({candidates:[{content:{parts:[{text:'{"ok":true}'}]}}]}));
+    const valid={technical_adequacy:'Adequate',observations:[],interpretation:'Test',differential:[],urgent_flags:[],missing_data:[],uncertainty:[],suggested_disease:'None',suggested_oracle_values:{disease:'None',fields:[]},pathway_link:{requires_clinician_confirmation:true,suggested_module:'None',note:'Test'},teaching:[]};
+    res.end(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify(valid)}]}}]}));
   });
 });
 await new Promise(resolve => mock.listen(8821, '127.0.0.1', resolve));
