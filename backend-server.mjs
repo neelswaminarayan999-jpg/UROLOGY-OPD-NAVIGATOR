@@ -25,12 +25,13 @@ const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const API_KEY = process.env.GEMINI_API_KEY || '';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.8-27b';
 const GROQ_API_BASE_URL = (process.env.GROQ_API_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, '');
 const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || '';
 const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'gpt-oss-120b';
 const CEREBRAS_API_BASE_URL = (process.env.CEREBRAS_API_BASE_URL || 'https://api.cerebras.ai/v1').replace(/\/$/, '');
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openai/gpt-oss-120b:free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free';
 const OPENROUTER_API_BASE_URL = (process.env.OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
@@ -239,8 +240,18 @@ async function callOpenAICompatible(body, cfg) {
   const systemSuffix = '\n\nReturn valid JSON only. Do not wrap JSON in markdown fences. The JSON must contain exactly these top-level keys: technical_adequacy, observations, interpretation, differential, urgent_flags, missing_data, uncertainty, suggested_disease, suggested_oracle_values, pathway_link, teaching. pathway_link.requires_clinician_confirmation must be true.';
   if (Array.isArray(messages[0]?.content)) messages[0].content = messages[0].content.map((p,i) => i===0 && p.type==='text' ? { ...p, text: p.text + systemSuffix } : p);
   else messages[0].content = String(messages[0].content || '') + systemSuffix;
+  const hasImageParts = messages.some(m => Array.isArray(m?.content) && m.content.some(p => p?.type === 'image_url'));
+  // Groq's GPT-OSS text models require string content. Keep text-only requests
+  // compatible, while using the Groq vision model when image input is present.
+  let model = cfg.model;
+  if (cfg.name === 'Groq' && hasImageParts) model = GROQ_VISION_MODEL;
+  if (!hasImageParts) {
+    for (const m of messages) {
+      if (Array.isArray(m.content)) m.content = m.content.map(p => p?.type === 'text' ? p.text : '').filter(Boolean).join('\n');
+    }
+  }
   const request = {
-    model: cfg.model,
+    model,
     messages,
     temperature: 0.1,
     max_tokens: 3500,
@@ -250,7 +261,7 @@ async function callOpenAICompatible(body, cfg) {
   const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
   if (!r.ok) { const err = new Error(`${cfg.name} HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
   const output_text = extractOpenAIText(data); if (!output_text) throw new Error(`${cfg.name} returned an empty response.`);
-  return { output_text, model: data.model || cfg.model, provider: cfg.name };
+  return { output_text, model: data.model || model, provider: cfg.name };
 }
 
 const PROVIDERS = [

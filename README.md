@@ -20,10 +20,10 @@ This release preserves the large clinical Oracle and the V13 offline/PWA archite
 - A quota/rate-limit response is surfaced without repeated retry attempts.
 
 ## Provider environment variables
-- `GROQ_API_KEY`, `GROQ_MODEL`
+- `GROQ_API_KEY`, `GROQ_MODEL`, `GROQ_VISION_MODEL`
 - `GEMINI_API_KEY`, `GEMINI_MODEL`
 - `CEREBRAS_API_KEY`, `CEREBRAS_MODEL`
-- `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`
+- `OPENROUTER_API_KEY`, `OPENROUTER_MODEL` (default: `openrouter/free`)
 
 Keys remain server-side only; do not put them in frontend code.
 
@@ -50,3 +50,9 @@ npm test
 
 ## Clinical status
 This remains a clinical decision-support/teaching tool, not an autonomous prescribing system. Verify doses, contraindications, regimen schedules and institutional protocols against current authoritative sources before patient care.
+
+
+### Provider notes
+- Groq text requests use `openai/gpt-oss-120b`; image requests automatically use `GROQ_VISION_MODEL` (default `qwen/qwen3.8-27b`).
+- OpenRouter defaults to `openrouter/free`, which dynamically selects an available free model.
+- Cerebras is retained in the fallback order but may return HTTP 402 when the account has no active inference credit; the router then continues to OpenRouter.
