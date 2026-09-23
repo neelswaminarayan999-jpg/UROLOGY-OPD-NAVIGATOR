@@ -1,10 +1,10 @@
-const CACHE='urology-oracle-v13.3-core';
+const CACHE='urology-oracle-v13.6-core';
 const CORE=['./','./index.html','./oracle-config.js','./v13-clinical-engine.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()).then(()=>self.clients.matchAll()).then(clients=>clients.forEach(client=>client.postMessage({type:'UROLOGY_ORACLE_OFFLINE_READY',version:'13.3.0'}))));
+  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()).then(()=>self.clients.matchAll()).then(clients=>clients.forEach(client=>client.postMessage({type:'UROLOGY_ORACLE_OFFLINE_READY',version:'13.6.0'}))));
 });
 self.addEventListener('fetch',event=>{
   const url=new URL(event.request.url);

@@ -4,7 +4,7 @@
 */
 (function(){
 'use strict';
-const VERSION='13.3.0';
+const VERSION='13.6.0';
 const GUIDELINE_SET={EAU:'2026',TNM:'9th edition where adopted by the relevant 2026 guideline'};
 const RULE_META={
   prostate:{version:'EAU-PCa-2026',source:'EAU Prostate Cancer 2026'},

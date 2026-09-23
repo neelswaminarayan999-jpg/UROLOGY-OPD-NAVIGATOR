@@ -22,7 +22,6 @@ loadEnv(path.join(__dirname, '.env'));
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
-const FALLBACK_MODELS = String(process.env.GEMINI_FALLBACK_MODELS || 'gemini-3.7-flash,gemini-3.6-flash').split(',').map(s => s.trim()).filter(Boolean).filter(m => m !== MODEL);
 const API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
@@ -153,89 +152,6 @@ function outputSchema() {
   };
 }
 
-const GEMINI_MAX_RETRIES = Math.max(0, Number(process.env.GEMINI_MAX_RETRIES || 3));
-const GEMINI_RETRY_BASE_MS = Math.max(100, Number(process.env.GEMINI_RETRY_BASE_MS || 1000));
-const GEMINI_RETRY_MAX_MS = Math.max(GEMINI_RETRY_BASE_MS, Number(process.env.GEMINI_RETRY_MAX_MS || 8000));
-const GEMINI_FALLBACK_RETRIES = Math.max(0, Number(process.env.GEMINI_FALLBACK_RETRIES || 1));
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-function isRetryableGeminiStatus(status) {
-  return status === 408 || status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
-}
-function retryDelayMs(attempt, retryAfterHeader) {
-  const retryAfter = Number(retryAfterHeader);
-  if (Number.isFinite(retryAfter) && retryAfter >= 0) {
-    return Math.min(GEMINI_RETRY_MAX_MS, retryAfter * 1000);
-  }
-  const exponential = Math.min(GEMINI_RETRY_MAX_MS, GEMINI_RETRY_BASE_MS * (2 ** attempt));
-  return Math.round(Math.random() * exponential);
-}
-
-function requestForModel(model, parts) {
-  const generationConfig = {
-    responseMimeType: 'application/json',
-    responseSchema: outputSchema(),
-    maxOutputTokens: 2400
-  };
-  if (model.startsWith('gemini-2.5-')) {
-    generationConfig.thinkingConfig = { thinkingBudget: 1024 };
-  } else {
-    generationConfig.thinkingConfig = { thinkingLevel: 'low' };
-  }
-  return {
-    contents: [{ role: 'user', parts }],
-    generationConfig
-  };
-}
-
-async function callGeminiModel(model, parts, maxRetries) {
-  const request = requestForModel(model, parts);
-  const url = `${GEMINI_API_BASE_URL}/models/${encodeURIComponent(model)}:generateContent`;
-  let lastStatus = 0;
-  let lastMessage = '';
-  let lastRetryableStatus = false;
-
-  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-    let r;
-    try {
-      r = await fetch(url, {
-        method: 'POST',
-        headers: { 'x-goog-api-key': API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify(request)
-      });
-    } catch (err) {
-      if (attempt >= maxRetries) throw Object.assign(new Error(`Gemini API network error after ${attempt + 1} attempts: ${err?.message || String(err)}`), { retryable: true, status: 0, model });
-      const delay = retryDelayMs(attempt, '');
-      console.warn(`Gemini ${model} network error; retry ${attempt + 1}/${maxRetries} in ${delay}ms.`);
-      await sleep(delay);
-      continue;
-    }
-
-    const txt = await r.text();
-    let data = {}; try { data = JSON.parse(txt); } catch {}
-    if (r.ok) {
-      return { output_text: extractGeminiText(data), model, provider: 'Gemini', fallback_used: model !== MODEL };
-    }
-
-    lastStatus = r.status;
-    lastMessage = data?.error?.message || txt.slice(0, 1000) || `Gemini HTTP ${r.status}`;
-    lastRetryableStatus = isRetryableGeminiStatus(r.status);
-    if (!lastRetryableStatus || attempt >= maxRetries) break;
-
-    const delay = retryDelayMs(attempt, r.headers.get('retry-after'));
-    console.warn(`Gemini ${model} HTTP ${r.status}; retry ${attempt + 1}/${maxRetries} in ${delay}ms.`);
-    await sleep(delay);
-  }
-
-  const err = new Error(`Gemini API HTTP ${lastStatus} after ${maxRetries + 1} attempts: ${lastMessage}`);
-  err.status = lastStatus;
-  err.retryable = lastRetryableStatus;
-  err.model = model;
-  throw err;
-}
-
 async function callGemini(body) {
   if (!API_KEY) throw new Error('Server is not configured with GEMINI_API_KEY.');
   const parts = [{ text: makePrompt(body) }];
@@ -246,26 +162,25 @@ async function callGemini(body) {
     const x = stripDataUrl(img);
     if (x && /^image\//i.test(x.mimeType)) parts.push({ inline_data: { mime_type: x.mimeType, data: x.data } });
   }
-
-  const errors = [];
-  const modelsToTry = [MODEL, ...FALLBACK_MODELS];
-  for (let i = 0; i < modelsToTry.length; i += 1) {
-    const model = modelsToTry[i];
-    try {
-      const result = await callGeminiModel(model, parts, i === 0 ? GEMINI_MAX_RETRIES : GEMINI_FALLBACK_RETRIES);
-      return { ...result, requested_model: MODEL };
-    } catch (err) {
-      errors.push({ model, status: err?.status || 0, message: err?.message || String(err) });
-      // Automatic fallback is used only after a transient 502/503/504 from the current model.
-      // Authentication, permission, invalid-request and quota errors are not masked by model switching.
-      const canFallback = err?.retryable && [502, 503, 504].includes(err?.status) && i < modelsToTry.length - 1;
-      if (!canFallback) break;
-      console.warn(`Gemini ${model} unavailable (${err.status}); trying fallback model ${modelsToTry[i + 1]}.`);
+  const request = {
+    contents: [{ role: 'user', parts }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: outputSchema(),
+      thinkingConfig: { thinkingLevel: 'medium' },
+      maxOutputTokens: 3500
     }
-  }
-
-  const summary = errors.map(e => `${e.model}: HTTP ${e.status || 'network'} — ${e.message}`).join(' | ');
-  throw new Error(`Gemini analysis unavailable. ${summary}`);
+  };
+  const url = `${GEMINI_API_BASE_URL}/models/${encodeURIComponent(MODEL)}:generateContent`;
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'x-goog-api-key': API_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(request)
+  });
+  const txt = await r.text();
+  let data = {}; try { data = JSON.parse(txt); } catch {}
+  if (!r.ok) { const msg = data?.error?.message || txt.slice(0, 1000) || `Gemini HTTP ${r.status}`; throw new Error(`Gemini API: ${msg}`); }
+  return { output_text: extractGeminiText(data), model: MODEL, provider: 'Gemini' };
 }
 
 const server = http.createServer(async (req, res) => {
@@ -277,7 +192,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.5.0', model: MODEL, fallbackModels: FALLBACK_MODELS, provider: 'Gemini', configured: Boolean(API_KEY), offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.6.0', model: MODEL, provider: 'Gemini', configured: Boolean(API_KEY), offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);

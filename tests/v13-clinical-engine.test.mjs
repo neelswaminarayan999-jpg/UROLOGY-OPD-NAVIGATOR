@@ -5,7 +5,7 @@ const code=fs.readFileSync(new URL('../frontend/v13-clinical-engine.js',import.m
 let domReady;
 const context={console,setInterval:()=>{},document:{readyState:'loading',addEventListener:(ev,fn)=>{if(ev==='DOMContentLoaded')domReady=fn;},getElementById(){return null},querySelector(){return null}},window:{},Date};
 vm.createContext(context);vm.runInContext(code,context);assert.equal(typeof domReady,'function');domReady();
-const E=context.window.UROLOGY_ORACLE_V13;assert.equal(E.version,'13.3.0');
+const E=context.window.UROLOGY_ORACLE_V13;assert.equal(E.version,'13.6.0');
 let a=E.audit('Ca Bladder',{t:'T2',m:'M0',nodes:'N0',rct:'Yes',immuno:'Yes',g_ecog:0,g_crcl:85,g_hearing:'<Grade 2',g_neuro:'<Grade 2',g_nyha:'NYHA I–II'});assert.equal(a.status,'READY');assert.equal(a.galsky.positive.length,0);
 a=E.audit('Ca Bladder',{t:'T2',m:'M0',nodes:'N0',rct:'Yes',immuno:'Yes',g_ecog:'',g_crcl:85,g_hearing:'<Grade 2',g_neuro:'<Grade 2',g_nyha:'NYHA I–II'});assert.equal(a.status,'INCOMPLETE');assert.ok(a.missing.includes('g_ecog'));
 a=E.audit('Ca Bladder',{t:'T2',m:'M0',nodes:'N0',rct:'Yes',immuno:'Yes',g_ecog:2,g_crcl:85,g_hearing:'<Grade 2',g_neuro:'<Grade 2',g_nyha:'NYHA I–II'});assert.equal(a.status,'READY');assert.ok(a.galsky.positive.some(x=>x.includes('ECOG')));
@@ -14,7 +14,7 @@ a=E.audit('Urethral Stricture',{sex:'Male',site:'Bulbar',length:'',obliterative:
 a=E.audit('Stone Disease',{site:'Kidney',size:'>20 mm',infection:'Yes'});assert.equal(a.status,'READY');
 a=E.audit('BPH / Male LUTS',{bother:'Moderate',size:'30–80 mL'});assert.equal(a.status,'READY');
 assert.equal(E.provenance('Ca Prostate').version,'EAU-PCa-2026');
-console.log('V13.3 clinical rule regression: PASS (8 representative cases)');
+console.log('V13.6 clinical rule regression: PASS (8 representative cases)');
 // Integration contract: the safety wrapper must see the live Oracle state rather than a stale copy.
 assert.equal(typeof context.window.oracleState, 'undefined');
 context.window.oracleState={t:'T2',m:'M0',nodes:'N0',rct:'Yes',immuno:'Yes',g_ecog:0,g_crcl:85,g_hearing:'<Grade 2',g_neuro:'<Grade 2',g_nyha:'NYHA I–II'};
