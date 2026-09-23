@@ -1,4 +1,4 @@
-# Urology Oracle V13.2 FINAL — no offline AI
+# Urology Oracle V13.3 FINAL — offline core + resilient online AI
 
 This release preserves the large V12.1/V13 clinical frontend and adds the V13 deterministic safety/provenance architecture without replacing the clinical corpus with a smaller rewrite.
 
@@ -22,7 +22,7 @@ This release preserves the large V12.1/V13 clinical frontend and adds the V13 de
 - PWA offline core with API paths excluded from caching.
 - PWA icon and manifest hardening.
 - Regression and HTTP smoke tests.
-- V13.2 state bridge so the safety engine reads the live Oracle state correctly.
+- V13.3 state bridge so the safety engine reads the live Oracle state correctly.
 
 ## Important clinical status
 This is a clinical decision-support/teaching tool, not an autonomous prescribing system. Before patient care, verify drug doses, regimen schedules, contraindications and institutional protocols against the current guideline/product information. The Oracle should not override specialist judgement.
@@ -44,4 +44,11 @@ node tests/smoke.mjs
 Set `GEMINI_API_KEY` server-side. Do not place a Gemini key in frontend files. `GEMINI_MODEL` may be set server-side; otherwise the configured default is used by the backend.
 
 ## Release note
-V13.2 is the final engineering package in this revision cycle. Future clinical-content changes should be versioned as a new rules release rather than silently modifying this release.
+## Online Gemini resilience
+
+- Gemini investigation requests remain online-only.
+- The backend retries transient Gemini `408`, `429`, `500`, `502`, `503`, and `504` responses with exponential backoff and jitter.
+- Default policy: up to 3 retries (4 total attempts), with a 1–8 second capped backoff window; `Retry-After` is honored when supplied.
+- No silent model fallback is performed. A persistent failure is surfaced to the clinician.
+
+V13.3 is the final engineering package in this revision cycle. Future clinical-content changes should be versioned as a new rules release rather than silently modifying this release.

@@ -152,6 +152,25 @@ function outputSchema() {
   };
 }
 
+const GEMINI_MAX_RETRIES = Math.max(0, Number(process.env.GEMINI_MAX_RETRIES || 3));
+const GEMINI_RETRY_BASE_MS = Math.max(100, Number(process.env.GEMINI_RETRY_BASE_MS || 1000));
+const GEMINI_RETRY_MAX_MS = Math.max(GEMINI_RETRY_BASE_MS, Number(process.env.GEMINI_RETRY_MAX_MS || 8000));
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+function isRetryableGeminiStatus(status) {
+  return status === 408 || status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+}
+function retryDelayMs(attempt, retryAfterHeader) {
+  const retryAfter = Number(retryAfterHeader);
+  if (Number.isFinite(retryAfter) && retryAfter >= 0) {
+    return Math.min(GEMINI_RETRY_MAX_MS, retryAfter * 1000);
+  }
+  const exponential = Math.min(GEMINI_RETRY_MAX_MS, GEMINI_RETRY_BASE_MS * (2 ** attempt));
+  return Math.round(Math.random() * exponential);
+}
+
 async function callGemini(body) {
   if (!API_KEY) throw new Error('Server is not configured with GEMINI_API_KEY.');
   const parts = [{ text: makePrompt(body) }];
@@ -172,15 +191,42 @@ async function callGemini(body) {
     }
   };
   const url = `${GEMINI_API_BASE_URL}/models/${encodeURIComponent(MODEL)}:generateContent`;
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: { 'x-goog-api-key': API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(request)
-  });
-  const txt = await r.text();
-  let data = {}; try { data = JSON.parse(txt); } catch {}
-  if (!r.ok) { const msg = data?.error?.message || txt.slice(0, 1000) || `Gemini HTTP ${r.status}`; throw new Error(`Gemini API: ${msg}`); }
-  return { output_text: extractGeminiText(data), model: MODEL, provider: 'Gemini' };
+  let lastStatus = 0;
+  let lastMessage = '';
+
+  for (let attempt = 0; attempt <= GEMINI_MAX_RETRIES; attempt += 1) {
+    let r;
+    try {
+      r = await fetch(url, {
+        method: 'POST',
+        headers: { 'x-goog-api-key': API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(request)
+      });
+    } catch (err) {
+      if (attempt >= GEMINI_MAX_RETRIES) throw new Error(`Gemini API network error after ${attempt + 1} attempts: ${err?.message || String(err)}`);
+      const delay = retryDelayMs(attempt, '');
+      console.warn(`Gemini network error; retry ${attempt + 1}/${GEMINI_MAX_RETRIES} in ${delay}ms.`);
+      await sleep(delay);
+      continue;
+    }
+
+    const txt = await r.text();
+    let data = {}; try { data = JSON.parse(txt); } catch {}
+    if (r.ok) {
+      return { output_text: extractGeminiText(data), model: MODEL, provider: 'Gemini' };
+    }
+
+    lastStatus = r.status;
+    lastMessage = data?.error?.message || txt.slice(0, 1000) || `Gemini HTTP ${r.status}`;
+    const shouldRetry = isRetryableGeminiStatus(r.status);
+    if (!shouldRetry || attempt >= GEMINI_MAX_RETRIES) break;
+
+    const delay = retryDelayMs(attempt, r.headers.get('retry-after'));
+    console.warn(`Gemini HTTP ${r.status}; retry ${attempt + 1}/${GEMINI_MAX_RETRIES} in ${delay}ms.`);
+    await sleep(delay);
+  }
+
+  throw new Error(`Gemini API HTTP ${lastStatus} after ${GEMINI_MAX_RETRIES + 1} attempts: ${lastMessage}`);
 }
 
 const server = http.createServer(async (req, res) => {
@@ -192,7 +238,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.2.0', model: MODEL, provider: 'Gemini', configured: Boolean(API_KEY), offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.3.0', model: MODEL, provider: 'Gemini', configured: Boolean(API_KEY), offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
