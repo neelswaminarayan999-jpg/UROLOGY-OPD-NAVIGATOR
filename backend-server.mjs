@@ -22,7 +22,7 @@ loadEnv(path.join(__dirname, '.env'));
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
-const FALLBACK_MODELS = String(process.env.GEMINI_FALLBACK_MODELS || 'gemini-3.7-flash,gemini-2.5-flash').split(',').map(s => s.trim()).filter(Boolean).filter(m => m !== MODEL);
+const FALLBACK_MODELS = String(process.env.GEMINI_FALLBACK_MODELS || 'gemini-3.7-flash,gemini-3.6-flash').split(',').map(s => s.trim()).filter(Boolean).filter(m => m !== MODEL);
 const API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
@@ -277,7 +277,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.4.0', model: MODEL, fallbackModels: FALLBACK_MODELS, provider: 'Gemini', configured: Boolean(API_KEY), offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.5.0', model: MODEL, fallbackModels: FALLBACK_MODELS, provider: 'Gemini', configured: Boolean(API_KEY), offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);

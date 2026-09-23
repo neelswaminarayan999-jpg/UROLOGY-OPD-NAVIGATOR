@@ -41,7 +41,7 @@ const child = spawn(process.execPath, [path.join(root, 'backend-server.mjs')], {
     WEB_ROOT: path.join(root, 'frontend'),
     GEMINI_API_KEY: 'test-key',
     GEMINI_MODEL: 'gemini-3.8-flash',
-    GEMINI_FALLBACK_MODELS: 'gemini-3.7-flash,gemini-2.5-flash',
+    GEMINI_FALLBACK_MODELS: 'gemini-3.7-flash,gemini-3.6-flash',
     GEMINI_API_BASE_URL: 'http://127.0.0.1:8811',
     GEMINI_MAX_RETRIES: '3',
     GEMINI_FALLBACK_RETRIES: '0',
