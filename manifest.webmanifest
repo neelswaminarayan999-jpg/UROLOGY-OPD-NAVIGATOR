@@ -1,0 +1,17 @@
+{
+  "name": "Urology Oracle 2026",
+  "short_name": "Urology Oracle",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "description": "Offline-first urology clinical decision-support and teaching Oracle. Online investigation AI remains online-only.",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

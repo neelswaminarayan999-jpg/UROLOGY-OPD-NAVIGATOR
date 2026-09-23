@@ -1,10 +1,10 @@
-# Urology Oracle V13.6 — offline core + proven Gemini request profile
+# Urology Oracle V13.7 — offline core + multi-provider AI failover
 
-This release preserves the large clinical Oracle and the V13 offline/PWA architecture while restoring the proven V12.1 Gemini request behaviour.
+This release preserves the large clinical Oracle and the V13 offline/PWA architecture while replacing the single-provider AI dependency with ordered multi-provider failover. The clinical Oracle/UI are otherwise preserved.
 
 ## Architecture
 - Clinical Oracle core: offline-capable PWA on every device after first successful online load.
-- Investigation AI: ONLINE ONLY through the server-side Gemini endpoint.
+- Investigation AI: ONLINE ONLY through the server-side AI endpoint with ordered failover: Groq → Gemini → Cerebras → OpenRouter.
 - Offline AI / MedGemma: NOT INCLUDED.
 - API credentials: server-side only.
 - AI output: advisory; clinician confirmation is required before Oracle handoff.
@@ -19,10 +19,18 @@ This release preserves the large clinical Oracle and the V13 offline/PWA archite
 - A transient 503 is reported as temporary Gemini unavailability rather than consuming multiple free-tier requests.
 - A quota/rate-limit response is surfaced without repeated retry attempts.
 
+## Provider environment variables
+- `GROQ_API_KEY`, `GROQ_MODEL`
+- `GEMINI_API_KEY`, `GEMINI_MODEL`
+- `CEREBRAS_API_KEY`, `CEREBRAS_MODEL`
+- `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`
+
+Keys remain server-side only; do not put them in frontend code.
+
 ## Offline behaviour
 - `sw.js` caches the core Oracle assets and excludes `/api/` from caching.
 - Gemini remains unavailable offline by design.
-- Cache version is `urology-oracle-v13.6-core`.
+- Cache version remains `urology-oracle-v13.6-core` because the clinical frontend is intentionally unchanged in this provider-only release.
 
 ## Clinical safety architecture retained
 - TNM/classification validation gates.

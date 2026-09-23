@@ -23,6 +23,15 @@ const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const API_KEY = process.env.GEMINI_API_KEY || '';
+const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+const GROQ_API_BASE_URL = (process.env.GROQ_API_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, '');
+const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || '';
+const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'gpt-oss-120b';
+const CEREBRAS_API_BASE_URL = (process.env.CEREBRAS_API_BASE_URL || 'https://api.cerebras.ai/v1').replace(/\/$/, '');
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openai/gpt-oss-120b:free';
+const OPENROUTER_API_BASE_URL = (process.env.OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
 const RATE_LIMIT = Number(process.env.RATE_LIMIT_PER_10MIN || 30);
@@ -152,12 +161,57 @@ function outputSchema() {
   };
 }
 
-async function callGemini(body) {
-  if (!API_KEY) throw new Error('Server is not configured with GEMINI_API_KEY.');
-  const parts = [{ text: makePrompt(body) }];
-  if (typeof body.context?.report === 'string' && body.context.report) {
-    parts.push({ text: 'Written report:\n' + body.context.report });
+function extractOpenAIText(data) {
+  return data?.choices?.[0]?.message?.content || data?.choices?.[0]?.text || data?.output_text || '';
+}
+
+function extractInputMessages(body) {
+  if (Array.isArray(body?.messages) && body.messages.length) return body.messages;
+  if (!Array.isArray(body?.input)) return null;
+  return body.input.map(item => {
+    const role = item?.role === 'system' ? 'system' : item?.role === 'assistant' ? 'assistant' : 'user';
+    const content = Array.isArray(item?.content) ? item.content.map(part => {
+      if (part?.type === 'input_text') return { type: 'text', text: String(part.text || '') };
+      if (part?.type === 'input_image' && part?.image_url) return { type: 'image_url', image_url: { url: String(part.image_url) } };
+      if (part?.type === 'text') return { type: 'text', text: String(part.text || '') };
+      if (part?.type === 'image_url') return part;
+      return null;
+    }).filter(Boolean) : String(item?.content || '');
+    return { role, content };
+  });
+}
+
+function buildCompatMessages(body) {
+  const inputMessages = extractInputMessages(body);
+  if (inputMessages) return inputMessages;
+  const content = [{ type: 'text', text: makePrompt(body) }];
+  if (typeof body.context?.report === 'string' && body.context.report) content.push({ type: 'text', text: 'Written report:\n' + body.context.report });
+  for (const img of (body.images || [])) {
+    if (typeof img === 'string' && img.startsWith('data:image/')) content.push({ type: 'image_url', image_url: { url: img } });
   }
+  return [{ role: 'user', content }];
+}
+
+async function fetchJsonWithTimeout(url, options, timeoutMs=12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally { clearTimeout(timer); }
+}
+
+async function callGemini(body) {
+  if (!API_KEY) throw new Error('Gemini is not configured.');
+  const parts = [{ text: makePrompt(body) }];
+  if (Array.isArray(body?.input)) {
+    const texts = [];
+    for (const item of body.input) {
+      if (typeof item?.content === 'string') texts.push(item.content);
+      else if (Array.isArray(item?.content)) for (const part of item.content) if (part?.type === 'input_text') texts.push(String(part.text || ''));
+    }
+    if (texts.length) parts[0] = { text: texts.join('\n\n') };
+  }
+  if (typeof body.context?.report === 'string' && body.context.report) parts.push({ text: 'Written report:\n' + body.context.report });
   for (const img of (body.images || [])) {
     const x = stripDataUrl(img);
     if (x && /^image\//i.test(x.mimeType)) parts.push({ inline_data: { mime_type: x.mimeType, data: x.data } });
@@ -172,15 +226,52 @@ async function callGemini(body) {
     }
   };
   const url = `${GEMINI_API_BASE_URL}/models/${encodeURIComponent(MODEL)}:generateContent`;
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: { 'x-goog-api-key': API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(request)
-  });
-  const txt = await r.text();
-  let data = {}; try { data = JSON.parse(txt); } catch {}
-  if (!r.ok) { const msg = data?.error?.message || txt.slice(0, 1000) || `Gemini HTTP ${r.status}`; throw new Error(`Gemini API: ${msg}`); }
-  return { output_text: extractGeminiText(data), model: MODEL, provider: 'Gemini' };
+  const r = await fetchJsonWithTimeout(url, { method: 'POST', headers: { 'x-goog-api-key': API_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
+  const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
+  if (!r.ok) { const err = new Error(`Gemini HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
+  const output_text = extractGeminiText(data); if (!output_text) throw new Error('Gemini returned an empty response.');
+  return { output_text, model: MODEL, provider: 'Gemini' };
+}
+
+async function callOpenAICompatible(body, cfg) {
+  if (!cfg.apiKey) throw new Error(`${cfg.name} is not configured.`);
+  const messages = buildCompatMessages(body);
+  const systemSuffix = '\n\nReturn valid JSON only. Do not wrap JSON in markdown fences. The JSON must contain exactly these top-level keys: technical_adequacy, observations, interpretation, differential, urgent_flags, missing_data, uncertainty, suggested_disease, suggested_oracle_values, pathway_link, teaching. pathway_link.requires_clinician_confirmation must be true.';
+  if (Array.isArray(messages[0]?.content)) messages[0].content = messages[0].content.map((p,i) => i===0 && p.type==='text' ? { ...p, text: p.text + systemSuffix } : p);
+  else messages[0].content = String(messages[0].content || '') + systemSuffix;
+  const request = {
+    model: cfg.model,
+    messages,
+    temperature: 0.1,
+    max_tokens: 3500,
+    response_format: { type: 'json_object' }
+  };
+  const r = await fetchJsonWithTimeout(cfg.url, { method: 'POST', headers: { Authorization: `Bearer ${cfg.apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
+  const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
+  if (!r.ok) { const err = new Error(`${cfg.name} HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
+  const output_text = extractOpenAIText(data); if (!output_text) throw new Error(`${cfg.name} returned an empty response.`);
+  return { output_text, model: data.model || cfg.model, provider: cfg.name };
+}
+
+const PROVIDERS = [
+  { name: 'Groq', apiKey: GROQ_API_KEY, model: GROQ_MODEL, url: `${GROQ_API_BASE_URL}/chat/completions` },
+  { name: 'Gemini', apiKey: API_KEY, model: MODEL },
+  { name: 'Cerebras', apiKey: CEREBRAS_API_KEY, model: CEREBRAS_MODEL, url: `${CEREBRAS_API_BASE_URL}/chat/completions` },
+  { name: 'OpenRouter', apiKey: OPENROUTER_API_KEY, model: OPENROUTER_MODEL, url: `${OPENROUTER_API_BASE_URL}/chat/completions` }
+];
+
+async function callWithFallback(body) {
+  const attempts = [];
+  for (const p of PROVIDERS) {
+    try {
+      const result = p.name === 'Gemini' ? await callGemini(body) : await callOpenAICompatible(body, p);
+      return { ...result, fallback_attempts: attempts };
+    } catch (e) {
+      attempts.push({ provider: p.name, status: e?.status || 0, error: String(e?.message || e).slice(0, 500) });
+    }
+  }
+  const summary = attempts.map(a => `${a.provider}${a.status ? ` (${a.status})` : ''}: ${a.error}`).join(' | ');
+  const err = new Error(`All AI providers failed. ${summary}`); err.status = 503; err.attempts = attempts; throw err;
 }
 
 const server = http.createServer(async (req, res) => {
@@ -192,13 +283,13 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.6.0', model: MODEL, provider: 'Gemini', configured: Boolean(API_KEY), offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.7.0', fallbackOrder: PROVIDERS.map(p => p.name), configured: Object.fromEntries(PROVIDERS.map(p => [p.name, Boolean(p.apiKey)])), offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
       const raw = await readBody(req);
       let body = {}; try { body = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
-      return json(res, 200, await callGemini(body), origin);
+      return json(res, 200, await callWithFallback(body), origin);
     }
     if (req.method === 'GET') {
       let urlPath = (req.url || '/').split('?')[0];
