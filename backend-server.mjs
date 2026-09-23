@@ -5,7 +5,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const WEB_ROOT = path.resolve(process.env.WEB_ROOT || path.join(__dirname, '../frontend'));
+const WEB_ROOT = path.resolve(process.env.WEB_ROOT || path.join(__dirname, 'frontend'));
 
 function loadEnv(file) {
   if (!fs.existsSync(file)) return;
