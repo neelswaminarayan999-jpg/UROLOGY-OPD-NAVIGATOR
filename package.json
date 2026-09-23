@@ -1,0 +1,1 @@
+{"name":"urology-oracle-v13.2","private":true,"type":"module","scripts":{"start":"node backend-server.mjs","test":"node tests/v13-clinical-engine.test.mjs && node tests/smoke.mjs"}}

@@ -1,37 +1,47 @@
-# Urology Oracle V12.1 — GitHub + Online AI deployment package
+# Urology Oracle V13.2 FINAL — no offline AI
 
-This repository package preserves the V12.1 offline Clinical Oracle and adds a clean Online AI route without exposing endpoint/model/API-key controls in the clinical UI.
+This release preserves the large V12.1/V13 clinical frontend and adds the V13 deterministic safety/provenance architecture without replacing the clinical corpus with a smaller rewrite.
 
-## Recommended live setup
-Use GitHub as the source repository and Render as the full-stack web host. Render serves `frontend/index.html` and the `/api/urology-ai` backend from the same origin, so the online AI requires no CORS or browser endpoint configuration.
+## Locked architecture
+- Clinical Oracle core: offline-capable PWA.
+- Investigation AI: ONLINE ONLY through the server-side Gemini endpoint.
+- Offline AI / MedGemma: **NOT INCLUDED**.
+- API credentials: server-side only.
+- AI output: advisory; clinician confirmation is required before Oracle handoff.
 
-1. Create a GitHub repository and upload the contents of this folder.
-2. In Render, choose **New → Blueprint** and point it to the GitHub repository. Render will read `render.yaml`.
-3. In Render, set `GEMINI_API_KEY` as a secret environment variable.
-4. Deploy. Open the generated Render URL; the Oracle and `/api/urology-ai` are on the same origin.
-5. Test `https://YOUR-RENDER-URL/health` and confirm `{ "ok": true }`.
+## Final release additions
+- TNM/classification validation gates.
+- Deterministic treatment-gate architecture.
+- Explicit cisplatin component collection / Galsky screen support.
+- Drug safety registry structure.
+- Missing-data and contradiction states.
+- Decision trace and clinical provenance metadata.
+- Versioned 2026 EAU rule-family metadata.
+- Operative and reconstructive atlas preserved.
+- Investigation-specific online AI architecture.
+- PWA offline core with API paths excluded from caching.
+- PWA icon and manifest hardening.
+- Regression and HTTP smoke tests.
+- V13.2 state bridge so the safety engine reads the live Oracle state correctly.
 
-## Optional GitHub Pages frontend
-A GitHub Pages workflow is included at `.github/workflows/pages.yml`. Pages hosts only the static frontend. If you use it, edit `frontend/oracle-config.js` once after the Render backend exists:
+## Important clinical status
+This is a clinical decision-support/teaching tool, not an autonomous prescribing system. Before patient care, verify drug doses, regimen schedules, contraindications and institutional protocols against the current guideline/product information. The Oracle should not override specialist judgement.
 
-`window.UROLOGY_ORACLE_AI_BASE_URL = "https://YOUR-RENDER-SERVICE.onrender.com";`
+## Run
+```bash
+node backend-server.mjs
+```
 
-Then commit the change. The clinical UI still shows no endpoint/model/API-key controls; this file is deployment configuration, not a clinical setting.
+## Test
+```bash
+node --check backend-server.mjs
+node --check frontend/v13-clinical-engine.js
+node tests/v13-clinical-engine.test.mjs
+node tests/smoke.mjs
+```
 
-## Local test
-From the repository root:
+## Production configuration
+Set `GEMINI_API_KEY` server-side. Do not place a Gemini key in frontend files. `GEMINI_MODEL` may be set server-side; otherwise the configured default is used by the backend.
 
-`cd backend`
-
-Copy `.env.example` to `.env`, set `GEMINI_API_KEY`, then run:
-
-`npm start`
-
-The server will serve the frontend at `http://127.0.0.1:8787/`.
-
-## Security / clinical use
-Never commit `.env` or an API key. Keep the Gemini credential only in the backend host's secret store. Online AI output is advisory and must be independently checked against the original investigation and clinical context. The deterministic Clinical Oracle is kept separate from AI output.
-
-
-## Gemini API
-Create a Gemini API key in Google AI Studio and set it only as the Render environment variable `GEMINI_API_KEY`. Do not commit it to GitHub or put it in the browser. The backend uses Gemini multimodal image input and structured JSON output. Current default model: `gemini-3.8-flash`.
+## Release note
+V13.2 is the final engineering package in this revision cycle. Future clinical-content changes should be versioned as a new rules release rather than silently modifying this release.

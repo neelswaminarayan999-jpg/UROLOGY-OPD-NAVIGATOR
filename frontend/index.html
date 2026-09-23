@@ -5,6 +5,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Uro-Oncology Oracle — Guideline Navigator 2026</title>
 
 <style>
@@ -307,6 +311,8 @@ header.sticky-top button{background:#173650!important;color:#fff!important;borde
 @media(max-width:1280px){#oracleView .oracle-grid{height:auto!important;min-height:0!important;overflow:visible!important}#oracleView #oracleForm,#oracleView #oracleRiskPanel{height:680px!important;max-height:none!important}#oracleView #oracleOutput{height:620px!important}}
 @media(max-width:900px){#oracleView .oracle-grid{height:auto!important;min-height:0!important}#oracleView #oracleForm,#oracleView #oracleRiskPanel,#oracleView #oracleOutput{height:auto!important;overflow:visible!important}}
 </style>
+<link rel="manifest" href="./manifest.webmanifest">
+<script src="./v13-clinical-engine.js"></script>
 </head>
 <body>
 <div class="max-w-7xl mx-auto min-h-screen">
@@ -327,7 +333,7 @@ header.sticky-top button{background:#173650!important;color:#fff!important;borde
   <section id="homeView">
     <div class="card p-5 mb-4">
       <div class="flex flex-wrap gap-2 items-center mb-3">
-        <span class="badge badge-blue">2026 content baseline</span><span class="badge badge-slate">V10.1 • online AI optional</span>
+        <span class="badge badge-blue">2026 content baseline</span><span class="chip">V13 offline-first</span><span class="badge badge-slate">V10.1 • online AI optional</span>
         <span class="chip">EAU 2026</span>
         <span class="chip">NCCN 2026 version registry</span>
         <span class="chip">Rule-based Oracle</span>
@@ -1246,6 +1252,8 @@ const ORACLE_FIELDS={
 };
 
 let oracleState={};
+// V13.2 bridge: expose the live Oracle state to the deterministic safety engine without duplicating state.
+Object.defineProperty(window, "oracleState", { configurable:true, get:()=>oracleState, set:v=>{ oracleState=v||{}; } });
 const ACTIVE_ORACLE={};
 function oracleValue(id){return oracleState[id]==null?'':oracleState[id];}
 function oracleVisible(f,v){return typeof f.show==='function' ? !!f.show(v) : true;}
@@ -2320,10 +2328,8 @@ async function callAI12(){
    if(disease&&q('v12PathwayBtn'))q('v12PathwayBtn').style.display='inline-block';
    status.innerHTML='<div class="v12-ok">Answer received.</div>';
  }catch(e){
-   const em=String(e?.message||e||'Unknown error');
-   const transient=/temporarily unavailable|high demand|HTTP 429|HTTP 500|HTTP 502|HTTP 503|HTTP 504/i.test(em);
-   out.innerHTML='<div class="v12-alert"><b>'+ (transient?'AI service temporarily unavailable':'Online AI request failed') +'.</b><br>'+esc12(em)+'</div>';
-   status.innerHTML='<div class="v12-alert">'+(transient?'The server automatically retries and can switch to an alternate Gemini model. Please retry shortly if no answer appears.':'The analysis request failed. The clinical Oracle remains available independently.')+'</div>';
+   out.innerHTML='<div class="v12-alert"><b>Online AI request failed.</b><br>'+esc12(e.message||e)+'</div>';
+   status.innerHTML='<div class="v12-alert">The analysis request failed. Check the Render service logs if this persists.</div>';
  }finally{
    if(btn){btn.disabled=false;btn.textContent='Analyze investigation';}
  }
@@ -2553,9 +2559,38 @@ const routeNames=['openCalculators','openDrugs','openTrials','openOracle','showH
 /* ---------- 7. STARTUP SANITY ---------- */
 function sanity12(){
  try{mergeProcedures12();}catch{}
- try{window.URO_ORACLE_V12={version:'12.0',procedureCount:Object.keys(PROCEDURES).length,bookFigureCount:Object.keys(FIGS).length,onlineAI:true,offlineAI:false};}catch{}
+ try{window.URO_ORACLE_V12={version:'13.0.0',offlineFirst:true,procedureCount:Object.keys(PROCEDURES).length,bookFigureCount:Object.keys(FIGS).length,onlineAI:true,offlineAI:false};}catch{}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sanity12);else sanity12();
+})();
+</script>
+<script id="v13OfflinePWA">
+(function(){
+  'use strict';
+  const OFFLINE_BANNER_ID='v13OfflineBanner';
+  function banner(){
+    if(document.getElementById(OFFLINE_BANNER_ID)) return;
+    const b=document.createElement('div');
+    b.id=OFFLINE_BANNER_ID;
+    b.className='no-print';
+    b.style.cssText='position:fixed;left:10px;right:10px;bottom:10px;z-index:9999;padding:10px 12px;border-radius:12px;background:#7f1d1d;color:#fff;font:700 12px/1.4 system-ui;box-shadow:0 8px 30px rgba(0,0,0,.25)';
+    b.innerHTML='<b>OFFLINE MODE</b> — Core Urology Oracle is available. Online Investigation AI and live guideline links require internet.';
+    document.body.appendChild(b);
+  }
+  function clear(){document.getElementById(OFFLINE_BANNER_ID)?.remove();}
+  function update(){navigator.onLine?clear():banner();}
+  window.addEventListener('online',update); window.addEventListener('offline',update);
+  document.addEventListener('DOMContentLoaded',update);
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(function(reg){
+        reg.update().catch(function(){});
+      }).catch(function(err){console.warn('Urology Oracle offline worker registration failed',err);});
+    });
+  }
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault(); window.__urologyOracleInstallPrompt=e;
+  });
 })();
 </script>
 </body>
