@@ -27,8 +27,8 @@
     }
     const model=document.getElementById('aiModel');
     if(model){
-      model.innerHTML='<option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option><option value="gemini-3.8-flash">Gemini 3.8 Flash</option>';
-      model.value='gemini-3.5-flash-lite';
+      model.innerHTML='<option value="google/gemma-4-26b-a4b-it:free">OpenRouter — Gemma 4 26B A4B (free)</option><option value="openrouter/free">OpenRouter — Free Models Router</option>';
+      model.value='google/gemma-4-26b-a4b-it:free';
       model.disabled=false;
     }
     const key=document.getElementById('aiKeyWrap'); if(key) key.style.display='none';
