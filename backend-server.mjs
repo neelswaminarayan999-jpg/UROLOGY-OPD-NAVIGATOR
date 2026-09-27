@@ -32,7 +32,8 @@ const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || '';
 const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'gpt-oss-120b';
 const CEREBRAS_API_BASE_URL = (process.env.CEREBRAS_API_BASE_URL || 'https://api.cerebras.ai/v1').replace(/\/$/, '');
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'qwen/qwen3.8-27b:free';
+const OPENROUTER_FALLBACK_MODELS = String(process.env.OPENROUTER_FALLBACK_MODELS || 'google/gemma-4-26b-a4b-it:free,openrouter/free').split(',').map(x => x.trim()).filter(Boolean);
 const OPENROUTER_API_BASE_URL = (process.env.OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
@@ -107,7 +108,12 @@ function makePrompt(body) {
   const study = String(body.study || 'investigation');
   const ctx = body.context || {};
   const canonical = ['Ca Prostate','Ca Bladder','UTUC','Ca Penis','Ca Testis','Ca Kidney','Urethral Cancer','Adrenal / Neuroendocrine','Urethral Stricture','BPH / Male LUTS','Stone Disease'];
-  return `You are the online investigation assistant inside a urology clinical decision-support tool. Study: ${study}.\n\nPatient/context data:\n${JSON.stringify(ctx)}\n\nTask: interpret only the supplied images, report and structured data. Do not invent measurements. State technical limitations and distinguish what is visible/readable from what cannot be established. Give a concise, clinically useful provisional interpretation, key alternatives, urgent findings, missing information, uncertainty, and teaching points. Where an existing Oracle module is reasonably suggested, choose exactly one of: ${canonical.join(', ')}. Only provide suggested Oracle field values when directly supported. Return valid JSON matching the requested schema. This is advisory clinical decision support; do not issue an autonomous diagnosis or treatment order.`;
+  return `You are the image/report interpretation assistant inside a urology clinical decision-support and teaching tool. Study: ${study}.
+  
+Patient/context data:
+${JSON.stringify(ctx)}
+
+Analyze only the supplied image(s), written report and structured data. This is clinician-facing support, not autonomous medical care. Do NOT identify a person, make a definitive patient diagnosis, prescribe treatment, or issue a treatment order. Describe visible radiologic/clinical features, extract measurements only when clearly readable, identify important abnormalities and limitations, and suggest which existing Oracle module should be opened for clinician review. Do not invent measurements or facts. Distinguish direct observations from interpretation. Return valid JSON matching the requested schema. Canonical Oracle modules: ${canonical.join(', ')}. The clinician must confirm all findings and treatment decisions.`;
 }
 function outputSchema() {
   const diseases = [
@@ -362,23 +368,32 @@ async function callOpenAICompatible(body, cfg) {
   return { output_text: valid.cleaned, model: data.model || model, provider: cfg.name };
 }
 
-const PROVIDERS = [
-  { name: 'OpenRouter', apiKey: OPENROUTER_API_KEY, model: OPENROUTER_MODEL, url: `${OPENROUTER_API_BASE_URL}/chat/completions` }
-];
+const PROVIDERS = [];
+
+
 
 async function callWithFallback(body) {
   const attempts = [];
-  for (const p of PROVIDERS) {
+  const models = [OPENROUTER_MODEL, ...OPENROUTER_FALLBACK_MODELS.filter(x => x !== OPENROUTER_MODEL)];
+  if (!OPENROUTER_API_KEY) {
+    const err = new Error('OPENROUTER_API_KEY is not configured.'); err.status = 503; err.attempts = []; throw err;
+  }
+  for (const model of models) {
+    const cfg = { name: 'OpenRouter', apiKey: OPENROUTER_API_KEY, model, url: `${OPENROUTER_API_BASE_URL}/chat/completions` };
     try {
-      const result = await callOpenAICompatible(body, p);
+      const result = await callOpenAICompatible(body, cfg);
       return { ...result, fallback_attempts: attempts };
     } catch (e) {
-      attempts.push({ provider: p.name, model: p.model, status: e?.status || 0, error: String(e?.message || e).slice(0, 500) });
+      attempts.push({ provider: 'OpenRouter', model, status: e?.status || 0, code: e?.code || '', error: String(e?.message || e).slice(0, 500) });
+      if (e?.status && ![429, 502, 503, 504].includes(e.status) && e?.code !== 'INVALID_ORACLE_RESPONSE') {
+        // A permanent HTTP/authentication error should not be hidden by model fallback.
+        break;
+      }
     }
   }
-  const summary = attempts.map(a => `${a.provider}${a.model ? ` / ${a.model}` : ''}${a.status ? ` (${a.status})` : ''}: ${a.error}`).join(' | ');
+  const summary = attempts.map(a => `${a.provider} / ${a.model}${a.status ? ` (${a.status})` : ''}: ${a.error}`).join(' | ');
   const status = attempts.find(a => a.status === 429)?.status || attempts.find(a => a.status === 503)?.status || 503;
-  const err = new Error(`OpenRouter AI failed. ${summary || 'OPENROUTER_API_KEY is not configured.'}`); err.status = status; err.attempts = attempts; throw err;
+  const err = new Error(`OpenRouter AI failed. ${summary}`); err.status = status; err.attempts = attempts; throw err;
 }
 
 function hotfixHtml(html) {
@@ -397,7 +412,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '14.0.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'OpenRouter', model: OPENROUTER_MODEL, freeTier: true, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '14.0.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'OpenRouter', model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
