@@ -32,7 +32,7 @@ const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || '';
 const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'gpt-oss-120b';
 const CEREBRAS_API_BASE_URL = (process.env.CEREBRAS_API_BASE_URL || 'https://api.cerebras.ai/v1').replace(/\/$/, '');
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemma-4-26b-a4b-it:free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free';
 const OPENROUTER_API_BASE_URL = (process.env.OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
@@ -318,10 +318,7 @@ async function callOpenAICompatible(body, cfg) {
   if (Array.isArray(messages[0]?.content)) messages[0].content = messages[0].content.map((p,i) => i===0 && p.type==='text' ? { ...p, text: p.text + systemSuffix } : p);
   else messages[0].content = String(messages[0].content || '') + systemSuffix;
   const hasImageParts = messages.some(m => Array.isArray(m?.content) && m.content.some(p => p?.type === 'image_url'));
-  // Groq's GPT-OSS text models require string content. Keep text-only requests
-  // compatible, while using the Groq vision model when image input is present.
-  let model = cfg.model;
-  if (cfg.name === 'Groq' && hasImageParts) model = GROQ_VISION_MODEL;
+  const model = cfg.model;
   if (!hasImageParts) {
     for (const m of messages) {
       if (Array.isArray(m.content)) m.content = m.content.map(p => p?.type === 'text' ? p.text : '').filter(Boolean).join('\n');
@@ -334,10 +331,33 @@ async function callOpenAICompatible(body, cfg) {
     max_tokens: 3500,
     response_format: { type: 'json_object' }
   };
-  const r = await fetchJsonWithTimeout(cfg.url, { method: 'POST', headers: { Authorization: `Bearer ${cfg.apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
-  const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
-  if (!r.ok) { const err = new Error(`${cfg.name} HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
-  const output_text = extractOpenAIText(data); if (!output_text) throw new Error(`${cfg.name} returned an empty response.`);
+
+  let r, txt = '', data = {};
+  let lastError = null;
+  for (const delay of [0, 1200, 3000]) {
+    if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+    r = await fetchJsonWithTimeout(cfg.url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${cfg.apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://urology-opd-navigator.onrender.com',
+        'X-Title': 'Urology Oracle V14.0'
+      },
+      body: JSON.stringify(request)
+    });
+    txt = await r.text();
+    data = {}; try { data = JSON.parse(txt); } catch {}
+    if (r.ok) break;
+    lastError = new Error(`${cfg.name} HTTP ${r.status}: ${data?.error?.message || data?.error?.metadata?.raw || txt.slice(0, 800)}`);
+    lastError.status = r.status;
+    lastError.providerResponse = data?.error || null;
+    if (![429, 502, 503, 504].includes(r.status)) throw lastError;
+  }
+  if (!r.ok) throw lastError || new Error(`${cfg.name} request failed.`);
+
+  const output_text = extractOpenAIText(data);
+  if (!output_text) throw new Error(`${cfg.name} returned an empty response.`);
   const valid = validateOracleOutput(output_text);
   return { output_text: valid.cleaned, model: data.model || model, provider: cfg.name };
 }
@@ -377,7 +397,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '14.0.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'OpenRouter', model: OPENROUTER_MODEL, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '14.0.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'OpenRouter', model: OPENROUTER_MODEL, freeTier: true, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
