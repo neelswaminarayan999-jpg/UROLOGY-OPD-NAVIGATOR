@@ -108,12 +108,24 @@ function makePrompt(body) {
   const study = String(body.study || 'investigation');
   const ctx = body.context || {};
   const canonical = ['Ca Prostate','Ca Bladder','UTUC','Ca Penis','Ca Testis','Ca Kidney','Urethral Cancer','Adrenal / Neuroendocrine','Urethral Stricture','BPH / Male LUTS','Stone Disease'];
+  const isUroflow = /uroflow|flow[- ]rate|qmax|q\\s*max|voided volume/i.test(study + ' ' + JSON.stringify(ctx));
+  const specialtyGuardrail = isUroflow ? `
+UROFLOWMETRY-SPECIFIC ACCURACY RULES:
+- Report the exact readable Qmax, Qavg, voided volume, flow pattern and PVR only when present.
+- A low Qmax is an abnormal low-flow finding, but uroflowmetry alone cannot distinguish bladder outlet obstruction (BOO/BPO) from detrusor underactivity (DU) or an under-filled bladder.
+- Do NOT state or imply that Qmax <10 mL/s by itself is diagnostic of significant obstruction.
+- For a voided volume around/above 150 mL, state that the tracing is more interpretable; for volumes <150 mL, recommend repeat uroflowmetry when clinically appropriate.
+- Use the flow curve as supportive information, not as proof of urethral stricture.
+- If the question is BOO vs DU, explain that pressure-flow urodynamics provides the functional distinction when indicated; do not infer BOO from uroflow alone.
+- If a urethral stricture is suggested, require direct supporting evidence such as visible narrowing on urethroscopy/RUG/VCUG rather than low flow alone.
+- Keep interpretation proportional to the data: do not invent prostate size, PVR, symptoms, obstruction grade, stricture length or detrusor contractility.
+` : '';
   return `You are the image/report interpretation assistant inside a urology clinical decision-support and teaching tool. Study: ${study}.
   
 Patient/context data:
 ${JSON.stringify(ctx)}
 
-Analyze only the supplied image(s), written report and structured data. This is clinician-facing support, not autonomous medical care. Do NOT identify a person, make a definitive patient diagnosis, prescribe treatment, or issue a treatment order. Describe visible radiologic/clinical features, extract measurements only when clearly readable, identify important abnormalities and limitations, and suggest which existing Oracle module should be opened for clinician review. Do not invent measurements or facts. Distinguish direct observations from interpretation. Return valid JSON matching the requested schema. Canonical Oracle modules: ${canonical.join(', ')}. The clinician must confirm all findings and treatment decisions.`;
+Analyze only the supplied image(s), written report and structured data. This is clinician-facing support, not autonomous medical care. Do NOT identify a person, make a definitive patient diagnosis, prescribe treatment, or issue a treatment order. Describe visible radiologic/clinical features, extract measurements only when clearly readable, identify important abnormalities and limitations, and suggest which existing Oracle module should be opened for clinician review. Do not invent measurements or facts. Distinguish direct observations from interpretation. ${specialtyGuardrail}Return valid JSON matching the requested schema. Canonical Oracle modules: ${canonical.join(', ')}. The clinician must confirm all findings and treatment decisions.`;
 }
 function outputSchema() {
   const diseases = [
