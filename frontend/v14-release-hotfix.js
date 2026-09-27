@@ -79,6 +79,126 @@
   }
 
   enhanceClinicalUI();
+
+  const GUIDELINES={
+    'Ca Prostate':['EAU Prostate Cancer 2026','https://uroweb.org/guidelines/prostate-cancer'],
+    'Ca Bladder':['EAU Non-muscle-invasive + Muscle-invasive/Metastatic Bladder Cancer 2026','https://uroweb.org/guidelines/non-muscle-invasive-bladder-cancer'],
+    'UTUC':['EAU Upper Urinary Tract Urothelial Cell Carcinoma 2026','https://uroweb.org/guidelines/upper-urinary-tract-urothelial-cell-carcinoma'],
+    'Ca Kidney':['EAU Renal Cell Carcinoma 2026','https://uroweb.org/guidelines/renal-cell-carcinoma'],
+    'Ca Testis':['EAU Testicular Cancer 2026','https://uroweb.org/guidelines/testicular-cancer'],
+    'Ca Penis':['EAU Penile Cancer 2026','https://uroweb.org/guidelines/penile-cancer'],
+    'Urethral Cancer':['EAU Primary Urethral Carcinoma 2026','https://uroweb.org/guidelines/primary-urethral-carcinoma'],
+    'Urethral Stricture':['EAU Urethral Strictures 2026','https://uroweb.org/guidelines/urethral-strictures'],
+    'BPH / Male LUTS':['EAU Non-neurogenic Male LUTS 2026','https://uroweb.org/guidelines/management-of-non-neurogenic-male-luts'],
+    'Stone Disease':['EAU Urolithiasis 2026','https://uroweb.org/guidelines/urolithiasis']
+  };
+  const DISEASES=Object.keys(GUIDELINES);
+
+  function detectSuggestedDisease(btn){
+    const attrKeys=['data-disease','data-module','data-suggested-disease','data-suggested-module'];
+    for(const k of attrKeys){ const v=btn.getAttribute(k); if(v && DISEASES.includes(v)) return v; }
+    const scopes=[];
+    let el=btn;
+    for(let i=0;i<5 && el;i++,el=el.parentElement) if(el.innerText) scopes.push(el.innerText);
+    for(const text of scopes){
+      const lower=text.toLowerCase();
+      for(const label of ['suggested oracle module','suggested disease','suggested module','clinical oracle']){
+        const ix=lower.indexOf(label);
+        if(ix>=0){
+          const tail=text.slice(ix,ix+500);
+          const hit=DISEASES.find(d=>tail.toLowerCase().includes(d.toLowerCase()));
+          if(hit) return hit;
+        }
+      }
+    }
+    for(const text of scopes){
+      const hit=DISEASES.find(d=>text.toLowerCase().includes(d.toLowerCase()+' module'));
+      if(hit) return hit;
+    }
+    return null;
+  }
+
+  function revealOracleView(){
+    const candidates=[...document.querySelectorAll('button,a,[role="button"]')].filter(x=>{
+      const t=(x.innerText||x.textContent||'').trim().toLowerCase();
+      return t==='clinical oracle'||t.includes('clinical oracle')||t==='oracle';
+    });
+    const nav=candidates.find(x=>!x.closest('#onlineAiView'))||candidates[0];
+    try{ if(nav) nav.click(); }catch{}
+    try{
+      if(typeof window.showView==='function') window.showView('oracleView');
+      else if(typeof window.showSection==='function') window.showSection('oracleView');
+      else if(typeof window.navigateView==='function') window.navigateView('oracleView');
+    }catch{}
+  }
+
+  function openSpecificOracle(disease){
+    if(!disease) return false;
+    revealOracleView();
+    setTimeout(()=>{
+      const sel=document.getElementById('oracleDisease');
+      if(!sel) return;
+      const opt=[...sel.options].find(o=>o.value===disease || o.textContent.trim()===disease);
+      if(opt){
+        sel.value=opt.value;
+        sel.dispatchEvent(new Event('input',{bubbles:true}));
+        sel.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      const view=document.getElementById('oracleView');
+      if(view) view.scrollIntoView({behavior:'smooth',block:'start'});
+    },250);
+    return true;
+  }
+
+  function addGuidelineButton(btn,disease){
+    if(!btn || !disease || !GUIDELINES[disease]) return;
+    btn.dataset.oracleDisease=disease;
+    let wrap=btn.parentElement;
+    if(!wrap) return;
+    let guide=wrap.querySelector('.v14-guideline-link');
+    if(!guide){
+      guide=document.createElement('button');
+      guide.type='button';
+      guide.className='v14-guideline-link';
+      guide.style.cssText='margin-left:8px;background:#0f766e;color:#fff;border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer';
+      guide.innerHTML='View disease guideline';
+      wrap.appendChild(guide);
+      guide.addEventListener('click',ev=>{
+        ev.preventDefault();
+        const d=btn.dataset.oracleDisease;
+        const g=GUIDELINES[d];
+        if(g) window.open(g[1],'_blank','noopener,noreferrer');
+      });
+    }
+  }
+
+  function enhanceSuggestedOracleHandoff(){
+    const buttons=[...document.querySelectorAll('button,a,[role="button"]')].filter(x=>{
+      const t=(x.innerText||x.textContent||'').trim().toLowerCase();
+      return t.includes('open suggested clinical oracle');
+    });
+    buttons.forEach(btn=>{
+      const disease=btn.dataset.oracleDisease||detectSuggestedDisease(btn);
+      if(disease) addGuidelineButton(btn,disease);
+      if(btn.dataset.v14Handoff==='1') return;
+      btn.dataset.v14Handoff='1';
+      btn.addEventListener('click',ev=>{
+        const d=btn.dataset.oracleDisease||detectSuggestedDisease(btn);
+        if(d){
+          ev.preventDefault();
+          ev.stopImmediatePropagation();
+          openSpecificOracle(d);
+        }
+      },true);
+    });
+  }
+
+  const observer=new MutationObserver(()=>enhanceSuggestedOracleHandoff());
+  try{observer.observe(document.body,{subtree:true,childList:true});}catch{}
+  enhanceSuggestedOracleHandoff();
+  setTimeout(enhanceSuggestedOracleHandoff,1200);
+  setTimeout(enhanceSuggestedOracleHandoff,3000);
+
   setTimeout(enhanceClinicalUI,1200);
   setTimeout(addEvidenceBlocks,1500);
   setTimeout(addEvidenceBlocks,3500);
