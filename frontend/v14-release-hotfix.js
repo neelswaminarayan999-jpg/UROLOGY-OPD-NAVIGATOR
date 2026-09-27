@@ -37,6 +37,76 @@
     const key=document.getElementById('aiKeyWrap'); if(key) key.style.display='none';
   }
 
+  function addMobileUX(){
+    if(document.getElementById('v14MobileUX')) return;
+    const style=document.createElement('style'); style.id='v14MobileUX';
+    style.textContent=[
+      '.v14-ai-error{border-left:4px solid #b91c1c;background:#fff7f7;color:#7f1d1d;padding:12px 14px;border-radius:10px;margin-top:10px}',
+      '.v14-ai-error-title{font-weight:900;font-size:14px;margin-bottom:5px}',
+      '.v14-ai-error-text{font-size:12px;line-height:1.5}',
+      '.v14-ai-error-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}',
+      '.v14-ai-error-actions button{border:0;border-radius:8px;padding:8px 11px;font-weight:800;cursor:pointer}',
+      '.v14-ai-retry{background:#0f6b99;color:#fff}.v14-ai-oracle{background:#0f172a;color:#fff}',
+      '.v14-ai-tech{margin-top:8px;font-size:10px;color:#64748b;word-break:break-word}',
+      '@media(max-width:600px){#v14ClinicalStatusBar{font-size:10px;padding:7px 9px}.v14-ai-error{padding:11px}.v14-ai-error-actions{display:grid;grid-template-columns:1fr}.v14-ai-error-actions button{width:100%}#onlineAiView{padding-left:0!important;padding-right:0!important}.v14-answer-section,.v14-evidence{border-radius:10px}}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  function optimizeInvestigationImages(){
+    const input=document.querySelector('#onlineAiView input[type="file"][accept*="image"], #onlineAiView input[type="file"]');
+    if(!input || input.dataset.v14Optimized==='1') return;
+    input.dataset.v14Optimized='1';
+    input.addEventListener('change', async ()=>{
+      const files=[...(input.files||[])];
+      if(!files.length) return;
+      const optimized=[];
+      for(const file of files){
+        if(!file.type.startsWith('image/') || file.size<=2500000){ optimized.push(file); continue; }
+        try{
+          const bmp=await createImageBitmap(file);
+          const maxSide=2200;
+          const scale=Math.min(1,maxSide/Math.max(bmp.width,bmp.height));
+          const canvas=document.createElement('canvas');
+          canvas.width=Math.max(1,Math.round(bmp.width*scale));
+          canvas.height=Math.max(1,Math.round(bmp.height*scale));
+          const ctx=canvas.getContext('2d');
+          ctx.drawImage(bmp,0,0,canvas.width,canvas.height);
+          const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.86));
+          bmp.close();
+          if(blob && blob.size < file.size) optimized.push(new File([blob],file.name.replace(/\.[^.]+$/i,'.jpg'),{type:'image/jpeg',lastModified:file.lastModified}));
+          else optimized.push(file);
+        }catch{ optimized.push(file); }
+      }
+      try{
+        const dt=new DataTransfer(); optimized.forEach(f=>dt.items.add(f)); input.files=dt.files;
+      }catch{}
+    });
+  }
+
+  function friendlyAIError(){
+    document.querySelectorAll('#onlineAiView .v12-error,#onlineAiView .v11-error,.v14-ai-error').forEach(el=>{
+      if(el.dataset.v14Friendly==='1') return;
+      const raw=el.innerText||'';
+      if(!/OpenRouter|Gemini|Groq|Cerebras|429|503|safety-classification|Run the supplied server package/i.test(raw)) return;
+      el.dataset.v14Friendly='1';
+      const details=document.createElement('details');
+      details.style.cssText='margin-top:8px';
+      const sum=document.createElement('summary'); sum.textContent='Technical details'; sum.style.cssText='cursor:pointer;font-weight:700;color:#64748b';
+      const pre=document.createElement('div'); pre.className='v14-ai-tech'; pre.textContent=raw;
+      details.append(sum,pre);
+      const box=document.createElement('div'); box.className='v14-ai-error';
+      box.innerHTML='<div class="v14-ai-error-title">Online AI temporarily unavailable</div><div class="v14-ai-error-text">The investigation image was uploaded successfully, but the free online AI service is temporarily unavailable. Your data remains in the current session. You can retry shortly or continue with the disease-specific Clinical Oracle.</div>';
+      const actions=document.createElement('div'); actions.className='v14-ai-error-actions';
+      const retry=document.createElement('button'); retry.className='v14-ai-retry'; retry.textContent='Retry analysis';
+      retry.onclick=()=>{ const b=[...document.querySelectorAll('#onlineAiView button')].find(x=>/analyze investigation/i.test(x.innerText||'')); if(b) b.click(); };
+      const oracle=document.createElement('button'); oracle.className='v14-ai-oracle'; oracle.textContent='Open Clinical Oracle';
+      oracle.onclick=()=>revealOracleView();
+      actions.append(retry,oracle); box.append(actions,details);
+      el.replaceWith(box);
+    });
+  }
+
   function enhanceClinicalUI(){
     if(document.getElementById('v14ClinicalStatusBar')) return;
     const style=document.createElement('style');
@@ -275,6 +345,11 @@
   setTimeout(enhanceClinicalUI,1200);
   setTimeout(addEvidenceBlocks,1500);
   setTimeout(addEvidenceBlocks,3500);
+
+  addMobileUX();
+  setTimeout(addMobileUX,500);
+  setTimeout(optimizeInvestigationImages,1000);
+  setInterval(()=>{optimizeInvestigationImages();friendlyAIError();},1200);
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',brand,{once:true}); else brand();
   setTimeout(brand,1200);
