@@ -325,15 +325,9 @@ header.sticky-top button{background:#173650!important;color:#fff!important;borde
 <main class="px-3 md:px-6 py-5">
   <section id="homeView">
     <div class="card p-5 mb-4">
-      <div class="flex flex-wrap gap-2 items-center mb-3">
-        <span class="badge badge-blue">2026 content baseline</span><span class="badge badge-slate">V10.1 • online AI optional</span>
-        <span class="chip">EAU 2026</span>
-        <span class="chip">NCCN 2026 version registry</span>
-        <span class="chip">Rule-based Oracle</span>
-      </div>
-      <h1 class="text-2xl md:text-3xl font-black mb-2">Urology Oracle — decision support + surgical workstation</h1>
-      <p class="text-sm text-slate-600 leading-6">Use the Oracle to derive a management pathway from explicit clinical criteria; use the Procedure Atlas for operative sequencing and Calculators for validated scores/metrics. The app intentionally summarizes guideline recommendations; it does not reproduce copyrighted guideline books verbatim.</p>
-      <div class="warn mt-4 text-xs leading-5"><b>Clinical safety:</b> Drug doses and algorithms are reference protocols, not patient-specific prescriptions. Confirm current product label, renal/hepatic function, interactions, laboratory criteria, institutional chemotherapy order set, MDT decision and the latest live NCCN/EAU version before treatment.</div>
+      <h1 class="text-2xl md:text-3xl font-black mb-2">Urology Oracle</h1>
+      <p class="text-sm text-slate-600 leading-6">Clinical decision support for diagnosis, classification, risk stratification, treatment pathways, operative planning, scores, drug references and follow-up.</p>
+      <div class="warn mt-4 text-xs leading-5"><b>Clinical safety:</b> Drug doses and algorithms are reference protocols, not patient-specific prescriptions. Confirm the current product label, renal/hepatic function, interactions, laboratory criteria and institutional protocols before treatment.</div>
     </div>
 
     <div id="diseaseGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -2061,7 +2055,7 @@ function renderOpTeaching(name){
 }
 
 
-function addHome(){const home=q('homeView');if(!home||q('v10BookHome'))return;const sec=document.createElement('section');sec.id='v10BookHome';sec.className='v10-home';sec.innerHTML='<div class="v10-home-head"><div><div class="v10-kicker">V10 • book-integrated clinical engine</div><h3>Textbooks are now the actual content layer</h3><p>Campbell provides the clinical spine; Hinman provides the operative atlas; Abrams and Blandy drive functional interpretation; the urethroplasty, hypospadias and MRI books supply reconstruction/radiology teaching; OAB pharmacotherapy informs the functional treatment layer.</p><div class="v10-actions"><button class="v10-btn primary" type="button" onclick="window.openBookLab()">Open Book Lab</button><button class="v10-btn blue" type="button" onclick="window.openBookLab(&quot;mpmri&quot;)">Open MRI teaching</button><button class="v10-btn" type="button" onclick="window.openBookLab(&quot;pfs&quot;)">Open UDS teaching</button><button class="v10-btn light" type="button" onclick="window.openBookLab(&quot;ops&quot;)">Open operative figures</button></div></div></div><div class="v10-home-body"><div class="v10-bookgrid">'+BOOKSHTML+'</div></div>';const target=home.querySelector('#investigationHomeCard')||home.querySelector('#surgicalAtlasHome')||home.firstElementChild;if(target&&target.parentNode)target.parentNode.insertBefore(sec,target);else home.appendChild(sec);}
+function addHome(){return;}
 function openBookLab(focus){buildBookLab();document.querySelectorAll('section[id$="View"]').forEach(el=>{if(el.id!=='bookLabView')el.classList.add('hidden')});q('bookLabView').classList.remove('hidden');if(focus==='ops'){q('v10OpsPanel').classList.remove('hidden');q('v10ReadPanel').classList.add('hidden');q('v10ReportPanel').classList.add('hidden');q('v10SourcesPanel').classList.add('hidden');document.querySelectorAll('[data-v10tab]').forEach(x=>x.classList.toggle('active',x.dataset.v10tab==='ops'));} else {q('v10ReadPanel').classList.remove('hidden');q('v10ReportPanel').classList.add('hidden');q('v10OpsPanel').classList.add('hidden');q('v10SourcesPanel').classList.add('hidden');document.querySelectorAll('[data-v10tab]').forEach(x=>x.classList.toggle('active',x.dataset.v10tab==='read'));if(focus&&LAB[focus]){q('v10LabType').value=focus;renderCurrentLab();}}q('bookLabView').scrollIntoView({behavior:'smooth',block:'start'});}
 window.openBookLab=openBookLab;
 const priorSurg=window.openSurgeryDetail;if(typeof priorSurg==='function'&&!priorSurg.__v10){const fn=function(name){const r=priorSurg.apply(this,arguments);[50,180].forEach(ms=>setTimeout(()=>injectBookFiguresIntoSurgery(name),ms));return r};fn.__v10=true;window.openSurgeryDetail=fn;}
@@ -2782,14 +2776,7 @@ if(typeof OLD_RUN==='function'){
 }
 
 /* ------------------ HOME / ORACLE VERSION MARKER ------------------ */
-function v13Banner(){
-  const home=v13q('homeView');
-  if(!home||v13q('v13HomeBanner'))return;
-  const first=home.firstElementChild;
-  const d=document.createElement('div'); d.id='v13HomeBanner'; d.className='card p-4 mb-4';
-  d.innerHTML=`<div class="flex flex-wrap gap-2 items-center"><span class="badge badge-blue">V13.3 • 27 Sep 2026</span><span class="chip">Deep reasoning layer</span><span class="chip">2026 evidence refresh</span><span class="chip">Non-destructive baseline</span></div><div class="text-sm font-black mt-2">Clinical depth upgrade</div><div class="text-xs text-slate-600 mt-1 leading-5">Adds contradiction checks, branch-sensitive reasoning, current 2026 uro-oncology evidence updates, and reference regimen cards while preserving the V12 Oracle, investigation AI and operative atlas.</div>`;
-  if(first)first.insertAdjacentElement('afterend',d);else home.prepend(d);
-}
+function v13Banner(){return;}
 
 function sanity13(){
   try{
@@ -2991,11 +2978,7 @@ function sanitizeOnlineAI(){
   }catch(e){}
 }
 
-function addHomeTile(){
- const home=document.getElementById('homeView');if(!home||q14('v14HomeTile'))return;
- const tile=document.createElement('section');tile.id='v14HomeTile';tile.className='card p-4 mb-4';tile.innerHTML=`<div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="section-title">V14 FINAL Clinical Workstation</div><div class="text-xs text-slate-500 mt-1">Reasoning gates • case mode • regimen reference • evidence registry • QA</div></div><button type="button" class="v4-btn dark" id="v14OpenHome">Open Workstation</button></div>`;
- const anchor=home.querySelector('#diseaseGrid'); if(anchor)anchor.before(tile); else home.appendChild(tile); q14('v14OpenHome').onclick=()=>{if(typeof window.openOracle==='function')window.openOracle();setTimeout(()=>renderWorkstation(),0);};
-}
+function addHomeTile(){return;}
 function attach(){
  addHomeTile();
  sanitizeOnlineAI();
