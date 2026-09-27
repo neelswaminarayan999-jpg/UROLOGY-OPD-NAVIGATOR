@@ -223,13 +223,14 @@ function validateOracleOutput(text) {
   catch { const e = new Error('Provider returned non-JSON content; expected Oracle JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) { const e = new Error('Provider returned an invalid Oracle JSON object.'); e.code='INVALID_ORACLE_RESPONSE'; throw e; }
   obj = normalizeOracleObject(obj);
-  const keys = Object.keys(obj);
   const missing = ORACLE_KEYS.filter(k => !(k in obj));
-  const extra = keys.filter(k => !ORACLE_KEYS.includes(k));
-  if (missing.length || extra.length) {
-    const e = new Error(`Invalid Oracle schema: missing=${missing.join(',') || 'none'}; extra=${extra.join(',') || 'none'}`);
+  if (missing.length) {
+    const e = new Error(`Invalid Oracle schema: missing=${missing.join(',')}`);
     e.code = 'INVALID_ORACLE_RESPONSE'; throw e;
   }
+  // Free models may append harmless non-Oracle metadata keys. Preserve only the
+  // canonical Oracle contract so provider-specific extras cannot break the handoff.
+  obj = Object.fromEntries(ORACLE_KEYS.map(k => [k, obj[k]]));
   if (!Array.isArray(obj.observations) || !Array.isArray(obj.differential) || !Array.isArray(obj.urgent_flags) ||
       !Array.isArray(obj.missing_data) || !Array.isArray(obj.uncertainty) || !Array.isArray(obj.teaching)) {
     const e = new Error('Invalid Oracle schema: list fields must be arrays.'); e.code='INVALID_ORACLE_RESPONSE'; throw e;
