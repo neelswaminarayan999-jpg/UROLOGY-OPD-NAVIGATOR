@@ -1,11 +1,11 @@
-/* Urology Oracle V13.9 — expanded protocol/content + visual atlas.
+/* Urology Oracle V14.0 — expanded protocol/content + visual atlas.
    This is additive: it does not replace the existing V12/V13 corpus or Oracle rules.
    Content is a structured paraphrase of current guideline pathways; verify live guidance,
    drug labels and local protocols before patient care.
 */
 (function(){
 'use strict';
-const PACK_VERSION='13.9.0';
+const PACK_VERSION='14.0.0';
 const SOURCES={
   EAU_UROL:'https://uroweb.org/guidelines/urolithiasis',
   EAU_US:'https://uroweb.org/guidelines/urethral-strictures',
@@ -118,11 +118,59 @@ const ADD={
  ]}
 ]};
 
+
+// V14.0 evidence and decision-completeness layer. Additive only; existing disease
+// modules remain intact. These updates are based on current 2026 EAU evidence
+// summaries and named contemporary phase III evidence where cited below.
+const V14_UPDATES={
+  'Ca Bladder':[{
+    title:'V14.0 — 2026 evidence updates',
+    items:[
+      ['MIBC perioperative checkpoint','For cT2–T4a cN0 M0 MIBC, explicitly capture cisplatin eligibility and immunotherapy eligibility before selecting perioperative treatment. The 2026 EAU MIBC update includes perioperative cisplatin/gemcitabine + durvalumab for patients eligible for cisplatin-based chemotherapy and immunotherapy.'],
+      ['Cisplatin-ineligible MIBC','Create a separate branch for cisplatin-ineligible MIBC. The 2026 EAU MIBC update incorporates KEYNOTE-905/EV-303 supporting perioperative enfortumab vedotin + pembrolizumab in this population.'],
+      ['Metastatic first-line','For advanced unresectable/metastatic urothelial carcinoma, explicitly capture whether the patient is fit for combination therapy and contraindications to EV. The current EAU pathway places EV + pembrolizumab as the first-line combination-therapy standard; alternatives depend on EV availability/contraindications, platinum fitness and prior therapy.'],
+      ['Biomarker / later-line checkpoint','Capture FGFR alteration status before later-line sequencing decisions and HER2 IHC status when antibody-drug-conjugate therapy is being considered.']
+    ]
+  }],
+  'Ca Kidney':[{
+    title:'V14.0 — treatment-decision completeness',
+    items:[
+      ['Adjuvant pembrolizumab eligibility','Do not treat all post-nephrectomy RCC as adjuvant candidates. Capture histology, pT, grade/sarcomatoid features, pN status and M1 NED status and explicitly compare the record with the current KEYNOTE-564 risk framework.'],
+      ['Metastatic ccRCC minimum dataset','Capture histology, IMDC risk, prior systemic therapy, measurable disease, key organ function and relevant contraindications before generating a systemic pathway.']
+    ]
+  }],
+  'Ca Testis':[{
+    title:'V14.0 — classification checkpoint',
+    items:[
+      ['IGCCCG input gate','For metastatic germ-cell tumour, explicitly record primary site, non-pulmonary visceral metastases and pre-chemotherapy AFP, hCG and LDH before applying the IGCCCG risk group.'],
+      ['Marker timing','Record AFP, hCG and LDH immediately before chemotherapy when used for IGCCCG classification; do not substitute a post-treatment value into the baseline risk calculation.']
+    ]
+  }],
+  'BPH / Male LUTS':[{
+    title:'V14.0 — investigation interpretation guardrail',
+    items:[
+      ['Uroflowmetry interpretation','Record Qmax, Qavg, voided volume, flow pattern and PVR when available. Low Qmax is an abnormal low-flow finding but uroflowmetry alone cannot distinguish BOO/BPO from detrusor underactivity or an under-filled bladder.'],
+      ['When functional distinction matters','Use pressure-flow urodynamics when the BOO-versus-detrusor-underactivity distinction is clinically important and the result would alter management.'],
+      ['Repeat low-volume study','When voided volume is <150 mL or the tracing is abnormal, consider repeat uroflowmetry under appropriate conditions rather than over-interpreting a single low-flow test.']
+    ]
+  }],
+  'Ca Prostate':[{
+    title:'V14.0 — decision-completeness checklist',
+    items:[
+      ['Before definitive pathway','Capture PSA, biopsy Grade Group/ISUP, clinical T/N/M, risk group, MRI/PSMA information when relevant, life expectancy/comorbidity and baseline urinary/sexual function before selecting a treatment branch.'],
+      ['Active surveillance gate','Document the actual eligibility criteria and protocol used; do not equate a PSA rise alone with automatic treatment failure without the required reassessment.'],
+      ['Metastatic pathway','Capture castration status, metastatic burden, prior AR-pathway therapy/chemotherapy, symptoms, molecular/biomarker data when relevant and treatment history before selecting a later-line pathway.']
+    ]
+  }]
+};
+
+
 function appendPack(){
   if(!window.DISEASES || window.__V139_CONTENT_PACK__) return;
   Object.entries(ADD).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
+  Object.entries(V14_UPDATES).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
   window.__V139_CONTENT_PACK__=true;
-  window.UROLOGY_ORACLE_V139_CONTENT={version:PACK_VERSION,sources:SOURCES,protocols:ADD};
+  window.UROLOGY_ORACLE_V139_CONTENT={version:PACK_VERSION,sources:SOURCES,protocols:ADD,evidenceUpdates:V14_UPDATES};
 }
 function svgShell(title,body){return `<div class="card p-3 mb-4 no-print" style="overflow:auto"><div class="text-xs font-black mb-2">${title}</div><svg viewBox="0 0 900 230" role="img" aria-label="${title}" style="width:100%;min-width:620px;height:auto;border-radius:12px;background:#f8fafc">${body}</svg></div>`;}
 function visuals(name){
