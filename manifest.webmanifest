@@ -1,11 +1,11 @@
 {
-  "name": "Urology Oracle 2026",
-  "short_name": "Urology Oracle",
+  "name": "Urology Oracle V14.0 — Final Clinical Workstation",
+  "short_name": "Oracle V14",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#0f172a",
-  "description": "Offline-first urology clinical decision-support and teaching Oracle. Online investigation AI remains online-only.",
+  "description": "Urology Oracle V14.0 — final clinical workstation for urology decision support, treatment pathways, surgical teaching and online investigation AI.",
   "icons": [
     {
       "src": "./icon.svg",
