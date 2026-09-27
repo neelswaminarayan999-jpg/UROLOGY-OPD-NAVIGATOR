@@ -32,7 +32,7 @@ const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || '';
 const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'gpt-oss-120b';
 const CEREBRAS_API_BASE_URL = (process.env.CEREBRAS_API_BASE_URL || 'https://api.cerebras.ai/v1').replace(/\/$/, '');
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemma-4-26b-a4b-it:free';
 const OPENROUTER_API_BASE_URL = (process.env.OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
@@ -176,9 +176,39 @@ const ORACLE_KEYS = [
 function stripJsonFences(text) {
   return String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
 }
+function normalizeOracleObject(obj) {
+  const listKeys = ['observations','differential','urgent_flags','missing_data','uncertainty','teaching'];
+  for (const key of listKeys) {
+    if (obj[key] == null) obj[key] = [];
+    else if (!Array.isArray(obj[key])) obj[key] = [String(obj[key])];
+  }
+  if (obj.suggested_oracle_values == null || typeof obj.suggested_oracle_values !== 'object' || Array.isArray(obj.suggested_oracle_values)) {
+    obj.suggested_oracle_values = { disease: 'None', fields: [] };
+  }
+  if (!obj.suggested_oracle_values.disease) obj.suggested_oracle_values.disease = 'None';
+  if (!Array.isArray(obj.suggested_oracle_values.fields)) {
+    obj.suggested_oracle_values.fields = obj.suggested_oracle_values.fields == null ? [] : [{ id: 'unparsed', value: String(obj.suggested_oracle_values.fields) }];
+  }
+  obj.suggested_oracle_values.fields = obj.suggested_oracle_values.fields
+    .filter(Boolean)
+    .map((x,i) => typeof x === 'object' ? { id: String(x.id ?? 'field_'+(i+1)), value: String(x.value ?? '') } : { id: 'field_'+(i+1), value: String(x) });
+  if (!obj.pathway_link || typeof obj.pathway_link !== 'object' || Array.isArray(obj.pathway_link)) {
+    obj.pathway_link = {
+      requires_clinician_confirmation: true,
+      suggested_module: 'None',
+      note: 'No safe Oracle handoff could be established from the provider response.'
+    };
+  }
+  obj.pathway_link.requires_clinician_confirmation = true;
+  if (!obj.pathway_link.suggested_module) obj.pathway_link.suggested_module = 'None';
+  if (!obj.pathway_link.note) obj.pathway_link.note = 'Clinician confirmation required.';
+  if (!obj.suggested_disease) obj.suggested_disease = 'None';
+  if (!obj.technical_adequacy) obj.technical_adequacy = 'Not stated by provider.';
+  if (!obj.interpretation) obj.interpretation = 'No provider interpretation returned.';
+  return obj;
+}
 function validateOracleOutput(text) {
   const cleaned = stripJsonFences(text);
-  // Never accept provider safety-classification/refusal text as a successful Oracle answer.
   if (/^user\s+safety\s*:/i.test(cleaned) || /safety\s+categories\s*:/i.test(cleaned)) {
     const e = new Error('Provider returned a safety-classification response instead of Oracle JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e;
   }
@@ -186,6 +216,7 @@ function validateOracleOutput(text) {
   try { obj = JSON.parse(cleaned); }
   catch { const e = new Error('Provider returned non-JSON content; expected Oracle JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) { const e = new Error('Provider returned an invalid Oracle JSON object.'); e.code='INVALID_ORACLE_RESPONSE'; throw e; }
+  obj = normalizeOracleObject(obj);
   const keys = Object.keys(obj);
   const missing = ORACLE_KEYS.filter(k => !(k in obj));
   const extra = keys.filter(k => !ORACLE_KEYS.includes(k));
@@ -200,7 +231,7 @@ function validateOracleOutput(text) {
   if (!obj.pathway_link || obj.pathway_link.requires_clinician_confirmation !== true) {
     const e = new Error('Invalid Oracle schema: clinician-confirmation gate is missing or false.'); e.code='INVALID_ORACLE_RESPONSE'; throw e;
   }
-  return { cleaned, obj };
+  return { cleaned: JSON.stringify(obj), obj };
 }
 
 function extractInputMessages(body) {
@@ -312,41 +343,22 @@ async function callOpenAICompatible(body, cfg) {
 }
 
 const PROVIDERS = [
-  { name: 'Groq', apiKey: GROQ_API_KEY, model: GROQ_MODEL, url: `${GROQ_API_BASE_URL}/chat/completions` },
-  { name: 'Gemini', apiKey: API_KEY, model: MODEL },
-  { name: 'Cerebras', apiKey: CEREBRAS_API_KEY, model: CEREBRAS_MODEL, url: `${CEREBRAS_API_BASE_URL}/chat/completions` },
   { name: 'OpenRouter', apiKey: OPENROUTER_API_KEY, model: OPENROUTER_MODEL, url: `${OPENROUTER_API_BASE_URL}/chat/completions` }
 ];
 
 async function callWithFallback(body) {
   const attempts = [];
-  const geminiModels = [MODEL, ...GEMINI_FALLBACK_MODELS.filter(x => x !== MODEL)];
   for (const p of PROVIDERS) {
-    if (!p.apiKey) continue;
     try {
-      if (p.name === 'Gemini') {
-        let last;
-        for (const model of geminiModels) {
-          try { return { ...(await callGemini(body, model)), fallback_attempts: attempts }; }
-          catch (e) {
-            last = e;
-            attempts.push({ provider: 'Gemini', model, status: e?.status || 0, error: String(e?.message || e).slice(0, 500) });
-            if (![429, 503].includes(e?.status)) break;
-          }
-        }
-        throw last || new Error('Gemini request failed.');
-      }
       const result = await callOpenAICompatible(body, p);
       return { ...result, fallback_attempts: attempts };
     } catch (e) {
-      if (!attempts.some(a => a.provider === p.name && a.status === (e?.status || 0))) {
-        attempts.push({ provider: p.name, status: e?.status || 0, error: String(e?.message || e).slice(0, 500) });
-      }
+      attempts.push({ provider: p.name, model: p.model, status: e?.status || 0, error: String(e?.message || e).slice(0, 500) });
     }
   }
   const summary = attempts.map(a => `${a.provider}${a.model ? ` / ${a.model}` : ''}${a.status ? ` (${a.status})` : ''}: ${a.error}`).join(' | ');
   const status = attempts.find(a => a.status === 429)?.status || attempts.find(a => a.status === 503)?.status || 503;
-  const err = new Error(`All configured AI providers failed. ${summary || 'No provider is configured.'}`); err.status = status; err.attempts = attempts; throw err;
+  const err = new Error(`OpenRouter AI failed. ${summary || 'OPENROUTER_API_KEY is not configured.'}`); err.status = status; err.attempts = attempts; throw err;
 }
 
 function hotfixHtml(html) {
@@ -365,7 +377,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '14.0.0', release: 'FINAL CLINICAL WORKSTATION', model: MODEL, geminiFallbackModels: GEMINI_FALLBACK_MODELS, fallbackOrder: PROVIDERS.filter(p => p.apiKey).map(p => p.name), configured: Object.fromEntries(PROVIDERS.map(p => [p.name, Boolean(p.apiKey)])), offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '14.0.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'OpenRouter', model: OPENROUTER_MODEL, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
