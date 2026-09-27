@@ -276,6 +276,10 @@
     const close=document.createElement('button'); close.type='button'; close.textContent='Close'; close.style.cssText='border:0;background:#0f172a;color:#fff;border-radius:9px;padding:9px 13px;font-weight:800;cursor:pointer'; close.onclick=()=>modal.remove();
     head.append(title,close); panel.appendChild(head);
 
+    const toc=document.createElement('div');
+    toc.style.cssText='position:sticky;top:0;z-index:2;background:#fff;padding:8px 0 10px;margin-bottom:10px;border-bottom:1px solid #e2e8f0;display:flex;gap:6px;flex-wrap:wrap';
+    panel.appendChild(toc);
+
     const note=document.createElement('div');
     note.style.cssText='padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#475569;font-size:11px;line-height:1.5;margin-bottom:16px';
     note.innerHTML='<b>How to use:</b> This is the disease-specific guideline navigator integrated into Oracle. It surfaces the current disease module\'s diagnostic, staging/risk and treatment content. It is a clinical aid, not a substitute for clinician judgement or local protocols.';
@@ -285,9 +289,16 @@
     if(!sections.length){
       const empty=document.createElement('div'); empty.textContent='No integrated guideline sections are currently available for this disease.'; empty.style.cssText='padding:16px;border:1px dashed #cbd5e1;border-radius:10px;color:#64748b'; panel.appendChild(empty);
     } else {
-      sections.forEach(sec=>{
+      sections.forEach((sec,secIndex)=>{
+        const anchor='v14GuideSec_'+secIndex;
+        const jump=document.createElement('button');
+        jump.type='button';
+        jump.textContent=sec.title||('Section '+(secIndex+1));
+        jump.style.cssText='border:1px solid #cbd5e1;background:#f8fafc;color:#334155;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:800;cursor:pointer';
+        jump.onclick=()=>document.getElementById(anchor)?.scrollIntoView({behavior:'smooth',block:'start'});
+        toc.appendChild(jump);
         const wrap=document.createElement('section');
-        wrap.style.cssText='margin:0 0 14px;padding:15px;border:1px solid #dbe5ec;border-radius:12px;background:#fff';
+        wrap.id=anchor; wrap.style.cssText='scroll-margin-top:110px;margin:0 0 14px;padding:15px;border:1px solid #dbe5ec;border-radius:12px;background:#fff';
         const sh=document.createElement('h3'); sh.textContent=sec.title||'Guideline section'; sh.style.cssText='margin:0 0 9px;font-size:15px;color:#0f172a';
         wrap.appendChild(sh);
         const items=Array.isArray(sec.items)?sec.items:[];
