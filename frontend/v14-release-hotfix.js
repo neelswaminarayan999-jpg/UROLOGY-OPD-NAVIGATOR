@@ -1,6 +1,3 @@
-/* Urology Oracle V14.0 release hotfix. Injected by backend-server.mjs so the large clinical index.html is not overwritten. */
-(function(){
-  'use strict';
   const RELEASE='14.0';
   const LABEL='FINAL CLINICAL WORKSTATION';
   function replaceText(oldText,newText){
@@ -35,6 +32,25 @@
       model.disabled=true;
     }
     const key=document.getElementById('aiKeyWrap'); if(key) key.style.display='none';
+  }
+  function brand(){
+    // Keep release/build metadata out of the clinician-facing UI.
+    document.title='Urology Oracle';
+    const mode=document.getElementById('aiMode');
+    if(mode){
+      mode.innerHTML='<option value="proxy">Server-side OpenRouter proxy</option>';
+      mode.value='proxy';
+      mode.disabled=true;
+      mode.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    const model=document.getElementById('aiModel');
+    if(model){
+      model.innerHTML='<option value="qwen/qwen3.8-27b:free">OpenRouter — Qwen 3.8 27B (free vision)</option>';
+      model.value='qwen/qwen3.8-27b:free';
+      model.disabled=true;
+    }
+    const key=document.getElementById('aiKeyWrap');
+    if(key) key.style.display='none';
   }
 
   function addMobileUX(){
@@ -158,8 +174,6 @@
     });
   }
 
-  enhanceClinicalUI();
-
   const GUIDELINES={
     'Ca Prostate':['EAU Prostate Cancer 2026','https://uroweb.org/guidelines/prostate-cancer'],
     'Ca Bladder':['EAU Non-muscle-invasive + Muscle-invasive/Metastatic Bladder Cancer 2026','https://uroweb.org/guidelines/non-muscle-invasive-bladder-cancer'],
@@ -270,7 +284,7 @@
     const head=document.createElement('div');
     head.style.cssText='display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px';
     const title=document.createElement('div');
-    const h2=document.createElement('h2'); h2.textContent=disease+' — In-App Guideline Navigator V14.0'; h2.style.cssText='margin:0;font-size:22px;color:#0f172a';
+    const h2=document.createElement('h2'); h2.textContent=disease+' — In-App Guideline Navigator'; h2.style.cssText='margin:0;font-size:22px;color:#0f172a';
     const sub=document.createElement('div'); sub.textContent=data.source+' · integrated Oracle content · clinician verification required'; sub.style.cssText='margin-top:6px;font-size:11px;color:#64748b;line-height:1.4';
     title.append(h2,sub);
     const close=document.createElement('button'); close.type='button'; close.textContent='Close'; close.style.cssText='border:0;background:#0f172a;color:#fff;border-radius:9px;padding:9px 13px;font-weight:800;cursor:pointer'; close.onclick=()=>modal.remove();
@@ -362,10 +376,6 @@
   enhanceSuggestedOracleHandoff();
   setTimeout(enhanceSuggestedOracleHandoff,1200);
   setTimeout(enhanceSuggestedOracleHandoff,3000);
-
-  setTimeout(enhanceClinicalUI,1200);
-  setTimeout(addEvidenceBlocks,1500);
-  setTimeout(addEvidenceBlocks,3500);
 
   addMobileUX();
   setTimeout(addMobileUX,500);
