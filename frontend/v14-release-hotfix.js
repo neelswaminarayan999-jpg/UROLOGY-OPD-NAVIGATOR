@@ -17,19 +17,22 @@
     replaceText('V13 clinical gate:','V14 clinical gate:');
     replaceText('V13.3 evidence-and-reasoning layer','V14.0 clinical reasoning and evidence layer');
     replaceText('V13.3 deep clinical','V14.0 clinical');
+    document.querySelectorAll('h1').forEach(el=>{ if(el.textContent.trim()==='Urology Oracle') el.textContent='Urology Oracle V14.0'; });
+    replaceText('Decision support • treatment pathways • surgical atlas • scores • trials • dose references • follow-up','FINAL CLINICAL WORKSTATION • decision support • treatment pathways • surgical atlas • scores • trials • dose references • follow-up');
+    replaceText('Run the supplied server package on this computer so the app can reach its governed AI endpoint.','Online AI endpoint: Render server → OpenRouter free vision model.');
     document.querySelectorAll('[id="v13ClinicalGate"]').forEach(el=>el.id='v14ClinicalGate');
     const mode=document.getElementById('aiMode');
     if(mode){
-      mode.innerHTML='<option value="proxy">Server-side Gemini proxy</option>';
+      mode.innerHTML='<option value="proxy">Server-side OpenRouter proxy</option>';
       mode.value='proxy';
       mode.disabled=true;
       mode.dispatchEvent(new Event('change',{bubbles:true}));
     }
     const model=document.getElementById('aiModel');
     if(model){
-      model.innerHTML='<option value="google/gemma-4-26b-a4b-it:free">OpenRouter — Gemma 4 26B A4B (free)</option><option value="openrouter/free">OpenRouter — Free Models Router</option>';
-      model.value='google/gemma-4-26b-a4b-it:free';
-      model.disabled=false;
+      model.innerHTML='<option value="qwen/qwen3.8-27b:free">OpenRouter — Qwen 3.8 27B (free vision)</option>';
+      model.value='qwen/qwen3.8-27b:free';
+      model.disabled=true;
     }
     const key=document.getElementById('aiKeyWrap'); if(key) key.style.display='none';
   }
