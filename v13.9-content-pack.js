@@ -119,6 +119,31 @@ const ADD={
 ]};
 
 
+// V14.0 focused decision algorithms for high-use OPD modules.
+const V14_HIGH_USE={
+  'Urethral Stricture':[{
+    title:'V14.0 — treatment decision algorithm',
+    items:[
+      ['Step 1 — define anatomy','Document site (meatus/fossa navicularis/penile/bulbar/bulbomembranous), length, calibre/obliteration, spongiofibrosis, lichen sclerosus, prior endoscopic procedures and prior urethroplasty.'],
+      ['Step 2 — first presentation','A short, single, non-obliterative primary bulbar stricture is the phenotype in which dilation/DVIU may be considered after counselling about recurrence.'],
+      ['Step 3 — recurrence / complexity','Recurrent disease, long disease, obliterative disease, penile strictures, significant spongiofibrosis or multiple failed endoscopic procedures should trigger reconstructive planning rather than serial endoscopic treatment.'],
+      ['Step 4 — reconstruction selection','Select EPA versus substitution/staged urethroplasty according to location, length, tissue quality and disease phenotype; penile/lichen-sclerosus disease requires particular attention to tissue quality and recurrence.'],
+      ['Step 5 — follow-up','Document objective outcome with symptoms, uroflow/PVR and anatomical assessment when indicated; recurrence should trigger re-characterisation rather than automatic repeat DVIU.']
+    ]
+  }],
+  'BPH / Male LUTS':[{
+    title:'V14.0 — treatment decision algorithm',
+    items:[
+      ['Step 1 — phenotype','Separate storage, voiding and post-micturition symptoms; record bother, PVR, urinalysis, prostate assessment and relevant PSA/uroflow data.'],
+      ['Step 2 — uncomplicated mild/bothersome symptoms','Use behavioural/conservative measures and shared decision-making before medication when appropriate.'],
+      ['Step 3 — pharmacotherapy','Choose alpha-blocker, 5-alpha-reductase inhibitor, combination therapy, PDE5 inhibitor or storage-directed therapy according to symptom phenotype, prostate enlargement/progression risk, contraindications and patient priorities.'],
+      ['Step 4 — before surgery','Confirm indication, prostate volume/anatomy, PVR and relevant differential diagnoses. Use pressure-flow urodynamics selectively when the functional diagnosis is uncertain and the result could change surgery selection.'],
+      ['Step 5 — procedure selection','Choose TURP, enucleation, vaporisation, simple prostatectomy or selected minimally invasive options according to prostate anatomy/volume, patient priorities, anticoagulation, expertise and local availability.'],
+      ['Step 6 — follow-up','Document symptom response, uroflow/PVR where appropriate, medication adverse effects and postoperative complications/sexual outcomes.']
+    ]
+  }]
+};
+
 // V14.0 evidence and decision-completeness layer. Additive only; existing disease
 // modules remain intact. These updates are based on current 2026 EAU evidence
 // summaries and named contemporary phase III evidence where cited below.
@@ -169,6 +194,7 @@ function appendPack(){
   if(!window.DISEASES || window.__V139_CONTENT_PACK__) return;
   Object.entries(ADD).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
   Object.entries(V14_UPDATES).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
+  Object.entries(V14_HIGH_USE).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
   window.__V139_CONTENT_PACK__=true;
   window.UROLOGY_ORACLE_V139_CONTENT={version:PACK_VERSION,sources:SOURCES,protocols:ADD,evidenceUpdates:V14_UPDATES};
 }
