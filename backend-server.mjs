@@ -21,7 +21,8 @@ loadEnv(path.join(__dirname, '.env'));
 
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const GEMINI_FALLBACK_MODELS = String(process.env.GEMINI_FALLBACK_MODELS || 'gemini-3.8-flash').split(',').map(x => x.trim()).filter(Boolean);
 const API_KEY = process.env.GEMINI_API_KEY || '';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
@@ -237,16 +238,24 @@ async function fetchJsonWithTimeout(url, options, timeoutMs=12000) {
   } finally { clearTimeout(timer); }
 }
 
-async function callGemini(body) {
+async function callGemini(body, model = MODEL) {
   if (!API_KEY) throw new Error('Gemini is not configured.');
   const parts = [{ text: makePrompt(body) }];
   if (Array.isArray(body?.input)) {
     const texts = [];
+    const inlineImages = [];
     for (const item of body.input) {
       if (typeof item?.content === 'string') texts.push(item.content);
-      else if (Array.isArray(item?.content)) for (const part of item.content) if (part?.type === 'input_text') texts.push(String(part.text || ''));
+      else if (Array.isArray(item?.content)) {
+        for (const part of item.content) {
+          if (part?.type === 'input_text') texts.push(String(part.text || ''));
+          if (part?.type === 'input_image' && typeof part.image_url === 'string') inlineImages.push(part.image_url);
+        }
+      }
     }
     if (texts.length) parts[0] = { text: texts.join('\n\n') };
+    if (!Array.isArray(body.images)) body.images = [];
+    for (const img of inlineImages) if (!body.images.includes(img)) body.images.push(img);
   }
   if (typeof body.context?.report === 'string' && body.context.report) parts.push({ text: 'Written report:\n' + body.context.report });
   for (const img of (body.images || [])) {
@@ -262,13 +271,13 @@ async function callGemini(body) {
       maxOutputTokens: 3500
     }
   };
-  const url = `${GEMINI_API_BASE_URL}/models/${encodeURIComponent(MODEL)}:generateContent`;
+  const url = `${GEMINI_API_BASE_URL}/models/${encodeURIComponent(model)}:generateContent`;
   const r = await fetchJsonWithTimeout(url, { method: 'POST', headers: { 'x-goog-api-key': API_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
   const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
   if (!r.ok) { const err = new Error(`Gemini HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
   const output_text = extractGeminiText(data); if (!output_text) throw new Error('Gemini returned an empty response.');
   const valid = validateOracleOutput(output_text);
-  return { output_text: valid.cleaned, model: MODEL, provider: 'Gemini' };
+  return { output_text: valid.cleaned, model, provider: 'Gemini' };
 }
 
 async function callOpenAICompatible(body, cfg) {
@@ -311,16 +320,40 @@ const PROVIDERS = [
 
 async function callWithFallback(body) {
   const attempts = [];
+  const geminiModels = [MODEL, ...GEMINI_FALLBACK_MODELS.filter(x => x !== MODEL)];
   for (const p of PROVIDERS) {
+    if (!p.apiKey) continue;
     try {
-      const result = p.name === 'Gemini' ? await callGemini(body) : await callOpenAICompatible(body, p);
+      if (p.name === 'Gemini') {
+        let last;
+        for (const model of geminiModels) {
+          try { return { ...(await callGemini(body, model)), fallback_attempts: attempts }; }
+          catch (e) {
+            last = e;
+            attempts.push({ provider: 'Gemini', model, status: e?.status || 0, error: String(e?.message || e).slice(0, 500) });
+            if (![429, 503].includes(e?.status)) break;
+          }
+        }
+        throw last || new Error('Gemini request failed.');
+      }
+      const result = await callOpenAICompatible(body, p);
       return { ...result, fallback_attempts: attempts };
     } catch (e) {
-      attempts.push({ provider: p.name, status: e?.status || 0, error: String(e?.message || e).slice(0, 500) });
+      if (!attempts.some(a => a.provider === p.name && a.status === (e?.status || 0))) {
+        attempts.push({ provider: p.name, status: e?.status || 0, error: String(e?.message || e).slice(0, 500) });
+      }
     }
   }
-  const summary = attempts.map(a => `${a.provider}${a.status ? ` (${a.status})` : ''}: ${a.error}`).join(' | ');
-  const err = new Error(`All AI providers failed. ${summary}`); err.status = 503; err.attempts = attempts; throw err;
+  const summary = attempts.map(a => `${a.provider}${a.model ? ` / ${a.model}` : ''}${a.status ? ` (${a.status})` : ''}: ${a.error}`).join(' | ');
+  const status = attempts.find(a => a.status === 429)?.status || attempts.find(a => a.status === 503)?.status || 503;
+  const err = new Error(`All configured AI providers failed. ${summary || 'No provider is configured.'}`); err.status = status; err.attempts = attempts; throw err;
+}
+
+function hotfixHtml(html) {
+  const tag = '<script src="/v14-release-hotfix.js" defer></script>';
+  if (html.includes('/v14-release-hotfix.js')) return html;
+  if (html.includes('</head>')) return html.replace('</head>', tag + '</head>');
+  return html + tag;
 }
 
 const server = http.createServer(async (req, res) => {
@@ -332,7 +365,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '13.9.0', fallbackOrder: PROVIDERS.map(p => p.name), configured: Object.fromEntries(PROVIDERS.map(p => [p.name, Boolean(p.apiKey)])), offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '14.0.0', release: 'FINAL CLINICAL WORKSTATION', model: MODEL, geminiFallbackModels: GEMINI_FALLBACK_MODELS, fallbackOrder: PROVIDERS.filter(p => p.apiKey).map(p => p.name), configured: Object.fromEntries(PROVIDERS.map(p => [p.name, Boolean(p.apiKey)])), offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
@@ -347,13 +380,19 @@ const server = http.createServer(async (req, res) => {
       const file = path.resolve(WEB_ROOT, `.${urlPath}`);
       if (!file.startsWith(WEB_ROOT) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return json(res, 404, { error: 'Not found' }, origin);
       const ext = path.extname(file).toLowerCase();
-      const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8' };
+      const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8', '.svg': 'image/svg+xml' };
       res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+      if (ext === '.html') {
+        const html = hotfixHtml(fs.readFileSync(file, 'utf8'));
+        res.end(html);
+        return;
+      }
       return fs.createReadStream(file).pipe(res);
     }
     return json(res, 405, { error: 'Method not allowed' }, origin);
   } catch (e) {
-    return json(res, 500, { error: e?.message || String(e) }, origin);
+    const status = Number.isInteger(e?.status) && e.status >= 400 && e.status < 600 ? e.status : 500;
+    return json(res, status, { error: e?.message || String(e), provider: 'Gemini/AI fallback', attempts: e?.attempts || undefined }, origin);
   }
 });
 
