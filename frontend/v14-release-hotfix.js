@@ -150,8 +150,81 @@
     return true;
   }
 
+  function guidelineData(disease){
+    const ds=window.DISEASES?.[disease];
+    const pack=window.UROLOGY_ORACLE_V139_CONTENT;
+    const sourceMap={
+      'Ca Prostate':'EAU Prostate Cancer 2026',
+      'Ca Bladder':'EAU NMIBC + MIBC/Metastatic Bladder Cancer 2026',
+      'UTUC':'EAU Upper Urinary Tract Urothelial Cell Carcinoma 2026',
+      'Ca Kidney':'EAU Renal Cell Carcinoma 2026',
+      'Ca Testis':'EAU Testicular Cancer 2026',
+      'Ca Penis':'EAU Penile Cancer 2026',
+      'Urethral Cancer':'EAU Primary Urethral Carcinoma 2026',
+      'Urethral Stricture':'EAU Urethral Strictures 2026',
+      'BPH / Male LUTS':'EAU Non-neurogenic Male LUTS 2026',
+      'Stone Disease':'EAU Urolithiasis 2026',
+      'Adrenal / Neuroendocrine':'Integrated Oracle endocrine/urologic oncology evidence layer'
+    };
+    return {ds,pack,source:sourceMap[disease]||'Integrated Oracle evidence layer'};
+  }
+
+  function openInAppGuideline(disease){
+    const data=guidelineData(disease);
+    if(!data.ds) return;
+    let modal=document.getElementById('v14GuidelineModal');
+    if(!modal){
+      modal=document.createElement('div');
+      modal.id='v14GuidelineModal';
+      modal.className='no-print';
+      modal.style.cssText='position:fixed;inset:0;background:rgba(2,6,23,.62);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto';
+      const panel=document.createElement('div');
+      panel.id='v14GuidelinePanel';
+      panel.style.cssText='width:min(1100px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 25px 70px rgba(2,6,23,.35);padding:24px';
+      modal.appendChild(panel);
+      modal.addEventListener('click',e=>{if(e.target===modal) modal.remove();});
+      document.body.appendChild(modal);
+    }
+    const panel=modal.querySelector('#v14GuidelinePanel');
+    panel.innerHTML='';
+    const head=document.createElement('div');
+    head.style.cssText='display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px';
+    const title=document.createElement('div');
+    const h2=document.createElement('h2'); h2.textContent=disease+' — In-App Guideline Navigator V14.0'; h2.style.cssText='margin:0;font-size:22px;color:#0f172a';
+    const sub=document.createElement('div'); sub.textContent=data.source+' · integrated Oracle content · clinician verification required'; sub.style.cssText='margin-top:6px;font-size:11px;color:#64748b;line-height:1.4';
+    title.append(h2,sub);
+    const close=document.createElement('button'); close.type='button'; close.textContent='Close'; close.style.cssText='border:0;background:#0f172a;color:#fff;border-radius:9px;padding:9px 13px;font-weight:800;cursor:pointer'; close.onclick=()=>modal.remove();
+    head.append(title,close); panel.appendChild(head);
+
+    const note=document.createElement('div');
+    note.style.cssText='padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#475569;font-size:11px;line-height:1.5;margin-bottom:16px';
+    note.innerHTML='<b>How to use:</b> This is the disease-specific guideline navigator integrated into Oracle. It surfaces the current disease module\'s diagnostic, staging/risk and treatment content. It is a clinical aid, not a substitute for clinician judgement or local protocols.';
+    panel.appendChild(note);
+
+    const sections=(data.ds.sections||[]);
+    if(!sections.length){
+      const empty=document.createElement('div'); empty.textContent='No integrated guideline sections are currently available for this disease.'; empty.style.cssText='padding:16px;border:1px dashed #cbd5e1;border-radius:10px;color:#64748b'; panel.appendChild(empty);
+    } else {
+      sections.forEach(sec=>{
+        const wrap=document.createElement('section');
+        wrap.style.cssText='margin:0 0 14px;padding:15px;border:1px solid #dbe5ec;border-radius:12px;background:#fff';
+        const sh=document.createElement('h3'); sh.textContent=sec.title||'Guideline section'; sh.style.cssText='margin:0 0 9px;font-size:15px;color:#0f172a';
+        wrap.appendChild(sh);
+        const items=Array.isArray(sec.items)?sec.items:[];
+        items.forEach(item=>{
+          const row=document.createElement('div'); row.style.cssText='padding:9px 0;border-top:1px solid #eef2f7;line-height:1.55';
+          const label=document.createElement('div'); label.textContent=String(item?.[0]??''); label.style.cssText='font-weight:800;color:#163247;font-size:12px';
+          const body=document.createElement('div'); body.textContent=String(item?.[1]??''); body.style.cssText='margin-top:4px;color:#334155;font-size:12px';
+          row.append(label,body); wrap.appendChild(row);
+        });
+        panel.appendChild(wrap);
+      });
+    }
+    modal.style.display='flex';
+  }
+
   function addGuidelineButton(btn,disease){
-    if(!btn || !disease || !GUIDELINES[disease]) return;
+    if(!btn || !disease) return;
     btn.dataset.oracleDisease=disease;
     let wrap=btn.parentElement;
     if(!wrap) return;
@@ -161,13 +234,13 @@
       guide.type='button';
       guide.className='v14-guideline-link';
       guide.style.cssText='margin-left:8px;background:#0f766e;color:#fff;border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer';
-      guide.innerHTML='View disease guideline';
+      guide.innerHTML='View in-app guideline';
       wrap.appendChild(guide);
       guide.addEventListener('click',ev=>{
         ev.preventDefault();
+        ev.stopPropagation();
         const d=btn.dataset.oracleDisease;
-        const g=GUIDELINES[d];
-        if(g) window.open(g[1],'_blank','noopener,noreferrer');
+        openInAppGuideline(d);
       });
     }
   }
