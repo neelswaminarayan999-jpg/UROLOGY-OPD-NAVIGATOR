@@ -194,22 +194,53 @@ const ORACLE_KEYS = [
 function stripJsonFences(text) {
   return String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
 }
+function readableValue(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') {
+    const t = value.trim();
+    if ((t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']'))) {
+      try { return readableValue(JSON.parse(t)); } catch {}
+    }
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) return value.map(readableValue).filter(Boolean).join('; ');
+  if (typeof value === 'object') {
+    const preferred=['summary','notes','note','finding','findings','text','description','observation','interpretation','value','details','reason'];
+    for (const key of preferred) {
+      if (value[key] != null) {
+        const v=readableValue(value[key]);
+        if(v) return v;
+      }
+    }
+    return Object.entries(value)
+      .map(([k,v])=>{ const x=readableValue(v); return x ? `${k.replace(/_/g,' ')}: ${x}` : ''; })
+      .filter(Boolean).join('; ');
+  }
+  return String(value);
+}
+
 function normalizeOracleObject(obj) {
   const listKeys = ['observations','differential','urgent_flags','missing_data','uncertainty','teaching'];
   for (const key of listKeys) {
     if (obj[key] == null) obj[key] = [];
-    else if (!Array.isArray(obj[key])) obj[key] = [String(obj[key])];
+    else if (!Array.isArray(obj[key])) obj[key] = [obj[key]];
+    obj[key] = obj[key].map(readableValue).filter(Boolean);
   }
+  obj.technical_adequacy = readableValue(obj.technical_adequacy) || 'Not stated by provider.';
+  obj.interpretation = readableValue(obj.interpretation) || 'No provider interpretation returned.';
   if (obj.suggested_oracle_values == null || typeof obj.suggested_oracle_values !== 'object' || Array.isArray(obj.suggested_oracle_values)) {
     obj.suggested_oracle_values = { disease: 'None', fields: [] };
   }
   if (!obj.suggested_oracle_values.disease) obj.suggested_oracle_values.disease = 'None';
   if (!Array.isArray(obj.suggested_oracle_values.fields)) {
-    obj.suggested_oracle_values.fields = obj.suggested_oracle_values.fields == null ? [] : [{ id: 'unparsed', value: String(obj.suggested_oracle_values.fields) }];
+    obj.suggested_oracle_values.fields = obj.suggested_oracle_values.fields == null ? [] : [{ id: 'unparsed', value: readableValue(obj.suggested_oracle_values.fields) }];
   }
   obj.suggested_oracle_values.fields = obj.suggested_oracle_values.fields
     .filter(Boolean)
-    .map((x,i) => typeof x === 'object' ? { id: String(x.id ?? 'field_'+(i+1)), value: String(x.value ?? '') } : { id: 'field_'+(i+1), value: String(x) });
+    .map((x,i) => typeof x === 'object'
+      ? { id: String(x.id ?? 'field_'+(i+1)), value: readableValue(x.value ?? x) }
+      : { id: 'field_'+(i+1), value: readableValue(x) });
   if (!obj.pathway_link || typeof obj.pathway_link !== 'object' || Array.isArray(obj.pathway_link)) {
     obj.pathway_link = {
       requires_clinician_confirmation: true,
@@ -219,12 +250,11 @@ function normalizeOracleObject(obj) {
   }
   obj.pathway_link.requires_clinician_confirmation = true;
   if (!obj.pathway_link.suggested_module) obj.pathway_link.suggested_module = 'None';
-  if (!obj.pathway_link.note) obj.pathway_link.note = 'Clinician confirmation required.';
+  obj.pathway_link.note = readableValue(obj.pathway_link.note) || 'Clinician confirmation required.';
   if (!obj.suggested_disease) obj.suggested_disease = 'None';
-  if (!obj.technical_adequacy) obj.technical_adequacy = 'Not stated by provider.';
-  if (!obj.interpretation) obj.interpretation = 'No provider interpretation returned.';
   return obj;
 }
+
 function validateOracleOutput(text) {
   const cleaned = stripJsonFences(text);
   if (/^user\s+safety\s*:/i.test(cleaned) || /safety\s+categories\s*:/i.test(cleaned)) {
