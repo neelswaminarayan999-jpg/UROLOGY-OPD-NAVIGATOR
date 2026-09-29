@@ -354,6 +354,247 @@
   setTimeout(optimizeInvestigationImages,1000);
   setInterval(()=>{optimizeInvestigationImages();friendlyAIError();},1200);
 
+  /* V14 clinical-audit hardening: wire modal actions, reset state, stone modifiers, emergency alert and print layout. */
+  window.modal=function(title,html){
+    const existing=document.getElementById('v14ActionModal');
+    if(existing) existing.remove();
+    const back=document.createElement('div');
+    back.id='v14ActionModal';
+    back.style.cssText='position:fixed;inset:0;background:rgba(2,6,23,.62);z-index:100000;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto';
+    const panel=document.createElement('div');
+    panel.style.cssText='width:min(820px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 25px 70px rgba(2,6,23,.35);padding:22px;color:#0f172a';
+    const head=document.createElement('div');
+    head.style.cssText='display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px';
+    const h=document.createElement('h3'); h.textContent=String(title||'Oracle information'); h.style.cssText='margin:0;font-size:20px;font-weight:900';
+    const close=document.createElement('button'); close.type='button'; close.textContent='Close'; close.style.cssText='border:0;background:#0f172a;color:#fff;border-radius:9px;padding:8px 12px;font-weight:800;cursor:pointer';
+    close.onclick=()=>back.remove();
+    head.append(h,close);
+    const body=document.createElement('div'); body.innerHTML=String(html||''); body.style.cssText='line-height:1.6';
+    panel.append(head,body); back.appendChild(panel); document.body.appendChild(back);
+    back.addEventListener('click',e=>{if(e.target===back)back.remove();});
+    document.addEventListener('keydown',function escClose(e){if(e.key==='Escape'){back.remove();document.removeEventListener('keydown',escClose);}}, {once:true});
+  };
+
+  function normalizeHeaderBrand(){
+    const h=document.querySelector('header .text-lg');
+    if(h) h.textContent='Urology Oracle V14.0';
+    replaceText('Decision support • treatment pathways • surgical atlas • scores • trials • dose references • follow-up',
+      'Decision support • Treatment pathways • Surgical atlas • Scores • Trials • Dose references • Follow-up');
+  }
+
+  function clearOracleOutputAfterReset(){
+    const out=document.getElementById('oracleOutput');
+    if(out) out.innerHTML='<div class="text-sm font-black">Management output</div><div class="text-xs text-slate-500 mt-1">Enter explicit clinical criteria to generate a pathway.</div>';
+    const modalIds=['v14ActionModal','v14GuidelineModal'];
+    modalIds.forEach(id=>document.getElementById(id)?.remove());
+  }
+
+  function wireResetHardening(){
+    if(document.body.dataset.v14ResetHardening==='1') return;
+    document.body.dataset.v14ResetHardening='1';
+    document.addEventListener('click',e=>{
+      const b=e.target?.closest?.('#oracleResetBtn');
+      if(!b) return;
+      setTimeout(clearOracleOutputAfterReset,0);
+    });
+  }
+
+  function collapseFloatingMenus(){
+    document.querySelectorAll('.dropdown-menu[open],.select-menu[open],[role="menu"][data-open="true"],[role="listbox"][data-open="true"]').forEach(el=>{
+      try{el.removeAttribute('open');}catch{}
+      try{el.dataset.open='false';}catch{}
+      try{el.hidden=true;}catch{}
+    });
+  }
+
+  function hardenDropdownLayering(){
+    if(document.getElementById('v14DropdownHardening')) return;
+    const style=document.createElement('style'); style.id='v14DropdownHardening';
+    style.textContent=[
+      '.oracle-grid,#oracleForm,#oracleView{overflow:visible!important}',
+      '#oracleForm label{position:relative}',
+      '#oracleForm select,#oracleForm input{position:relative;z-index:5}',
+      '.dropdown-menu,.select-menu,[role="listbox"],[role="menu"]{z-index:100001!important}',
+      '@media(max-width:900px){.oracle-grid{gap:10px!important}.v4-toolbar{position:relative;z-index:8}}'
+    ].join('');
+    document.head.appendChild(style);
+    document.addEventListener('change',e=>{
+      if(e.target?.tagName==='SELECT') collapseFloatingMenus();
+    });
+  }
+
+  function addStoneClinicalFields(){
+    if(typeof ORACLE_FIELDS==='undefined' || !ORACLE_FIELDS['Stone Disease']) return;
+    const fields=ORACLE_FIELDS['Stone Disease'];
+    const has=id=>fields.some(f=>f.id===id);
+    if(!has('lowerPole')) fields.push({
+      id:'lowerPole',label:'Lower-pole renal stone',options:['No','Yes'],show:v=>v.site==='Kidney'&&v.size==='10–20 mm'&&v.infection==='No'
+    });
+    if(!has('lpAnatomy')) fields.push({
+      id:'lpAnatomy',label:'Lower-pole anatomy relevant to SWL clearance',options:['Favourable / not obviously adverse','Unfavourable: steep IPA / long calyx / narrow infundibulum','Not assessed'],show:v=>v.lowerPole==='Yes'
+    });
+    if(!has('density')) fields.push({
+      id:'density',label:'Stone attenuation on NCCT',options:['<900 HU','900–1000 HU','>1000 HU','Not available'],show:v=>v.site==='Kidney'&&v.size==='10–20 mm'&&v.infection==='No'
+    });
+    if(!has('ssd')) fields.push({
+      id:'ssd',label:'Skin-to-stone distance',options:['<10 cm','≥10 cm','Not measured'],show:v=>v.site==='Kidney'&&v.size==='10–20 mm'&&v.infection==='No'
+    });
+    if(!has('composition')) fields.push({
+      id:'composition',label:'Stone composition / SWL resistance',options:['Not known','Likely SWL-sensitive','Known/likely SWL-resistant'],show:v=>v.site==='Kidney'&&v.size==='10–20 mm'&&v.infection==='No'
+    });
+  }
+
+  function stoneDecisionV14(v){
+    if(v.infection==='Yes'){
+      return '<div style="border-left:6px solid #b91c1c;background:#fef2f2;padding:15px 16px;border-radius:12px;font-size:14px;line-height:1.6"><b>🚨 UROLOGICAL EMERGENCY — DRAIN FIRST</b><br>Sepsis/infected obstruction takes priority over definitive stone treatment. Urgently decompress with ureteral stenting or percutaneous nephrostomy; obtain urine and blood cultures and start antibiotics immediately. Definitive stone treatment should be delayed until sepsis has resolved and the patient is clinically stabilised.</div><div class="mt-4 p-4 border border-slate-200 rounded-xl"><b>Why this branch:</b> An infected obstructed collecting system requires urgent source control; stent and nephrostomy are accepted decompression routes. <span class="badge badge-red" style="margin-left:6px">Do not lithotripsy in the acute septic phase</span></div><div class="mt-4 text-[11px] text-slate-500">Source layer: EAU Urolithiasis 2026</div>';
+    }
+    if(v.site==='Kidney'&&v.size==='10–20 mm'){
+      const lower=v.lowerPole==='Yes';
+      const unfavLower=lower&&v.lpAnatomy&&v.lpAnatomy.startsWith('Unfavourable');
+      const highHU=v.density==='>1000 HU';
+      const longSSD=v.ssd==='≥10 cm';
+      const resistant=v.composition==='Known/likely SWL-resistant';
+      const swlUnfavourable=unfavLower||highHU||longSSD||resistant;
+      let pathway='';
+      if(lower){
+        pathway=swlUnfavourable
+          ? 'For a 10–20 mm lower-pole stone with unfavourable SWL predictors, favour an endoscopic strategy (RIRS or mini-PCNL) rather than SWL. The choice between RIRS and mini-PCNL should reflect stone burden, anatomy, bleeding risk, operative goals and patient preference.'
+          : 'For a 10–20 mm lower-pole stone, RIRS and mini-PCNL are the principal endoscopic options; SWL has lower/less predictable clearance in the lower pole, and selection should account for calyceal anatomy and CT predictors of SWL success.';
+      }else{
+        pathway=swlUnfavourable
+          ? 'For a 10–20 mm renal stone outside the lower pole with adverse SWL predictors, RIRS/mini-PCNL become more attractive because SWL fragmentation/clearance is less favourable. Exact selection depends on burden, anatomy, bleeding risk and patient preference.'
+          : 'For a 10–20 mm non-lower-pole renal stone with favourable anatomy and CT characteristics, SWL, RIRS and mini-PCNL are established options. The trade-off is repeated SWL sessions versus endoscopic/percutaneous invasiveness and stone-free probability.';
+      }
+      const mods=[
+        ['Location',lower?'Lower pole':'Non-lower pole'],
+        ['Lower-pole anatomy',lower?(v.lpAnatomy||'Not assessed'):'Not applicable'],
+        ['CT attenuation',v.density||'Not assessed'],
+        ['Skin-to-stone distance',v.ssd||'Not assessed'],
+        ['Composition',v.composition||'Not assessed']
+      ];
+      return '<div class="flex flex-wrap gap-2 items-center"><span class="badge badge-green">Renal stone — 10–20 mm</span><span class="badge badge-blue">V14 CT/anatomy branch</span></div>'+
+        '<h3 class="text-lg font-black mt-2">Definitive treatment pathway</h3>'+
+        '<div class="rule mt-3 text-sm leading-6"><b>Recommended pathway:</b><br>'+pathway+'</div>'+
+        '<div class="decision mt-3 text-sm leading-6"><b>Decision modifiers recorded</b><br>'+mods.map(x=>'<b>'+esc(x[0])+':</b> '+esc(x[1])).join('<br>')+'</div>'+
+        '<div class="warn mt-3 text-xs leading-5"><b>SWL limitations to check:</b><br>EAU 2026 identifies lower-pole location, steep infundibulopelvic angle, long calyx, narrow infundibulum, long skin-to-stone distance and hard stone composition as negative predictors; CT attenuation >1000 HU with high homogeneity makes disintegration less likely. These are modifiers, not standalone absolute treatment rules.</div>'+
+        '<div class="mt-4 text-[11px] text-slate-500">Source layer: EAU Urolithiasis 2026; AUA Surgical Management of Stones (CT selection parameters and lower-pole guidance).</div>';
+    }
+    if(v.staghorn==='Yes'||v.size==='>20 mm'){
+      return '<div class="flex flex-wrap gap-2 items-center"><span class="badge badge-green">Large / branching renal stone</span></div><h3 class="text-lg font-black mt-2">PCNL-centred pathway</h3><div class="rule mt-3 text-sm leading-6"><b>Recommended pathway:</b><br>PCNL is the core treatment route for renal stone burden >20 mm and complex branching/staghorn stones, with staged or adjunctive procedures according to burden and anatomy.</div><div class="warn mt-3 text-xs leading-5"><b>Do not miss:</b><br>Pre-op urine culture; infection control; bleeding/antithrombotic planning; consider stone or renal-pelvic urine culture during PCNL when possible.</div><div class="mt-4 text-[11px] text-slate-500">Source layer: EAU Urolithiasis 2026</div>';
+    }
+    if(v.site==='Distal ureter'){
+      return '<div class="flex flex-wrap gap-2 items-center"><span class="badge badge-green">Distal ureter stone</span></div><h3 class="text-lg font-black mt-2">Ureteral pathway</h3><div class="rule mt-3 text-sm leading-6"><b>Recommended pathway:</b><br>For a stable non-infected distal ureter stone, observation/medical expulsive management may be used when spontaneous passage is plausible; ureteroscopy or SWL is used when active intervention is indicated.</div><div class="warn mt-3 text-xs leading-5"><b>Urgency gate:</b><br>Do not delay drainage or definitive management when infection, anuria, uncontrolled pain or threatened renal function is present.</div><div class="mt-4 text-[11px] text-slate-500">Source layer: EAU Urolithiasis 2026</div>';
+    }
+    if(v.site==='Proximal ureter'){
+      return '<div class="flex flex-wrap gap-2 items-center"><span class="badge badge-green">Proximal ureter stone</span></div><h3 class="text-lg font-black mt-2">Ureteral pathway</h3><div class="rule mt-3 text-sm leading-6"><b>Recommended pathway:</b><br>Select SWL or ureteroscopy according to stone size, obstruction, anatomy and the need for rapid definitive clearance; consider antegrade removal for selected large/impacted proximal stones when retrograde access is not suitable.</div><div class="warn mt-3 text-xs leading-5"><b>Urgency gate:</b><br>Infection or anuria changes the pathway to urgent drainage first.</div><div class="mt-4 text-[11px] text-slate-500">Source layer: EAU Urolithiasis 2026</div>';
+    }
+    return '<div class="flex flex-wrap gap-2 items-center"><span class="badge badge-green">Renal / bladder stone pathway</span></div><h3 class="text-lg font-black mt-2">Individualised stone treatment</h3><div class="rule mt-3 text-sm leading-6"><b>Recommended pathway:</b><br>Match intervention to stone burden, location, anatomy, infection status, bleeding risk and patient preference.</div><div class="warn mt-3 text-xs leading-5"><b>Safety gate:</b><br>Treat or exclude clinically significant infection before definitive stone removal.</div><div class="mt-4 text-[11px] text-slate-500">Source layer: EAU Urolithiasis 2026</div>';
+  }
+
+  function hardenStoneOracle(){
+    addStoneClinicalFields();
+    if(typeof ORACLE_FIELDS==='undefined') return;
+    const originalIncomplete=window.oracleIncomplete;
+    if(typeof originalIncomplete==='function'){}
+    if(typeof oracleRequired!=='undefined'){
+      /* oracleRequired is a global function declaration in the base build; replace the public binding for stone-specific readiness. */
+      const priorRequired=window.oracleRequired;
+      window.oracleRequired=function(name,v){
+        if(name!=='Stone Disease') return priorRequired?priorRequired(name,v):[];
+        const req=['site','size','infection'];
+        if(v.site==='Kidney'&&v.size==='10–20 mm'&&v.infection==='No'){
+          req.push('lowerPole','density','ssd','composition');
+          if(v.lowerPole==='Yes') req.push('lpAnatomy');
+        }
+        return req;
+      };
+    }
+  }
+
+  function updateStoneProgress(){
+    const sel=document.getElementById('oracleDisease');
+    if(!sel||sel.value!=='Stone Disease') return;
+    const p=document.getElementById('oracleProgress');
+    if(!p) return;
+    const v=window.__v14StoneState||{};
+    const required=['site','size','infection'];
+    const baseDone=required.filter(k=>v[k]!=null&&v[k]!=='').length;
+    const special=v.site==='Kidney'&&v.size==='10–20 mm'&&v.infection==='No';
+    if(!special){
+      p.innerHTML='Core decision inputs: <b>'+baseDone+'/3</b> • modifiers: assessed as applicable after location/size/infection are selected.';
+      return;
+    }
+    const mods=['lowerPole','density','ssd','composition'];
+    if(v.lowerPole==='Yes') mods.push('lpAnatomy');
+    const modDone=mods.filter(k=>v[k]!=null&&v[k]!=='').length;
+    const total=required.length+mods.length;
+    const done=baseDone+modDone;
+    p.innerHTML='Pathway readiness: <b>'+done+'/'+total+'</b> • core inputs '+baseDone+'/3 • CT/anatomy modifiers '+modDone+'/'+mods.length+' assessed.';
+  }
+
+  function syncStoneStateFromForm(){
+    const sel=document.getElementById('oracleDisease');
+    if(!sel||sel.value!=='Stone Disease') return;
+    const ids=['site','size','infection','lowerPole','lpAnatomy','density','ssd','composition'];
+    const v={};
+    ids.forEach(id=>{
+      const e=document.getElementById('of-'+id);
+      if(e) v[id]=e.value;
+    });
+    window.__v14StoneState=v;
+    updateStoneProgress();
+  }
+
+  function wireStoneCapture(){
+    if(document.body.dataset.v14StoneWire==='1') return;
+    document.body.dataset.v14StoneWire='1';
+    document.addEventListener('change',e=>{
+      if(e.target?.id?.startsWith('of-') || e.target?.id==='oracleDisease'){
+        setTimeout(()=>{syncStoneStateFromForm();collapseFloatingMenus();},0);
+      }
+    });
+    document.addEventListener('click',e=>{
+      const run=e.target?.closest?.('#oracleRunBtn');
+      const sel=document.getElementById('oracleDisease');
+      if(!run||!sel||sel.value!=='Stone Disease') return;
+      syncStoneStateFromForm();
+      const v=window.__v14StoneState||{};
+      if(v.site==='Kidney'&&v.size==='10–20 mm'&&v.infection==='No'){
+        const required=['lowerPole','density','ssd','composition'];
+        if(v.lowerPole==='Yes') required.push('lpAnatomy');
+        const missing=required.filter(k=>!v[k]);
+        if(missing.length){
+          e.preventDefault(); e.stopImmediatePropagation();
+          const out=document.getElementById('oracleOutput');
+          out.innerHTML='<div class="warn text-sm"><b>Pathway incomplete.</b><br>Complete the CT/anatomy modifiers before generating the 10–20 mm renal-stone recommendation: '+esc(missing.join(', '))+'.</div>';
+          return;
+        }
+        e.preventDefault(); e.stopImmediatePropagation();
+        document.getElementById('oracleOutput').innerHTML=stoneDecisionV14(v);
+      }else if(v.infection==='Yes'){
+        e.preventDefault(); e.stopImmediatePropagation();
+        document.getElementById('oracleOutput').innerHTML=stoneDecisionV14(v);
+      }
+      setTimeout(updateStoneProgress,0);
+    },true);
+  }
+
+  function hardenProcedurePrint(){
+    if(document.getElementById('v14PrintRules')) return;
+    const style=document.createElement('style'); style.id='v14PrintRules';
+    style.textContent='@media print{body{background:#fff!important;color:#000!important}header,footer,nav,.no-print,#globalSearch,button,select,input,textarea{display:none!important}#procedureView{display:block!important;padding:0!important;margin:0!important}#procedureView .card{box-shadow:none!important;border:1px solid #777!important;break-inside:avoid;page-break-inside:avoid;margin:0 0 12pt!important}#procedureView .grid{display:block!important}#procedureView .section-title{font-size:13pt!important}#procedureView .step{background:#fff!important;border-left:2pt solid #000!important;color:#000!important;break-inside:avoid;page-break-inside:avoid}#procedureView .warn,#procedureView .ok{background:#fff!important;border-left:2pt solid #000!important;color:#000!important;break-inside:avoid;page-break-inside:avoid}#procedureView h2,#procedureView h3{color:#000!important} @page{margin:14mm}}';
+    document.head.appendChild(style);
+  }
+
+  hardenStoneOracle();
+  wireResetHardening();
+  hardenDropdownLayering();
+  wireStoneCapture();
+  hardenProcedurePrint();
+  normalizeHeaderBrand();
+  setTimeout(()=>{normalizeHeaderBrand();syncStoneStateFromForm();},600);
+  setTimeout(()=>{normalizeHeaderBrand();syncStoneStateFromForm();},1600);
+
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',brand,{once:true}); else brand();
   setTimeout(brand,1200);
   setTimeout(brand,3000);
