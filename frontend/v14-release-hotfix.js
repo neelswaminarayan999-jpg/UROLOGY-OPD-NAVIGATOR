@@ -8,7 +8,7 @@
     nodes.forEach(node=>node.nodeValue=node.nodeValue.split(oldText).join(newText));
   }
   function brand(){
-    document.title='Urology Oracle V14.0 — Final Clinical Workstation';
+    document.title='Urology Oracle';
     const mode=document.getElementById('aiMode');
     if(mode){
       mode.innerHTML='<option value="proxy">Server-side OpenRouter proxy</option>';
@@ -377,7 +377,7 @@
 
   function normalizeHeaderBrand(){
     const h=document.querySelector('header .text-lg');
-    if(h) h.textContent='Urology Oracle V14.0';
+    if(h) h.textContent='Urology Oracle';
     replaceText('Decision support • treatment pathways • surgical atlas • scores • trials • dose references • follow-up',
       'Decision support • Treatment pathways • Surgical atlas • Scores • Trials • Dose references • Follow-up');
   }
