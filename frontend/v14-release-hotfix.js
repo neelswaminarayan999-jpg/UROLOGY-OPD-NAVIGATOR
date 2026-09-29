@@ -1,4 +1,4 @@
-/* Urology Oracle UI compatibility layer. Keeps the working AI and in-app guideline integration without exposing build metadata. */
+/* Urology Oracle V14.0 UI compatibility layer — working AI, in-app guideline integration and release branding. */
 (function(){
   'use strict';
   function replaceText(oldText,newText){
@@ -8,8 +8,7 @@
     nodes.forEach(node=>node.nodeValue=node.nodeValue.split(oldText).join(newText));
   }
   function brand(){
-    // Keep release/build metadata out of the clinician-facing UI.
-    document.title='Urology Oracle';
+    document.title='Urology Oracle V14.0 — Final Clinical Workstation';
     const mode=document.getElementById('aiMode');
     if(mode){
       mode.innerHTML='<option value="proxy">Server-side OpenRouter proxy</option>';
