@@ -440,10 +440,17 @@ async function callWithFallback(body) {
 }
 
 function hotfixHtml(html) {
-  const tag = '<script src="/v14-release-hotfix.js" defer></script>';
-  if (html.includes('/v14-release-hotfix.js')) return html;
-  if (html.includes('</head>')) return html.replace('</head>', tag + '</head>');
-  return html + tag;
+  const tags = [
+    '<script src="/v14-release-hotfix.js" defer></script>',
+    '<script src="/v14.1-opd-suite.js" defer></script>'
+  ];
+  let out = html;
+  for (const tag of tags) {
+    const src = tag.match(/src="([^"]+)"/)?.[1];
+    if (src && !out.includes(src) && out.includes('</head>')) out = out.replace('</head>', tag + '</head>');
+    else if (src && !out.includes(src)) out += tag;
+  }
+  return out;
 }
 
 const server = http.createServer(async (req, res) => {
