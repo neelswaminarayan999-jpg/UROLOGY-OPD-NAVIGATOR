@@ -72,29 +72,25 @@ function addClinicalHomeNavigation(){
     if(/BOOK-INTEGRATED CLINICAL ENGINE|CONTENT BASELINE|FINAL CLINICAL WORKSTATION|Urology Oracle V14\.0|NCCN 2026 version registry|Rule-based Oracle/i.test(t)) card.remove();
   });
   const box=document.createElement('div'); box.id='v141ClinicalNav';
-  box.innerHTML=`
-    <div class="card p-4">
-      <div class="section-title mb-1">Clinical Oracle</div>
-      <div style="font-size:13px;color:#64748b;line-height:1.5;margin-bottom:12px">Choose the problem you are managing. The Oracle will take you through classification, required inputs, treatment and follow-up.</div>
-      <div class="v141-home-group"><div class="v141-home-label">Uro-oncology</div><div class="v141-home-grid">
-        <button class="v141-tool" data-disease="Ca Prostate"><b>Prostate cancer</b><span>TNM · ISUP · risk · treatment</span></button>
-        <button class="v141-tool" data-disease="Ca Bladder"><b>Bladder cancer</b><span>NMIBC · MIBC · metastatic</span></button>
-        <button class="v141-tool" data-disease="UTUC"><b>Upper tract urothelial cancer</b><span>Risk · kidney-sparing · radical treatment</span></button>
-        <button class="v141-tool" data-disease="Ca Kidney"><b>Kidney cancer</b><span>Stage · histology · systemic pathway</span></button>
-        <button class="v141-tool" data-disease="Ca Testis"><b>Testicular cancer</b><span>Markers · stage · risk · treatment</span></button>
-        <button class="v141-tool" data-disease="Ca Penis"><b>Penile cancer</b><span>Local stage · nodes · treatment</span></button>
-      </div></div>
-      <div class="v141-home-group"><div class="v141-home-label">High-use urology</div><div class="v141-home-grid">
-        <button class="v141-tool" data-disease="Urethral Stricture"><b>Urethral stricture</b><span>Site · length · phenotype · reconstruction</span></button>
-        <button class="v141-tool" data-disease="BPH / Male LUTS"><b>BPH / male LUTS</b><span>Phenotype · medication · procedure selection</span></button>
-        <button class="v141-tool" data-disease="Stone Disease"><b>Stone disease</b><span>Stone factors · infection · procedure pathway</span></button>
-      </div></div>
-      <div class="v141-home-group"><div class="v141-home-label">Focused tools</div><div class="v141-home-grid">
-        <button class="v141-tool" id="v141BladderPath"><b>Bladder cancer pathway</b><span>Explicit NMIBC / MIBC decision algorithm</span></button>
-        <button class="v141-tool" id="v141ScoresHome"><b>Scores & calculators</b><span>IPSS · IIEF-5 · TWIST and more</span></button>
-        <button class="v141-tool" id="v141UrgentHome"><b>Urgent urology</b><span>Torsion · priapism · Fournier red flags</span></button>
-      </div></div>
-    </div>`;
+  box.innerHTML='<div class="card p-4"><div class="section-title mb-1">Clinical Oracle</div><div style="font-size:13px;color:#64748b;line-height:1.5;margin-bottom:12px">Choose the problem you are managing. The Oracle will take you through classification, required inputs, treatment and follow-up.</div>'+
+    '<div class="v141-home-group"><div class="v141-home-label">Uro-oncology</div><div class="v141-home-grid">'+
+    '<button class="v141-tool" data-disease="Ca Prostate"><b>Prostate cancer</b><span>TNM · ISUP · risk · treatment</span></button>'+
+    '<button class="v141-tool" data-disease="Ca Bladder"><b>Bladder cancer</b><span>NMIBC · MIBC · metastatic</span></button>'+
+    '<button class="v141-tool" data-disease="UTUC"><b>Upper tract urothelial cancer</b><span>Risk · kidney-sparing · radical treatment</span></button>'+
+    '<button class="v141-tool" data-disease="Ca Kidney"><b>Kidney cancer</b><span>Stage · histology · systemic pathway</span></button>'+
+    '<button class="v141-tool" data-disease="Ca Testis"><b>Testicular cancer</b><span>Markers · stage · risk · treatment</span></button>'+
+    '<button class="v141-tool" data-disease="Ca Penis"><b>Penile cancer</b><span>Local stage · nodes · treatment</span></button>'+
+    '</div></div>'+
+    '<div class="v141-home-group"><div class="v141-home-label">High-use urology</div><div class="v141-home-grid">'+
+    '<button class="v141-tool" data-disease="Urethral Stricture"><b>Urethral stricture</b><span>Site · length · phenotype · reconstruction</span></button>'+
+    '<button class="v141-tool" data-disease="BPH / Male LUTS"><b>BPH / male LUTS</b><span>Phenotype · medication · procedure selection</span></button>'+
+    '<button class="v141-tool" data-disease="Stone Disease"><b>Stone disease</b><span>Stone factors · infection · procedure pathway</span></button>'+
+    '</div></div>'+
+    '<div class="v141-home-group"><div class="v141-home-label">Focused tools</div><div class="v141-home-grid">'+
+    '<button class="v141-tool" id="v141BladderPath"><b>Bladder cancer pathway</b><span>Explicit NMIBC / MIBC decision algorithm</span></button>'+
+    '<button class="v141-tool" id="v141ScoresHome"><b>Scores & calculators</b><span>IPSS · IIEF-5 · TWIST and more</span></button>'+
+    '<button class="v141-tool" id="v141UrgentHome"><b>Urgent urology</b><span>Torsion · priapism · Fournier red flags</span></button>'+
+    '</div></div></div>';
   const first=home.querySelector('.card');
   (first?.parentElement||home).insertBefore(box,first||null);
   box.querySelectorAll('[data-disease]').forEach(b=>b.onclick=()=>openDiseaseFromHome(b.dataset.disease));
@@ -124,23 +120,22 @@ function addQuickTools(){
     btn.onclick=()=>openTool(k); grid.appendChild(btn);
   });
 }
-disease="Ca Bladder"><b>Bladder cancer</b><span>NMIBC · MIBC · metastatic</span></button>
-        <button class="v141-tool" data-disease="UTUC"><b>Upper tract urothelial cancer</b><span>Risk · kidney-sparing · radical treatment</span></button>
-        <button class="v141-tool" data-disease="Ca Kidney"><b>Kidney cancer</b><span>Stage · histology · systemic pathway</span></button>
-        <button class="v141-tool" data-disease="Ca Testis"><b>Testicular cancer</b><span>Markers · stage · risk · treatment</span></button>
-        <button class="v141-tool" data-disease="Ca Penis"><b>Penile cancer</b><span>Local stage · nodes · treatment</span></button>
-      </div></div>
-      <div class="v141-home-group"><div class="v141-home-label">High-use urology</div><div class="v141-home-grid">
-        <button class="v141-tool" data-disease="Urethral Stricture"><b>Urethral stricture</b><span>Site · length · phenotype · reconstruction</span></button>
-        <button class="v141-tool" data-disease="BPH / Male LUTS"><b>BPH / male LUTS</b><span>Phenotype · medication · procedure selection</span></button>
-        <button class="v141-tool" data-disease="Stone Disease"><b>Stone disease</b><span>Stone factors · infection · procedure pathway</span></button>
-      </div></div>
-      <div class="v141-home-group"><div class="v141-home-label">Focused tools</div><div class="v141-home-grid">
-        <button class="v141-tool" id="v141BladderPath"><b>Bladder cancer pathway</b><span>Explicit NMIBC / MIBC decision algorithm</span></button>
-        <button class="v141-tool" id="v141ScoresHome"><b>Scores & calculators</b><span>IPSS · IIEF-5 · TWIST and more</span></button>
-        <button class="v141-tool" id="v141UrgentHome"><b>Urgent urology</b><span>Torsion · priapism · Fournier red flags</span></button>
-      </div></div>
-    </div>`;
+><b>Bladder cancer</b><span>NMIBC · MIBC · metastatic</span></button>'+
+    '<button class="v141-tool" data-disease="UTUC"><b>Upper tract urothelial cancer</b><span>Risk · kidney-sparing · radical treatment</span></button>'+
+    '<button class="v141-tool" data-disease="Ca Kidney"><b>Kidney cancer</b><span>Stage · histology · systemic pathway</span></button>'+
+    '<button class="v141-tool" data-disease="Ca Testis"><b>Testicular cancer</b><span>Markers · stage · risk · treatment</span></button>'+
+    '<button class="v141-tool" data-disease="Ca Penis"><b>Penile cancer</b><span>Local stage · nodes · treatment</span></button>'+
+    '</div></div>'+
+    '<div class="v141-home-group"><div class="v141-home-label">High-use urology</div><div class="v141-home-grid">'+
+    '<button class="v141-tool" data-disease="Urethral Stricture"><b>Urethral stricture</b><span>Site · length · phenotype · reconstruction</span></button>'+
+    '<button class="v141-tool" data-disease="BPH / Male LUTS"><b>BPH / male LUTS</b><span>Phenotype · medication · procedure selection</span></button>'+
+    '<button class="v141-tool" data-disease="Stone Disease"><b>Stone disease</b><span>Stone factors · infection · procedure pathway</span></button>'+
+    '</div></div>'+
+    '<div class="v141-home-group"><div class="v141-home-label">Focused tools</div><div class="v141-home-grid">'+
+    '<button class="v141-tool" id="v141BladderPath"><b>Bladder cancer pathway</b><span>Explicit NMIBC / MIBC decision algorithm</span></button>'+
+    '<button class="v141-tool" id="v141ScoresHome"><b>Scores & calculators</b><span>IPSS · IIEF-5 · TWIST and more</span></button>'+
+    '<button class="v141-tool" id="v141UrgentHome"><b>Urgent urology</b><span>Torsion · priapism · Fournier red flags</span></button>'+
+    '</div></div></div>';
   const first=home.querySelector('.card');
   (first?.parentElement||home).insertBefore(box,first||null);
   box.querySelectorAll('[data-disease]').forEach(b=>b.onclick=()=>openDiseaseFromHome(b.dataset.disease));
@@ -172,28 +167,12 @@ function addQuickTools(){
 }
 
 function openBladderPathway(){
-  openToolkit('Bladder cancer pathway',`
-    <div class="v141-note">Decision framework: establish pathology and stage first, then branch to NMIBC, MIBC, locally advanced/unresectable or metastatic disease. Verify jurisdictional approvals, product information and MDT/local protocol before treatment.</div>
-    <div class="row"><div class="label">1. Disease state</div><div class="inputs">
-      <select id="bcStage"><option value="">Select stage</option><option value="Ta">Ta</option><option value="Tis">Tis / CIS</option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4a">T4a</option><option value="T4b">T4b / unresectable</option><option value="M1">M1 metastatic</option></select>
-      <select id="bcGrade"><option value="">Grade</option><option>Low grade</option><option>High grade</option></select>
-    </div></div>
-    <div class="row"><div class="label">2. NMIBC quality checks</div><div class="inputs">
-      <select id="bcComplete"><option value="">Initial TURBT complete?</option><option value="yes">Yes</option><option value="no">No / doubtful</option></select>
-      <select id="bcMuscle"><option value="">Detrusor muscle present?</option><option value="yes">Yes</option><option value="no">No</option><option value="na">Not applicable / CIS</option></select>
-      <select id="bcCis"><option value="">CIS present?</option><option value="yes">Yes</option><option value="no">No</option></select>
-      <select id="bcBCG"><option value="">BCG status</option><option value="na">Not indicated / not started</option><option value="naive">BCG-naive</option><option value="adequate">Adequate BCG without unresponsive recurrence</option><option value="unresponsive">BCG-unresponsive / high-risk recurrence despite adequate BCG</option></select>
-    </div></div>
-    <div class="row"><div class="label">3. MIBC cisplatin-fitness inputs</div><div class="inputs">
-      <select id="bcEcog"><option value="">ECOG PS</option><option value="0">0</option><option value="1">1</option><option value="2">2+</option></select>
-      <input id="bcCrcl" type="number" min="0" placeholder="CrCl / GFR (mL/min)">
-      <select id="bcHear"><option value="">Hearing loss ≥ grade 2?</option><option value="no">No</option><option value="yes">Yes</option></select>
-      <select id="bcNeuro"><option value="">Neuropathy ≥ grade 2?</option><option value="no">No</option><option value="yes">Yes</option></select>
-      <select id="bcNyha"><option value="">NYHA III–IV?</option><option value="no">No</option><option value="yes">Yes</option></select>
-    </div></div>
-    <button class="v141-primary" id="bcGenerate">Generate pathway</button>
-    <div class="v141-result" id="bcResult">Complete the clinically relevant fields above.</div>
-  `, 'EAU 2026-aligned clinical decision framework · verify jurisdictional approvals and MDT/local protocol before treatment');
+  openToolkit('Bladder cancer pathway','<div class="v141-note">Decision framework: establish pathology and stage first, then branch to NMIBC, MIBC, locally advanced/unresectable or metastatic disease. Verify jurisdictional approvals, product information and MDT/local protocol before treatment.</div>'+
+    '<div class="row"><div class="label">1. Disease state</div><div class="inputs"><select id="bcStage"><option value="">Select stage</option><option value="Ta">Ta</option><option value="Tis">Tis / CIS</option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4a">T4a</option><option value="T4b">T4b / unresectable</option><option value="M1">M1 metastatic</option></select><select id="bcGrade"><option value="">Grade</option><option>Low grade</option><option>High grade</option></select></div></div>'+
+    '<div class="row"><div class="label">2. NMIBC quality checks</div><div class="inputs"><select id="bcComplete"><option value="">Initial TURBT complete?</option><option value="yes">Yes</option><option value="no">No / doubtful</option></select><select id="bcMuscle"><option value="">Detrusor muscle present?</option><option value="yes">Yes</option><option value="no">No</option><option value="na">Not applicable / CIS</option></select><select id="bcCis"><option value="">CIS present?</option><option value="yes">Yes</option><option value="no">No</option></select><select id="bcBCG"><option value="">BCG status</option><option value="na">Not indicated / not started</option><option value="naive">BCG-naive</option><option value="adequate">Adequate BCG without unresponsive recurrence</option><option value="unresponsive">BCG-unresponsive / high-risk recurrence despite adequate BCG</option></select></div></div>'+
+    '<div class="row"><div class="label">3. MIBC cisplatin-fitness inputs</div><div class="inputs"><select id="bcEcog"><option value="">ECOG PS</option><option value="0">0</option><option value="1">1</option><option value="2">2+</option></select><input id="bcCrcl" type="number" min="0" placeholder="CrCl / GFR (mL/min)"><select id="bcHear"><option value="">Hearing loss ≥ grade 2?</option><option value="no">No</option><option value="yes">Yes</option></select><select id="bcNeuro"><option value="">Neuropathy ≥ grade 2?</option><option value="no">No</option><option value="yes">Yes</option></select><select id="bcNyha"><option value="">NYHA III–IV?</option><option value="no">No</option><option value="yes">Yes</option></select></div></div>'+
+    '<button class="v141-primary" id="bcGenerate">Generate pathway</button><div class="v141-result" id="bcResult">Complete the clinically relevant fields above.</div>',
+    'EAU 2026-aligned clinical decision framework · verify jurisdictional approvals and MDT/local protocol before treatment');
   setTimeout(()=>{
     const b=document.getElementById('bcGenerate'); if(!b || b.dataset.bound==='1') return; b.dataset.bound='1';
     b.onclick=()=>{
