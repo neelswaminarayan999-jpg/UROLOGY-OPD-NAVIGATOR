@@ -190,11 +190,73 @@ const V14_UPDATES={
 };
 
 
+
+// V14.0 disease-content audit additions for modules that had fewer explicit branches.
+// These are deliberately concise decision gates, not a replacement for the full guideline.
+const V14_AUDIT_ADDITIONS={
+  'UTUC':[{
+    title:'V14.0 — explicit risk-to-treatment algorithm',
+    items:[
+      ['Step 1 — confirm diagnosis and MDT','Review CT urography, cystoscopy and urine cytology; obtain ureteroscopic biopsy when imaging/cytology are insufficient for diagnosis or risk stratification; discuss suspected UTUC in MDT before treatment.'],
+      ['Step 2 — low-risk phenotype','Low-risk UTUC should preferentially enter a kidney-sparing pathway. If endoscopic ablation is chosen, plan an early second-look URS (within 8 weeks) and stringent surveillance.'],
+      ['Step 3 — high-risk phenotype','High-risk non-metastatic disease generally enters radical nephroureterectomy with bladder cuff; capture stage, grade, histology, hydronephrosis, multifocality and tumour location before finalising the pathway.'],
+      ['Step 4 — distal ureter','Selected distal ureter tumours may enter distal ureterectomy + ureteric reimplantation when adequate margins can be achieved and kidney preservation is appropriate.'],
+      ['Step 5 — imperative kidney preservation','Solitary kidney, bilateral disease or severe CKD can justify case-by-case kidney-sparing management even in selected high-risk disease; explicitly document the imperative indication and higher oncologic-risk trade-off.'],
+      ['Step 6 — adjuvant pathway','After RNU, capture pT/pN and renal function before considering postoperative platinum chemotherapy; also consider the current intravesical bladder-recurrence prevention step where applicable.']
+    ]
+  }],
+  'Ca Penis':[{
+    title:'V14.0 — explicit primary-tumour and nodal algorithm',
+    items:[
+      ['Primary tumour diagnosis','Obtain histological diagnosis and local staging before non-surgical treatment; small lesions may be excised diagnostically/therapeutically, while larger or potentially mutilating cases generally require planned biopsy and staging.'],
+      ['Organ-preserving pathway','For selected localised disease, choose organ-sparing surgery or an appropriate non-surgical option while ensuring negative margins and preserving function where oncologically feasible.'],
+      ['cN0 groin gate','Do not treat a clinically node-negative groin as automatically node-negative. Use primary-tumour stage/grade and lymphovascular invasion to determine whether invasive nodal staging is required.'],
+      ['cN1–2 pathway','Clinically evident cN1–2 disease enters therapeutic inguinal lymph-node management; capture laterality, pelvic involvement and systemic-therapy considerations.'],
+      ['cN3 / bulky disease','Bulky/fixed nodal disease requires MDT planning, consideration of systemic therapy and appropriate resection/chemoradiotherapy sequencing rather than routine limited node surgery.'],
+      ['Pathology completeness','Capture pTNM, grade, histologic subtype, depth/anatomic invasion, LVI, perineural invasion, margin status and nodal extracapsular extension.']
+    ]
+  }],
+  'Urethral Cancer':[{
+    title:'V14.0 — histology- and anatomy-specific algorithm',
+    items:[
+      ['Step 1 — define site and histology','Record distal/anterior vs proximal/posterior/prostatic urethra, sex, histology (SCC/urothelial/adenocarcinoma), local T stage and nodal status.'],
+      ['Localized distal male urethra','When penile/urethral-preserving treatment is intended, achieve negative margins with complete circumferential assessment of the proximal margin; distal urethrectomy can be considered as an alternative to penile amputation in selected localised tumours.'],
+      ['Locally advanced disease','Use MDT planning. Perioperative treatment should be histology-directed; urothelial histology should use the MIBC systemic-therapy framework where applicable, whereas SCC may enter a chemoradiotherapy pathway in selected cases.'],
+      ['Node-positive SCC','For urethral SCC with resectable involved inguinal nodes, inguinal lymph-node dissection is an option within the multimodal pathway.'],
+      ['Follow-up / recurrence','Document local and nodal recurrence separately and re-enter the patient into salvage surgery/radiotherapy or systemic-treatment review rather than repeating the original pathway automatically.']
+    ]
+  }],
+  'Stone Disease':[{
+    title:'V14.0 — explicit emergency and stone-location algorithm',
+    items:[
+      ['Emergency gate','Obstructed infected system and/or anuria = emergency: obtain urine/blood cultures, start antibiotics immediately and urgently decompress with ureteral stent or nephrostomy; delay definitive stone treatment until infection has resolved.'],
+      ['Ureteric stone — observation','Observation is appropriate only when spontaneous passage is plausible and there is no infection, refractory pain, persistent obstruction or deterioration of renal function.'],
+      ['Distal 5–10 mm','For selected uncomplicated distal ureteral stones 5–10 mm suitable for conservative management, alpha-blocker MET is an evidence-based option and is off-label.'],
+      ['Intervention selection','Choose URS vs SWL using stone size, location, density, anatomy, skin-to-stone distance, obstruction, comorbidity and patient priorities; do not use size alone.'],
+      ['Renal stone >2 cm','PCNL is the first-line active treatment for renal stones >2 cm.'],
+      ['Staghorn / complex renal burden','Enter a PCNL-based clearance pathway with CT-defined anatomy, infection/urine culture status, tract strategy and staged/multi-tract planning when required; document a residual-fragment imaging plan.'],
+      ['Prevention','For recurrent/high-risk stone formers, capture stone composition and metabolic evaluation/24-hour urine where indicated, then link abnormalities to specific preventive measures.']
+    ]
+  }],
+  'Adrenal / Neuroendocrine':[{
+    title:'V14.0 — adrenal mass safety algorithm',
+    items:[
+      ['Step 1 — phenotype the mass','Record non-contrast CT attenuation, homogeneity, size, growth, hormone-excess symptoms and history of extra-adrenal malignancy before deciding observation, surgery or further imaging.'],
+      ['Pheochromocytoma gate','Exclude pheochromocytoma with plasma free or urinary fractionated metanephrines when the lesion is not unequivocally a benign adenoma before biopsy or invasive intervention.'],
+      ['Cortisol / aldosterone assessment','Assess for cortisol excess; when there is concomitant hypertension or unexplained hypokalaemia, evaluate the aldosterone/renin ratio for primary aldosteronism.'],
+      ['Biopsy gate','Adrenal biopsy is not a routine first step. Consider it only when the lesion is hormonally inactive (especially pheochromocytoma excluded), imaging is indeterminate and histology would change management.'],
+      ['Suspected ACC','If imaging/clinical features suggest adrenocortical carcinoma, refer to an expert MDT; assess endocrine activity and plan oncologic en-bloc surgery when resectable.']
+    ]
+  }]
+};
+
+
 function appendPack(){
   if(!window.DISEASES || window.__V139_CONTENT_PACK__) return;
   Object.entries(ADD).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
   Object.entries(V14_UPDATES).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
   Object.entries(V14_HIGH_USE).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
+  Object.entries(V14_AUDIT_ADDITIONS).forEach(([d,secs])=>{ if(window.DISEASES[d]) window.DISEASES[d].sections.push(...secs); });
   window.__V139_CONTENT_PACK__=true;
   window.UROLOGY_ORACLE_V139_CONTENT={version:PACK_VERSION,sources:SOURCES,protocols:ADD,evidenceUpdates:V14_UPDATES};
 }
