@@ -186,13 +186,18 @@ function renderBladderPathway(){
       html+='<div class="v142-note"><b>High-risk BCG pathway:</b> verify the formal risk group and eligibility, then plan full-dose BCG induction and maintenance. The 2026 EAU guideline includes selected BCG-plus-systemic approaches for selected high/very-high-risk BCG-naive patients where approved and available.</div>';
     }
   } else if(stage==='T2'||stage==='T3'||stage==='T4a'){
-    var unfit=ecog==='2'||(Number.isFinite(crcl)&&crcl>0&&crcl<60)||hear||neuro||nyha;
+    var fitnessIncomplete=!ecog||!Number.isFinite(crcl)||crcl<=0||!val('v142Hear')||!val('v142Neuro')||!val('v142Nyha');
+    var classicUnfit=ecog==='2'||(Number.isFinite(crcl)&&crcl>0&&crcl<60)||hear||neuro||nyha;
+    var niagaraEligible=!fitnessIncomplete&&ecog!=='2'&&crcl>=40&&!hear&&!neuro&&!nyha;
     html='<b>Muscle-invasive bladder cancer pathway</b>'+
       '<div class="v142-note"><b>Confirm:</b> T2–T4a stage, cN/M stage, pathology and curative-treatment fitness; discuss in MDT.</div>';
-    if(unfit){
-      html+='<div class="v142-alert"><b>Cisplatin-unfit screen positive or incomplete.</b> Do not substitute neoadjuvant carboplatin for cisplatin. The 2026 EAU MIBC pathway recommends perioperative enfortumab vedotin + pembrolizumab for cisplatin-ineligible patients, subject to indication, availability and MDT review.</div>';
+    if(fitnessIncomplete){
+      html+='<div class="v142-alert"><b>Cisplatin-fitness data incomplete.</b> Complete performance status, measured renal function and the hearing/neuropathy/heart-failure screen before selecting the perioperative regimen.</div>';
+    }else if(niagaraEligible){
+      html+='<div class="v142-note"><b>Perioperative GC + durvalumab pathway:</b> the 2026 EAU guideline recommends cisplatin/gemcitabine + durvalumab for eligible T2–T4a cN0–1 M0 patients who can receive immunotherapy. In the NIAGARA evidence base, GFR ≥40 mL/min was permitted, with split-dose cisplatin used for eGFR 40–60 mL/min. This is distinct from the classic Galsky cisplatin-unfitness threshold and should be reconciled with local protocol.</div>';
+      if(classicUnfit) html+='<div class="v142-note"><b>Important:</b> this patient would meet a classic Galsky cisplatin-unfit renal threshold (GFR <60), but the 2026 perioperative GC + durvalumab pathway permits GFR ≥40 in the NIAGARA population. Confirm suitability rather than automatically excluding cisplatin.</div>';
     }else{
-      html+='<div class="v142-note"><b>Cisplatin pathway:</b> in cisplatin-eligible T2–T4a cN0–1 M0 disease, offer neoadjuvant cisplatin-based combination chemotherapy. The 2026 EAU guideline also recommends perioperative cisplatin/gemcitabine + durvalumab for eligible patients who are candidates for immunotherapy, followed by radical cystectomy + pelvic lymph-node dissection.</div>';
+      html+='<div class="v142-alert"><b>Cisplatin-ineligible / not eligible for the NIAGARA perioperative pathway on the entered data.</b> Do not substitute neoadjuvant carboplatin for cisplatin. The 2026 EAU MIBC pathway recommends perioperative enfortumab vedotin + pembrolizumab for cisplatin-ineligible patients, subject to indication, availability and MDT review.</div>';
     }
     html+='<div class="v142-note"><b>Local treatment:</b> radical cystectomy + pelvic lymph-node dissection is a core curative pathway. Trimodality bladder-preserving treatment is reserved for carefully selected patients with appropriate tumour/anatomy, complete TURBT and capacity for close surveillance.</div>';
   } else if(stage==='T4b'){
