@@ -21,6 +21,13 @@ for (const file of [
 const manifest = JSON.parse(fs.readFileSync(path.join(FRONT, 'manifest.webmanifest'), 'utf8'));
 assert.match(manifest.name, /Urology Oracle V14\.0/);
 assert.equal(manifest.short_name, 'Oracle V14');
+const hotfix = fs.readFileSync(path.join(FRONT, 'v14-release-hotfix.js'), 'utf8');
+assert.match(hotfix, /document\.title='Urology Oracle V14\.0 — Final Clinical Workstation'/);
+assert.match(hotfix, /window\.modal=function/);
+assert.match(hotfix, /lowerPole/);
+assert.match(hotfix, /stoneDecisionV14/);
+assert.match(hotfix, /UROLOGICAL EMERGENCY — DRAIN FIRST/);
+assert.match(hotfix, /@media print/);
 
 const child = spawn(process.execPath, [path.join(ROOT, 'backend-server.mjs')], {
   cwd: ROOT,
