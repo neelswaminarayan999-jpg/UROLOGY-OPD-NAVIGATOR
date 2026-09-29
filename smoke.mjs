@@ -13,6 +13,7 @@ for (const file of [
   'smoke.mjs',
   'frontend/v14-release-hotfix.js',
   'frontend/v14.1-opd-suite.js',
+  'frontend/v14.1-core-hardening.js',
   'v13.9-content-pack.js',
   'v13-clinical-engine.js'
 ]) {
@@ -56,10 +57,13 @@ try {
   assert.equal(index.status, 200);
   assert.match(index.body, /v14-release-hotfix\.js/);
   assert.match(index.body, /v14\.1-opd-suite\.js/);
+  assert.match(index.body, /v14\.1-core-hardening\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
   assert.match(manifestRes.body, /Urology Oracle V14\.0/);
+  const contentPack = fs.readFileSync(path.join(ROOT, 'v13.9-content-pack.js'), 'utf8');
+  assert.doesNotMatch(contentPack, /V13\.9 —/);
 
   const icon = await get('/icon.svg');
   assert.equal(icon.status, 200);
