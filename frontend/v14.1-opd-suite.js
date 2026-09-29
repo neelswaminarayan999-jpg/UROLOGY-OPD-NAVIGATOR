@@ -35,6 +35,7 @@ function styleV14(){
     .v141-alert{border-left:5px solid #b91c1c;background:#fef2f2;padding:12px;border-radius:10px;color:#5b2a27;font-size:12px;line-height:1.6}
     .v141-note{border:1px solid #cbd5e1;background:#f8fafc;padding:11px;border-radius:10px;color:#475569;font-size:11px;line-height:1.6}
     .v141-result{margin-top:10px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;background:#fbfdff;font-size:12px;line-height:1.6}
+    .v141-home-group{margin-top:14px}.v141-home-label{font-size:11px;font-weight:900;color:#163247;margin:0 0 7px}.v141-home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.v141-home-grid .v141-tool{min-height:72px}.v141-note{border:1px solid #cbd5e1;background:#f8fafc;padding:11px;border-radius:10px;color:#475569;font-size:11px;line-height:1.6}.v141-alert{border-left:5px solid #b91c1c;background:#fef2f2;padding:12px;border-radius:10px;color:#5b2a27;font-size:12px;line-height:1.6}.v141-result{margin-top:10px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;background:#fbfdff;font-size:12px;line-height:1.6}
     @media(max-width:900px){#v141QuickTools .v141-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#v141ToolkitPanel .inputs{grid-template-columns:1fr}}
     @media(max-width:560px){#v141QuickTools .v141-grid{grid-template-columns:1fr}#v141ToolkitPanel{padding:15px}}
   `;
@@ -54,18 +55,63 @@ function openToolkit(title,html,subtitle='V14.1 OPD toolkit · clinician verific
   const onKey=e=>{if(e.key==='Escape'){back.remove();document.removeEventListener('keydown',onKey);}};
   document.addEventListener('keydown',onKey);
 }
+function openDiseaseFromHome(disease){
+  const sel=document.getElementById('oracleDisease');
+  if(sel){
+    sel.value=disease;
+    sel.dispatchEvent(new Event('input',{bubbles:true}));
+    sel.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  setTimeout(()=>document.getElementById('oracleView')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+function addClinicalHomeNavigation(){
+  if(document.getElementById('v141ClinicalNav')) return;
+  const home=document.getElementById('homeView'); if(!home) return;
+  [...home.querySelectorAll('.card')].forEach(card=>{
+    const t=(card.innerText||'').replace(/\s+/g,' ').trim();
+    if(/BOOK-INTEGRATED CLINICAL ENGINE|CONTENT BASELINE|FINAL CLINICAL WORKSTATION|Urology Oracle V14\.0|NCCN 2026 version registry|Rule-based Oracle/i.test(t)) card.remove();
+  });
+  const box=document.createElement('div'); box.id='v141ClinicalNav';
+  box.innerHTML=`
+    <div class="card p-4">
+      <div class="section-title mb-1">Clinical Oracle</div>
+      <div style="font-size:13px;color:#64748b;line-height:1.5;margin-bottom:12px">Choose the problem you are managing. The Oracle will take you through classification, required inputs, treatment and follow-up.</div>
+      <div class="v141-home-group"><div class="v141-home-label">Uro-oncology</div><div class="v141-home-grid">
+        <button class="v141-tool" data-disease="Ca Prostate"><b>Prostate cancer</b><span>TNM · ISUP · risk · treatment</span></button>
+        <button class="v141-tool" data-disease="Ca Bladder"><b>Bladder cancer</b><span>NMIBC · MIBC · metastatic</span></button>
+        <button class="v141-tool" data-disease="UTUC"><b>Upper tract urothelial cancer</b><span>Risk · kidney-sparing · radical treatment</span></button>
+        <button class="v141-tool" data-disease="Ca Kidney"><b>Kidney cancer</b><span>Stage · histology · systemic pathway</span></button>
+        <button class="v141-tool" data-disease="Ca Testis"><b>Testicular cancer</b><span>Markers · stage · risk · treatment</span></button>
+        <button class="v141-tool" data-disease="Ca Penis"><b>Penile cancer</b><span>Local stage · nodes · treatment</span></button>
+      </div></div>
+      <div class="v141-home-group"><div class="v141-home-label">High-use urology</div><div class="v141-home-grid">
+        <button class="v141-tool" data-disease="Urethral Stricture"><b>Urethral stricture</b><span>Site · length · phenotype · reconstruction</span></button>
+        <button class="v141-tool" data-disease="BPH / Male LUTS"><b>BPH / male LUTS</b><span>Phenotype · medication · procedure selection</span></button>
+        <button class="v141-tool" data-disease="Stone Disease"><b>Stone disease</b><span>Stone factors · infection · procedure pathway</span></button>
+      </div></div>
+      <div class="v141-home-group"><div class="v141-home-label">Focused tools</div><div class="v141-home-grid">
+        <button class="v141-tool" id="v141BladderPath"><b>Bladder cancer pathway</b><span>Explicit NMIBC / MIBC decision algorithm</span></button>
+        <button class="v141-tool" id="v141ScoresHome"><b>Scores & calculators</b><span>IPSS · IIEF-5 · TWIST and more</span></button>
+        <button class="v141-tool" id="v141UrgentHome"><b>Urgent urology</b><span>Torsion · priapism · Fournier red flags</span></button>
+      </div></div>
+    </div>`;
+  const first=home.querySelector('.card');
+  (first?.parentElement||home).insertBefore(box,first||null);
+  box.querySelectorAll('[data-disease]').forEach(b=>b.onclick=()=>openDiseaseFromHome(b.dataset.disease));
+  box.querySelector('#v141BladderPath').onclick=()=>openBladderPathway();
+  box.querySelector('#v141ScoresHome').onclick=()=>openScores();
+  box.querySelector('#v141UrgentHome').onclick=()=>openUrgent();
+}
 function addQuickTools(){
   if(document.getElementById('v141QuickTools')) return;
   const home=document.getElementById('homeView'); if(!home) return;
-  const anchor=home.querySelector('.card');
   const box=document.createElement('div'); box.id='v141QuickTools';
-  box.innerHTML='<div class="card p-4"><div class="section-title mb-2">OPD quick tools</div><div class="v141-grid" id="v141QuickGrid"></div></div>';
-  (anchor?.parentElement||home).insertBefore(box,anchor?.nextSibling||null);
+  box.innerHTML='<div class="card p-4"><div class="section-title mb-2">More clinical tools</div><div class="v141-grid" id="v141QuickGrid"></div></div>';
+  const anchor=document.getElementById('v141ClinicalNav')?.nextElementSibling;
+  (anchor?.parentElement||home).insertBefore(box,anchor||null);
   const tools=[
-    ['Scores','IPSS · IIEF-5 · TWIST','scores'],
     ['Medication safety','PSA/5-ARI · renal limits · IFIS · PDE5/nitrates','drugs'],
     ['Follow-up','NMIBC risk-adapted surveillance + stone prevention','follow'],
-    ['Urgent urology','torsion · priapism · Fournier red flags','urgent'],
     ['Perioperative anticoagulation','DOAC/warfarin/P2Y12 planning aid','anticoag'],
     ['Andrology','WHO semen limits · azoospermia pathway','andrology'],
     ['Paediatric urology','cryptorchidism · VUR · antenatal hydronephrosis','paeds'],
@@ -78,6 +124,108 @@ function addQuickTools(){
     btn.onclick=()=>openTool(k); grid.appendChild(btn);
   });
 }
+disease="Ca Bladder"><b>Bladder cancer</b><span>NMIBC · MIBC · metastatic</span></button>
+        <button class="v141-tool" data-disease="UTUC"><b>Upper tract urothelial cancer</b><span>Risk · kidney-sparing · radical treatment</span></button>
+        <button class="v141-tool" data-disease="Ca Kidney"><b>Kidney cancer</b><span>Stage · histology · systemic pathway</span></button>
+        <button class="v141-tool" data-disease="Ca Testis"><b>Testicular cancer</b><span>Markers · stage · risk · treatment</span></button>
+        <button class="v141-tool" data-disease="Ca Penis"><b>Penile cancer</b><span>Local stage · nodes · treatment</span></button>
+      </div></div>
+      <div class="v141-home-group"><div class="v141-home-label">High-use urology</div><div class="v141-home-grid">
+        <button class="v141-tool" data-disease="Urethral Stricture"><b>Urethral stricture</b><span>Site · length · phenotype · reconstruction</span></button>
+        <button class="v141-tool" data-disease="BPH / Male LUTS"><b>BPH / male LUTS</b><span>Phenotype · medication · procedure selection</span></button>
+        <button class="v141-tool" data-disease="Stone Disease"><b>Stone disease</b><span>Stone factors · infection · procedure pathway</span></button>
+      </div></div>
+      <div class="v141-home-group"><div class="v141-home-label">Focused tools</div><div class="v141-home-grid">
+        <button class="v141-tool" id="v141BladderPath"><b>Bladder cancer pathway</b><span>Explicit NMIBC / MIBC decision algorithm</span></button>
+        <button class="v141-tool" id="v141ScoresHome"><b>Scores & calculators</b><span>IPSS · IIEF-5 · TWIST and more</span></button>
+        <button class="v141-tool" id="v141UrgentHome"><b>Urgent urology</b><span>Torsion · priapism · Fournier red flags</span></button>
+      </div></div>
+    </div>`;
+  const first=home.querySelector('.card');
+  (first?.parentElement||home).insertBefore(box,first||null);
+  box.querySelectorAll('[data-disease]').forEach(b=>b.onclick=()=>openDiseaseFromHome(b.dataset.disease));
+  box.querySelector('#v141BladderPath').onclick=()=>openBladderPathway();
+  box.querySelector('#v141ScoresHome').onclick=()=>openScores();
+  box.querySelector('#v141UrgentHome').onclick=()=>openUrgent();
+}
+function addQuickTools(){
+  if(document.getElementById('v141QuickTools')) return;
+  const home=document.getElementById('homeView'); if(!home) return;
+  const box=document.createElement('div'); box.id='v141QuickTools';
+  box.innerHTML='<div class="card p-4"><div class="section-title mb-2">More clinical tools</div><div class="v141-grid" id="v141QuickGrid"></div></div>';
+  const anchor=document.getElementById('v141ClinicalNav')?.nextElementSibling;
+  (anchor?.parentElement||home).insertBefore(box,anchor||null);
+  const tools=[
+    ['Medication safety','PSA/5-ARI · renal limits · IFIS · PDE5/nitrates','drugs'],
+    ['Follow-up','NMIBC risk-adapted surveillance + stone prevention','follow'],
+    ['Perioperative anticoagulation','DOAC/warfarin/P2Y12 planning aid','anticoag'],
+    ['Andrology','WHO semen limits · azoospermia pathway','andrology'],
+    ['Paediatric urology','cryptorchidism · VUR · antenatal hydronephrosis','paeds'],
+    ['DJ stent registry','removal-date tracker + patient reminder','stent'],
+    ['Consent checklist','rapid TURP/PCNL complication counselling','consent']
+  ];
+  const grid=box.querySelector('#v141QuickGrid');
+  tools.forEach(([a,b,k])=>{
+    const btn=document.createElement('button'); btn.type='button'; btn.className='v141-tool'; btn.innerHTML='<b>'+escV14(a)+'</b><span>'+escV14(b)+'</span>';
+    btn.onclick=()=>openTool(k); grid.appendChild(btn);
+  });
+}
+
+function openBladderPathway(){
+  openToolkit('Bladder cancer pathway',`
+    <div class="v141-note">Decision framework: establish pathology and stage first, then branch to NMIBC, MIBC, locally advanced/unresectable or metastatic disease. Verify jurisdictional approvals, product information and MDT/local protocol before treatment.</div>
+    <div class="row"><div class="label">1. Disease state</div><div class="inputs">
+      <select id="bcStage"><option value="">Select stage</option><option value="Ta">Ta</option><option value="Tis">Tis / CIS</option><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4a">T4a</option><option value="T4b">T4b / unresectable</option><option value="M1">M1 metastatic</option></select>
+      <select id="bcGrade"><option value="">Grade</option><option>Low grade</option><option>High grade</option></select>
+    </div></div>
+    <div class="row"><div class="label">2. NMIBC quality checks</div><div class="inputs">
+      <select id="bcComplete"><option value="">Initial TURBT complete?</option><option value="yes">Yes</option><option value="no">No / doubtful</option></select>
+      <select id="bcMuscle"><option value="">Detrusor muscle present?</option><option value="yes">Yes</option><option value="no">No</option><option value="na">Not applicable / CIS</option></select>
+      <select id="bcCis"><option value="">CIS present?</option><option value="yes">Yes</option><option value="no">No</option></select>
+      <select id="bcBCG"><option value="">BCG status</option><option value="na">Not indicated / not started</option><option value="naive">BCG-naive</option><option value="adequate">Adequate BCG without unresponsive recurrence</option><option value="unresponsive">BCG-unresponsive / high-risk recurrence despite adequate BCG</option></select>
+    </div></div>
+    <div class="row"><div class="label">3. MIBC cisplatin-fitness inputs</div><div class="inputs">
+      <select id="bcEcog"><option value="">ECOG PS</option><option value="0">0</option><option value="1">1</option><option value="2">2+</option></select>
+      <input id="bcCrcl" type="number" min="0" placeholder="CrCl / GFR (mL/min)">
+      <select id="bcHear"><option value="">Hearing loss ≥ grade 2?</option><option value="no">No</option><option value="yes">Yes</option></select>
+      <select id="bcNeuro"><option value="">Neuropathy ≥ grade 2?</option><option value="no">No</option><option value="yes">Yes</option></select>
+      <select id="bcNyha"><option value="">NYHA III–IV?</option><option value="no">No</option><option value="yes">Yes</option></select>
+    </div></div>
+    <button class="v141-primary" id="bcGenerate">Generate pathway</button>
+    <div class="v141-result" id="bcResult">Complete the clinically relevant fields above.</div>
+  `, 'EAU 2026-aligned clinical decision framework · verify jurisdictional approvals and MDT/local protocol before treatment');
+  setTimeout(()=>{
+    const b=document.getElementById('bcGenerate'); if(!b || b.dataset.bound==='1') return; b.dataset.bound='1';
+    b.onclick=()=>{
+      const g=id=>document.getElementById(id)?.value||'';
+      const stage=g('bcStage'), grade=g('bcGrade'), complete=g('bcComplete'), muscle=g('bcMuscle'), cis=g('bcCis'), bcg=g('bcBCG');
+      const ecog=g('bcEcog'), crcl=Number(g('bcCrcl')), hear=g('bcHear')==='yes', neuro=g('bcNeuro')==='yes', nyha=g('bcNyha')==='yes';
+      let html='';
+      if(!stage) html='<div class="v141-alert"><b>Stage required.</b> Select the disease state before choosing treatment.</div>';
+      else if(['Ta','Tis','T1'].includes(stage)){
+        const reTUR=(complete==='no') || (muscle==='no' && !(stage==='Ta' && /low/i.test(grade))) || stage==='T1';
+        html='<b>NMIBC pathway</b><div class="v141-note"><b>Pathology checkpoint:</b> confirm stage, grade, CIS, detrusor muscle and completeness of TURBT.</div>';
+        if(reTUR) html+='<div class="v141-alert"><b>Second TURBT indicated:</b> incomplete/doubtful initial TURBT; absent detrusor muscle except Ta low-grade/G1 and primary CIS; or any T1 tumour. When indicated, perform within 2–6 weeks and resect the original tumour site.</div>';
+        else html+='<div class="v141-note"><b>Second TURBT checkpoint:</b> no automatic indication from the fields entered; reconcile the complete pathology report and operative record.</div>';
+        html+='<div class="v141-note"><b>Risk-directed treatment:</b> low-risk disease generally receives a single immediate postoperative intravesical chemotherapy instillation when safe; intermediate-risk disease generally uses intravesical chemotherapy or a one-year BCG strategy according to recurrence/progression risk; high/very-high-risk disease requires full-dose BCG with maintenance and discussion of early radical cystectomy in appropriate very-high-risk patients.</div>';
+        if(bcg==='unresponsive') html+='<div class="v141-alert"><b>BCG-unresponsive:</b> do not simply repeat ineffective BCG. Radical cystectomy is the key oncologic option; bladder-preserving options depend on tumour phenotype, approved/available therapies and jurisdiction and should be reviewed in an MDT.</div>';
+        else if(bcg==='naive' && (/high/i.test(grade)||stage==='T1'||cis==='yes')) html+='<div class="v141-note"><b>High-risk BCG pathway:</b> verify formal EAU risk group and eligibility, then plan full-dose BCG induction and maintenance. The 2026 EAU guideline also includes selected BCG-plus-systemic approaches for selected high/very-high-risk BCG-naive patients where approved/available.</div>';
+      } else if(['T2','T3','T4a'].includes(stage)){
+        const classicUnfit=ecog==='2'||(Number.isFinite(crcl)&&crcl>0&&crcl<60)||hear||neuro||nyha;
+        html='<b>Muscle-invasive bladder cancer pathway</b><div class="v141-note"><b>Confirm:</b> T2–T4a stage, cN/M stage, pathology and curative-treatment fitness; discuss in MDT.</div>';
+        if(classicUnfit) html+='<div class="v141-alert"><b>Cisplatin-unfit screen positive or incomplete.</b> Do not substitute neoadjuvant carboplatin for cisplatin. The 2026 EAU MIBC pathway recommends perioperative enfortumab vedotin + pembrolizumab for cisplatin-ineligible patients, subject to indication, availability and MDT review.</div>';
+        else html+='<div class="v141-note"><b>Cisplatin pathway:</b> in cisplatin-eligible T2–T4a cN0–1 M0 disease, offer neoadjuvant cisplatin-based combination chemotherapy. The 2026 EAU guideline also recommends perioperative cisplatin/gemcitabine + durvalumab for eligible patients who are candidates for immunotherapy, followed by radical cystectomy + pelvic lymph-node dissection.</div>';
+        html+='<div class="v141-note"><b>Local treatment:</b> radical cystectomy + pelvic lymph-node dissection is a core curative pathway. Trimodality bladder-preserving treatment is reserved for carefully selected patients with appropriate tumour/anatomy, complete TURBT and capacity for close surveillance.</div>';
+      } else if(stage==='T4b') {
+        html='<b>Locally advanced / unresectable pathway</b><div class="v141-note">Confirm unresectability and metastatic staging. Use systemic and/or palliative treatment according to disease extent, symptoms, fitness, molecular profile, treatment availability and MDT assessment.</div>';
+      } else if(stage==='M1') {
+        html='<b>Metastatic urothelial carcinoma pathway</b><div class="v141-note"><b>First-line:</b> for patients fit for combination therapy, enfortumab vedotin + pembrolizumab is the 2026 EAU standard pathway. If EV is contraindicated/unavailable, platinum-containing combination chemotherapy with avelumab maintenance after at least stable disease is a key alternative; cisplatin/gemcitabine + nivolumab is an option in appropriate cisplatin-eligible patients when EV cannot be used.</div><div class="v141-note"><b>Fitness and sequencing:</b> distinguish cisplatin-, carboplatin- and platinum-ineligible status; assess renal function, PS and organ-specific contraindications, and confirm FGFR/HER2-directed options and jurisdictional indications.</div>';
+      }
+      document.getElementById('bcResult').innerHTML=html||'<div class="v141-note">Enter the required disease-state information.</div>';
+    };
+  },40);
+}
+
 function openTool(key){
   if(key==='scores') return openScores();
   if(key==='drugs') return openDrugSafety();
@@ -273,7 +421,7 @@ function cleanupLegacyLabels(){
   });
 }
 function apply(){
-  styleV14(); addQuickTools(); addKeyboardSearch(); cleanupLegacyLabels();
+  styleV14(); addClinicalHomeNavigation(); addQuickTools(); addKeyboardSearch(); cleanupLegacyLabels();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true}); else apply();
 setTimeout(apply,1200); setTimeout(apply,3000);
