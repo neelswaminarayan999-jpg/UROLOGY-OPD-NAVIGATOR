@@ -3,6 +3,7 @@ import { spawn, execFileSync } from 'node:child_process';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const FRONT = path.join(ROOT, 'frontend');
@@ -17,7 +18,7 @@ for (const file of [
   execFileSync(process.execPath, ['--check', path.join(ROOT, file)], { stdio: 'inherit' });
 }
 
-const manifest = JSON.parse(require('node:fs').readFileSync(path.join(FRONT, 'manifest.webmanifest'), 'utf8'));
+const manifest = JSON.parse(fs.readFileSync(path.join(FRONT, 'manifest.webmanifest'), 'utf8'));
 assert.match(manifest.name, /Urology Oracle V14\.0/);
 assert.equal(manifest.short_name, 'Oracle V14');
 
