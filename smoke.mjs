@@ -12,6 +12,7 @@ for (const file of [
   'backend-server.mjs',
   'smoke.mjs',
   'frontend/v14-release-hotfix.js',
+  'frontend/v14.1-opd-suite.js',
   'v13.9-content-pack.js',
   'v13-clinical-engine.js'
 ]) {
@@ -54,6 +55,7 @@ try {
   const index = await get('/');
   assert.equal(index.status, 200);
   assert.match(index.body, /v14-release-hotfix\.js/);
+  assert.match(index.body, /v14\.1-opd-suite\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
