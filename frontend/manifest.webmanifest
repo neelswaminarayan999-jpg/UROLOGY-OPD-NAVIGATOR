@@ -1,6 +1,6 @@
 {
-  "name": "Urology Oracle V14.0 — Final Clinical Workstation",
-  "short_name": "Oracle V14",
+  "name": "Urology Oracle",
+  "short_name": "Oracle",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
