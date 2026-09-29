@@ -244,6 +244,39 @@ function openNephrometry(){
     '<div class="v141-core-note"><b>S.T.O.N.E. nephrolithometry</b><br>Use the original PCNL scoring definitions from the validated reference rather than treating a simplified secondary schema as interchangeable. The components are stone size, tract length, obstruction, number of involved calyces and stone density.</div>');
 }
 
+
+function openTrials(){
+  modal('Landmark trials — quick evidence map','Named pivotal studies for rapid teaching and pathway review · use the disease module for the actual treatment pathway',
+    '<div class="v141-core-note"><b>Metastatic hormone-sensitive prostate cancer (mHSPC)</b><br>PEACE-1 and ARASENS evaluated intensified systemic therapy beyond ADT plus docetaxel. CHAARTED and LATITUDE established major doublet approaches; STAMPEDE is a platform trial evaluating multiple systemic strategies; ENZAMET evaluated enzalutamide-based intensification. Trial names are evidence landmarks, not standalone treatment rules.</div>'+
+    '<div class="v141-core-note"><b>BCG-unresponsive NMIBC</b><br>KEYNOTE-057 evaluated pembrolizumab in high-risk BCG-unresponsive NMIBC. Current guideline pathways distinguish CIS-containing and papillary-only disease and continue to place radical cystectomy as the standard/preferred option for suitable high-risk BCG-unresponsive disease, with bladder-preserving options considered according to patient factors, availability and regulatory setting.</div>'+
+    '<div class="v141-core-note"><b>Metastatic urothelial carcinoma</b><br>EV-302/KEYNOTE-A39 established enfortumab vedotin plus pembrolizumab as a first-line combination option for patients fit for combination therapy. CheckMate 901 established cisplatin/gemcitabine plus nivolumab as another evidence-based first-line option in selected cisplatin-eligible patients.</div>'+
+    '<div class="v141-core-note"><b>Adjuvant ccRCC</b><br>KEYNOTE-564 defined the high-risk resected clear-cell RCC population studied for adjuvant pembrolizumab; eligibility should be checked explicitly against the trial framework rather than inferred from “post-nephrectomy” status.</div>');
+}
+function addGlobalSearch(){
+  if(document.body.dataset.v141GlobalSearch==='1') return;
+  document.body.dataset.v141GlobalSearch='1';
+  const show=()=>{
+    const old=document.getElementById('v141GlobalSearchModal'); if(old) old.remove();
+    const back=document.createElement('div'); back.id='v141GlobalSearchModal'; back.className='no-print';
+    back.style.cssText='position:fixed;inset:0;background:rgba(2,6,23,.58);z-index:100002;display:flex;align-items:flex-start;justify-content:center;padding:70px 12px';
+    const panel=document.createElement('div'); panel.style.cssText='width:min(760px,100%);max-height:80vh;overflow:auto;background:#fff;border-radius:15px;box-shadow:0 25px 70px rgba(2,6,23,.35);padding:16px';
+    const input=document.createElement('input'); input.id='v141SearchInput'; input.placeholder='Search disease, score, drug, trial, procedure…'; input.style.cssText='width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:10px;padding:11px;font-size:14px';
+    const results=document.createElement('div'); results.style.cssText='margin-top:10px';
+    panel.append(input,results); back.append(panel); document.body.append(back);
+    const items=[...document.querySelectorAll('h1,h2,h3,h4,.section-title,button,a,.v141-tool')].filter(el=>!el.closest('#v141GlobalSearchModal')).map(el=>({el,text:(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim()})).filter(x=>x.text.length>1);
+    const seen=new Set();
+    const render=()=>{
+      const q=input.value.trim().toLowerCase();
+      const hits=items.filter(x=>!q||x.text.toLowerCase().includes(q)).filter(x=>{const k=x.text.slice(0,180);if(seen.has(k))return false;seen.add(k);return true;}).slice(0,30);
+      results.innerHTML=hits.length?hits.map((x,i)=>'<button data-hit="'+i+'" style="display:block;width:100%;text-align:left;margin:4px 0;border:1px solid #e2e8f0;background:#fff;border-radius:9px;padding:9px;cursor:pointer;font-weight:700;color:#334155">'+esc(x.text.slice(0,180))+'</button>').join(''):'<div class="v141-core-note">No matching visible item.</div>';
+      results.querySelectorAll('[data-hit]').forEach((b,i)=>b.onclick=()=>{const el=hits[i].el;back.remove();el.scrollIntoView({behavior:'smooth',block:'center'});});
+    };
+    input.addEventListener('input',render); input.addEventListener('keydown',e=>{if(e.key==='Escape')back.remove();}); render(); input.focus();
+    back.addEventListener('click',e=>{if(e.target===back)back.remove();});
+  };
+  document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();show();}});
+}
+
 function addScoreLinks(){
   const grid=document.getElementById('v141QuickGrid'); if(!grid) return;
   const add=(id,title,sub,fn)=>{
@@ -252,10 +285,11 @@ function addScoreLinks(){
   };
   add('pc-risk','Prostate risk','ISUP Grade Group · PSA · cT stage',openProstateRisk);
   add('nephrometry','Nephrometry & stone scores','RENAL · PADUA · Guy’s · S.T.O.N.E. reference',openNephrometry);
+  add('trials','Landmark trials','mHSPC · NMIBC · urothelial · RCC',openTrials);
 }
 
 function apply(){
-  styleCore(); bindCoreActions(); addScoreLinks(); refreshCompleteness(); addStoneModifiers();
+  styleCore(); bindCoreActions(); addScoreLinks(); addGlobalSearch(); refreshCompleteness(); addStoneModifiers();
   const sel=document.getElementById('oracleDisease');
   if(sel && sel.dataset.v141CoreBound!=='1'){
     sel.dataset.v141CoreBound='1';
