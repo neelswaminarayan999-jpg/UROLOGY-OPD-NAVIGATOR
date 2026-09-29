@@ -352,7 +352,7 @@
   addMobileUX();
   setTimeout(addMobileUX,500);
   setTimeout(optimizeInvestigationImages,1000);
-  setInterval(()=>{optimizeInvestigationImages();friendlyAIError();},1200);
+  setInterval(()=>{optimizeInvestigationImages();friendlyAIError();rewriteClinicalProgressLabel();polishClinicalLanguage();},1200);
 
   /* V14 clinical-audit hardening: wire modal actions, reset state, stone modifiers, emergency alert and print layout. */
   window.modal=function(title,html){
@@ -586,14 +586,30 @@
     document.head.appendChild(style);
   }
 
+  function rewriteClinicalProgressLabel(){
+    document.querySelectorAll('#oracleProgress').forEach(p=>{
+      const t=p.textContent||'';
+      if(/^Required decision inputs:/i.test(t) && !/Pathway readiness:/i.test(t)){
+        p.innerHTML=t.replace(/^Required decision inputs:/i,'Core decision inputs:')+' <span style="color:#64748b">• Review disease-specific modifiers before finalising the pathway.</span>';
+      }
+    });
+  }
+
+  function polishClinicalLanguage(){
+    replaceText('A single “stone = RIRS” rule is not appropriate.',
+      'Intervention modality should be individualised according to stone burden, location, calyceal anatomy, radiologic attenuation and patient-specific factors.');
+    replaceText('A single "stone = RIRS" rule is not appropriate.',
+      'Intervention modality should be individualised according to stone burden, location, calyceal anatomy, radiologic attenuation and patient-specific factors.');
+  }
+
   hardenStoneOracle();
   wireResetHardening();
   hardenDropdownLayering();
   wireStoneCapture();
   hardenProcedurePrint();
   normalizeHeaderBrand();
-  setTimeout(()=>{normalizeHeaderBrand();syncStoneStateFromForm();},600);
-  setTimeout(()=>{normalizeHeaderBrand();syncStoneStateFromForm();},1600);
+  setTimeout(()=>{normalizeHeaderBrand();syncStoneStateFromForm();rewriteClinicalProgressLabel();polishClinicalLanguage();},600);
+  setTimeout(()=>{normalizeHeaderBrand();syncStoneStateFromForm();rewriteClinicalProgressLabel();polishClinicalLanguage();},1600);
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',brand,{once:true}); else brand();
   setTimeout(brand,1200);
