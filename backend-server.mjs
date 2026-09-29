@@ -482,7 +482,7 @@ const server = http.createServer(async (req, res) => {
     return json(res, 405, { error: 'Method not allowed' }, origin);
   } catch (e) {
     const status = Number.isInteger(e?.status) && e.status >= 400 && e.status < 600 ? e.status : 500;
-    return json(res, status, { error: e?.message || String(e), provider: 'Gemini/AI fallback', attempts: e?.attempts || undefined }, origin);
+    return json(res, status, { error: e?.message || String(e), provider: 'OpenRouter', attempts: e?.attempts || undefined }, origin);
   }
 });
 
