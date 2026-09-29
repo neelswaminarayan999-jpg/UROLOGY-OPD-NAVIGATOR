@@ -442,7 +442,8 @@ async function callWithFallback(body) {
 function hotfixHtml(html) {
   const tags = [
     '<script src="/v14-release-hotfix.js" defer></script>',
-    '<script src="/v14.1-opd-suite.js" defer></script>'
+    '<script src="/v14.1-opd-suite.js" defer></script>',
+    '<script src="/v14.1-core-hardening.js" defer></script>'
   ];
   let out = html;
   for (const tag of tags) {
