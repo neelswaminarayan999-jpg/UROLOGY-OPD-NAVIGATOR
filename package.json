@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node backend-server.mjs",
-    "test": "node smoke.mjs && node content-pack.test.mjs && node provider-regression.test.mjs"
+    "test": "node smoke.mjs && node content-pack.test.mjs && node provider-regression.test.mjs && node ui-regression.test.mjs"
   },
   "engines": {
     "node": ">=20"
