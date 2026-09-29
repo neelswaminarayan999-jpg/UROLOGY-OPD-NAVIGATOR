@@ -21,7 +21,7 @@ const SOURCES={
 };
 const ADD={
 'Ca Prostate':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['Before definitive treatment','Confirm PSA trend, biopsy histology/ISUP GG, clinical T/N/M, life expectancy, urinary/sexual baseline and patient priorities. Use MRI/PSMA PET or other staging only when it changes management.'],
   ['Active surveillance protocol','Confirm eligibility using current risk criteria; establish PSA/DRE/MRI/biopsy surveillance schedule according to the chosen guideline protocol; progression should be defined by pathology/risk reassessment rather than PSA rise alone.'],
   ['Localized surgery protocol','Confirm oncologic suitability → choose open/robotic RP → document nerve-sparing decision → apex/bladder-neck/seminal-vesicle dissection → appropriate pelvic nodal staging when indicated → specimen orientation and pathology checklist → PSA surveillance.'],
@@ -30,7 +30,7 @@ const ADD={
  ]}
 ],
 'Ca Bladder':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['NMIBC first-line sequence','Adequate TURBT with muscle in specimen when relevant → pathology risk classification → immediate intravesical chemotherapy when appropriate and safe → repeat TURBT for defined high-risk/incomplete/T1 situations → intravesical BCG or early radical cystectomy according to risk/BCG status.'],
   ['BCG-unresponsive gate','Do not label a recurrence “BCG-unresponsive” from the word recurrence alone. Verify adequate BCG exposure, timing, pathology, CIS/high-grade phenotype and whether the patient actually meets the current definition before selecting bladder-sparing salvage versus radical cystectomy.'],
   ['MIBC curative pathway','Complete staging → MDT review → assess cisplatin fitness using explicit criteria rather than a single creatinine → choose an evidence-based perioperative systemic strategy and/or neoadjuvant pathway → radical cystectomy + bilateral pelvic lymph-node dissection when indicated, or guideline-supported bladder-preserving trimodality therapy in selected patients.'],
@@ -39,7 +39,7 @@ const ADD={
  ]}
 ],
 'UTUC':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['Risk assignment','Integrate grade, cytology, local invasion, hydronephrosis, tumour size, multifocality and imaging rather than relying on a single feature. Document low-risk versus high-risk phenotype explicitly.'],
   ['Low-risk kidney-sparing protocol','Complete endoscopic assessment → complete endoscopic ablation where feasible → second-look ureteroscopy/biopsy according to the current protocol → intensive ureteroscopic/cytologic/imaging surveillance.'],
   ['High-risk localized protocol','MDT staging → radical nephroureterectomy with bladder cuff for surgically appropriate high-risk disease → regional lymph-node dissection according to location/template → consider perioperative systemic therapy based on renal function, stage and current evidence.'],
@@ -48,7 +48,7 @@ const ADD={
  ]}
 ],
 'Ca Kidney':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['Localized T1 protocol','Assess renal function, tumour anatomy/nephrometry, solitary kidney/hereditary risk and surgical feasibility → partial nephrectomy when oncologically and technically appropriate → radical nephrectomy when nephron-sparing is not reasonable.'],
   ['Active surveillance / ablation','For selected small renal masses, especially patients with competing risks, consider active surveillance or thermal ablation after documenting tumour size, growth pattern, renal function and patient preference.'],
   ['Radical nephrectomy safety gate','Do not infer radical nephrectomy solely from tumour size. Review venous involvement, adjacent-organ invasion, contralateral kidney, baseline renal function and whether partial nephrectomy remains feasible.'],
@@ -57,7 +57,7 @@ const ADD={
  ]}
 ],
 'Ca Testis':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['Initial sequence','Scrotal US + serum AFP/β-hCG/LDH → inguinal radical orchiectomy without trans-scrotal violation → prosthesis discussion when appropriate → stage with cross-sectional imaging and post-orchiectomy markers.'],
   ['Stage I seminoma','Risk-stratify and discuss surveillance as the preferred default for many patients; adjuvant carboplatin or radiotherapy is reserved for selected circumstances and local protocols, with overtreatment avoided.'],
   ['Stage I NSGCT','Use pathology risk, especially LVI, and patient preference to choose surveillance, adjuvant BEP or selected RPLND pathways according to current guideline criteria and expertise.'],
@@ -66,7 +66,7 @@ const ADD={
  ]}
 ],
 'Ca Penis':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['Primary lesion','Biopsy/adequate histology → document exact site, T category, grade, LVI and corporal/urethral involvement → select organ-preserving excision/laser/radiation versus partial/total penectomy according to stage and margins.'],
   ['cN0 gate','Do not equate a clinically negative groin with zero metastatic risk. Use tumour stage/grade/LVI and current risk criteria to decide surveillance versus invasive nodal staging.'],
   ['cN+ pathway','Confirm nodal disease with appropriate imaging/FNA when indicated → perform therapeutic inguinal/pelvic nodal management in appropriate patients → use neoadjuvant/adjuvant chemotherapy selectively for bulky/high-volume disease according to current guideline criteria.'],
@@ -74,7 +74,7 @@ const ADD={
  ]}
 ],
 'Urethral Cancer':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['Diagnostic protocol','Document site + histology + depth/T category + nodal basin → urethroscopy/biopsy → MRI pelvis and systemic staging when clinically indicated → MDT review.'],
   ['Anterior localized disease','Select urethra-preserving excision/urethrectomy or combined surgery according to tumour extent and margin requirements; nodal staging depends on site, stage and histology.'],
   ['Posterior/prostatic disease','Expect different local anatomy and pelvic drainage; treatment commonly requires multimodal planning rather than a generic urethrectomy algorithm.'],
@@ -82,7 +82,7 @@ const ADD={
  ]}
 ],
 'Adrenal / Neuroendocrine':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['Incidentaloma protocol','Characterise imaging phenotype + hormonal activity + symptoms → exclude clinically important pheochromocytoma before invasive procedures → determine whether surveillance, endocrine treatment or adrenalectomy is indicated.'],
   ['Pheochromocytoma protocol','Biochemical confirmation → genetic assessment when indicated → alpha blockade + volume optimisation → perioperative anaesthetic planning → adrenalectomy when indicated. Do not biopsy before pheochromocytoma is excluded.'],
   ['Suspected ACC','Expert adrenal MDT → staging and hormonal assessment → plan oncologic en-bloc resection when resectable, avoiding tumour violation → consider mitotane and/or systemic therapy for advanced/high-risk disease according to specialist protocol.'],
@@ -90,7 +90,7 @@ const ADD={
  ]}
 ],
 'Urethral Stricture':[
- {title:'V13.9 — explicit phenotype-based treatment protocol',items:[
+ {title:'V14.0 — explicit phenotype-based treatment protocol',items:[
   ['Diagnostic sequence','Symptoms/uroflow/PVR → urine testing → RUG ± VCUG → cystoscopy when needed → document exact location, length, lumen calibre/obliteration, spongiofibrosis, LS, prior procedures and urethral rest.'],
   ['Short primary bulbar','A single short (<2 cm), non-obliterative primary bulbar stricture is the principal phenotype where DVIU/dilatation may be offered. Counsel recurrence risk and avoid serial endoluminal treatment when recurrence becomes clinically important.'],
   ['Long or recurrent anterior','For long (>2 cm), recurrent or complex anterior strictures, plan urethroplasty rather than repeated DVIU/dilatation. Select EPA versus graft reconstruction according to length, location, spongiofibrosis and tissue quality.'],
@@ -99,7 +99,7 @@ const ADD={
  ]}
 ],
 'BPH / Male LUTS':[
- {title:'V13.9 — treatment protocol checkpoints',items:[
+ {title:'V14.0 — treatment protocol checkpoints',items:[
   ['Initial assessment','History + symptom score/bother + medication review → DRE when appropriate → urinalysis → PVR/uroflow when useful → PSA when it changes management → assess complications and alternative diagnoses.'],
   ['Medical therapy','Use alpha-blocker for rapid symptom relief when appropriate; add 5-alpha-reductase inhibitor for men with prostatic enlargement/appropriate progression risk; consider combination therapy when both symptom and progression benefits are needed.'],
   ['Storage symptoms','Treat obstruction and storage symptoms as related but distinct problems; reassess residual urine and infection/other causes before escalating antimuscarinic or beta-3 therapy.'],
@@ -108,7 +108,7 @@ const ADD={
  ]}
 ],
 'Stone Disease':[
- {title:'V13.9 — explicit treatment protocol',items:[
+ {title:'V14.0 — explicit treatment protocol',items:[
   ['Septic obstructed system — emergency','Recognise obstruction + infection/sepsis → cultures and immediate antibiotics → urgent decompression with ureteric stent or nephrostomy → delay definitive stone clearance until sepsis has resolved and the patient is stabilised.'],
   ['Ureteric stone','Assess size, location, obstruction, infection, renal function and symptoms → observation/medical therapy only in an appropriate uncomplicated phenotype → URS or SWL when intervention is indicated; use current EAU selection criteria rather than size alone.'],
   ['Renal stone','Map stone burden/location/anatomy → SWL, RIRS or PCNL according to burden and anatomy. PCNL is generally the preferred first-line approach for large renal stone burdens >2 cm and complex/staghorn stones.'],
