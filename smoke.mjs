@@ -14,6 +14,7 @@ for (const file of [
   'frontend/v14-release-hotfix.js',
   'frontend/v14.1-opd-suite.js',
   'frontend/v14.1-core-hardening.js',
+  'frontend/v14.2-clinical-navigation.js',
   'v13.9-content-pack.js',
   'v13-clinical-engine.js'
 ]) {
@@ -21,10 +22,10 @@ for (const file of [
 }
 
 const manifest = JSON.parse(fs.readFileSync(path.join(FRONT, 'manifest.webmanifest'), 'utf8'));
-assert.match(manifest.name, /Urology Oracle V14\.0/);
-assert.equal(manifest.short_name, 'Oracle V14');
+assert.equal(manifest.name, 'Urology Oracle');
+assert.equal(manifest.short_name, 'Oracle');
 const hotfix = fs.readFileSync(path.join(FRONT, 'v14-release-hotfix.js'), 'utf8');
-assert.match(hotfix, /document\.title='Urology Oracle V14\.0 — Final Clinical Workstation'/);
+assert.match(hotfix, /document\.title='Urology Oracle'/);
 assert.match(hotfix, /window\.modal=function/);
 assert.match(hotfix, /lowerPole/);
 assert.match(hotfix, /stoneDecisionV14/);
@@ -58,10 +59,11 @@ try {
   assert.match(index.body, /v14-release-hotfix\.js/);
   assert.match(index.body, /v14\.1-opd-suite\.js/);
   assert.match(index.body, /v14\.1-core-hardening\.js/);
+  assert.match(index.body, /v14\.2-clinical-navigation\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
-  assert.match(manifestRes.body, /Urology Oracle V14\.0/);
+  assert.match(manifestRes.body, /Urology Oracle/);
   const contentPack = fs.readFileSync(path.join(ROOT, 'v13.9-content-pack.js'), 'utf8');
   assert.doesNotMatch(contentPack, /V13\.9 —/);
 
