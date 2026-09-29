@@ -1,0 +1,25 @@
+name: V14 Oracle regression
+
+on:
+  push:
+    branches: [v13.2-final]
+  pull_request:
+    branches: [v13.2-final]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm install
+      - name: Run V14 regression suite
+        run: npm test
