@@ -16,6 +16,9 @@ const atlas2 = fs.readFileSync(new URL('./frontend/v15.1-operative-atlas-bph-rec
 const atlas3 = fs.readFileSync(new URL('./frontend/v15.2-operative-atlas-oncology-recon.js', import.meta.url), 'utf8');
 const atlas4 = fs.readFileSync(new URL('./frontend/v15.3-operative-atlas-rplnd-ureter-ecirs.js', import.meta.url), 'utf8');
 const atlas5 = fs.readFileSync(new URL('./frontend/v15.4-operative-atlas-advanced-stone.js', import.meta.url), 'utf8');
+const atlas6 = fs.readFileSync(new URL('./frontend/v15.5-operative-atlas-bph-testis-penile.js', import.meta.url), 'utf8');
+const trauma = fs.readFileSync(new URL('./frontend/v15.6-operative-atlas-trauma.js', import.meta.url), 'utf8');
+const launcher = fs.readFileSync(new URL('./frontend/v15.7-operative-atlas-unified-launcher.js', import.meta.url), 'utf8');
 const hotfix = fs.readFileSync(new URL('./frontend/v14-release-hotfix.js', import.meta.url), 'utf8');
 
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.1-opd-suite.js', import.meta.url).pathname], {stdio:'pipe'});
@@ -31,6 +34,11 @@ execFileSync(process.execPath, ['--check', new URL('./frontend/v14.9-scores-engi
 execFileSync(process.execPath, ['--check', new URL('./frontend/v15.0-operative-atlas.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v15.1-operative-atlas-bph-recon.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v15.2-operative-atlas-oncology-recon.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v15.3-operative-atlas-rplnd-ureter-ecirs.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v15.4-operative-atlas-advanced-stone.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v15.5-operative-atlas-bph-testis-penile.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v15.6-operative-atlas-trauma.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v15.7-operative-atlas-unified-launcher.js', import.meta.url).pathname], {stdio:'pipe'});
 
 assert.ok(nav.includes('Clinical Oracle'));
 assert.ok(nav.includes('Bladder cancer pathway'));
@@ -91,6 +99,16 @@ assert.ok(atlas5.includes('Tubeless / Totally Tubeless PCNL'));
 assert.ok(atlas5.includes('Antegrade Ureteroscopy'));
 assert.ok(atlas5.includes('Laparoscopic / Open Ureterolithotomy'));
 assert.ok(atlas5.includes('Pyelolithotomy'));
+assert.ok(atlas6.includes('Simple Prostatectomy'));
+assert.ok(atlas6.includes('Radical Inguinal Orchidectomy'));
+assert.ok(atlas6.includes('Inguinal Lymph Node Dissection'));
+assert.ok(trauma.includes('Renal Trauma'));
+assert.ok(trauma.includes('Bladder Trauma'));
+assert.ok(trauma.includes('Penile Fracture Repair'));
+assert.ok(trauma.includes('Testicular Trauma'));
+assert.ok(launcher.includes('Unified procedure index'));
+assert.ok(launcher.includes('V156'));
+assert.ok(launcher.includes('UROLOGY_ATLAS_SHOWERS'));
 assert.ok(oncology.includes('BEP'));
 assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
