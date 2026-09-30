@@ -13,6 +13,7 @@ const bph = fs.readFileSync(new URL('./frontend/v14.8-bph-engine.js', import.met
 const scores = fs.readFileSync(new URL('./frontend/v14.9-scores-engine.js', import.meta.url), 'utf8');
 const atlas = fs.readFileSync(new URL('./frontend/v15.0-operative-atlas.js', import.meta.url), 'utf8');
 const atlas2 = fs.readFileSync(new URL('./frontend/v15.1-operative-atlas-bph-recon.js', import.meta.url), 'utf8');
+const atlas3 = fs.readFileSync(new URL('./frontend/v15.2-operative-atlas-oncology-recon.js', import.meta.url), 'utf8');
 const hotfix = fs.readFileSync(new URL('./frontend/v14-release-hotfix.js', import.meta.url), 'utf8');
 
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.1-opd-suite.js', import.meta.url).pathname], {stdio:'pipe'});
@@ -27,6 +28,7 @@ execFileSync(process.execPath, ['--check', new URL('./frontend/v14.8-bph-engine.
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.9-scores-engine.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v15.0-operative-atlas.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v15.1-operative-atlas-bph-recon.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v15.2-operative-atlas-oncology-recon.js', import.meta.url).pathname], {stdio:'pipe'});
 
 assert.ok(nav.includes('Clinical Oracle'));
 assert.ok(nav.includes('Bladder cancer pathway'));
@@ -74,6 +76,10 @@ assert.ok(atlas2.includes('TURP'));
 assert.ok(atlas2.includes('HOLEP'));
 assert.ok(atlas2.includes('URETHROPLASTY'));
 assert.ok(atlas2.includes('Safety checkpoints'));
+assert.ok(atlas3.includes('Radical Prostatectomy'));
+assert.ok(atlas3.includes('Radical Cystectomy'));
+assert.ok(atlas3.includes('Partial Nephrectomy'));
+assert.ok(atlas3.includes('Anderson–Hynes Dismembered Pyeloplasty'));
 assert.ok(oncology.includes('BEP'));
 assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
