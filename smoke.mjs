@@ -18,7 +18,15 @@ for (const file of [
   'frontend/v14.3-prostate-pathway.js',
   'frontend/v14.4-oncology-pathways.js',
   'v13.9-content-pack.js',
-  'v13-clinical-engine.js'
+  'v13-clinical-engine.js',
+  'frontend/v15.0-operative-atlas.js',
+  'frontend/v15.1-operative-atlas-bph-recon.js',
+  'frontend/v15.2-operative-atlas-oncology-recon.js',
+  'frontend/v15.3-operative-atlas-rplnd-ureter-ecirs.js',
+  'frontend/v15.4-operative-atlas-advanced-stone.js',
+  'frontend/v15.5-operative-atlas-bph-testis-penile.js',
+  'frontend/v15.6-operative-atlas-trauma.js',
+  'frontend/v15.7-operative-atlas-unified-launcher.js'
 ]) {
   execFileSync(process.execPath, ['--check', path.join(ROOT, file)], { stdio: 'inherit' });
 }
@@ -52,7 +60,7 @@ try {
   await new Promise(r => setTimeout(r, 400));
   const health = await get('/health');
   assert.equal(health.status, 200);
-  assert.match(health.body, /"version":"14\.0\.0"/);
+  assert.match(health.body, /"version":"15.7.0"/);
   assert.match(health.body, /"provider":"OpenRouter"/);
   assert.match(health.body, /"freeTier":true/);
 
@@ -74,6 +82,9 @@ try {
   assert.match(index.body, /v15\.2-operative-atlas-oncology-recon\.js/);
   assert.match(index.body, /v15\.3-operative-atlas-rplnd-ureter-ecirs\.js/);
   assert.match(index.body, /v15\.4-operative-atlas-advanced-stone\.js/);
+  assert.match(index.body, /v15\.5-operative-atlas-bph-testis-penile\.js/);
+  assert.match(index.body, /v15\.6-operative-atlas-trauma\.js/);
+  assert.match(index.body, /v15\.7-operative-atlas-unified-launcher\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
