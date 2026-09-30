@@ -460,6 +460,7 @@ function hotfixHtml(html) {
     '<script src="/v15.5-operative-atlas-bph-testis-penile.js" defer></script>',
     '<script src="/v15.6-operative-atlas-trauma.js" defer></script>',
     '<script src="/v15.7-operative-atlas-unified-launcher.js" defer></script>',
+    '<script src="/v15.8-opd-workflow.js" defer></script>',
   ];
   let out = html;
   for (const tag of tags) {
@@ -479,7 +480,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '15.7.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'OpenRouter', model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '15.8.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'OpenRouter', model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
