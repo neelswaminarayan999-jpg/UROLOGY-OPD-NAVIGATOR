@@ -6,6 +6,7 @@ const suite = fs.readFileSync(new URL('./frontend/v14.1-opd-suite.js', import.me
 const nav = fs.readFileSync(new URL('./frontend/v14.2-clinical-navigation.js', import.meta.url), 'utf8');
 const prostate = fs.readFileSync(new URL('./frontend/v14.3-prostate-pathway.js', import.meta.url), 'utf8');
 const oncology = fs.readFileSync(new URL('./frontend/v14.4-oncology-pathways.js', import.meta.url), 'utf8');
+const urgent = fs.readFileSync(new URL('./frontend/v14.5-urgent-urology.js', import.meta.url), 'utf8');
 const hotfix = fs.readFileSync(new URL('./frontend/v14-release-hotfix.js', import.meta.url), 'utf8');
 
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.1-opd-suite.js', import.meta.url).pathname], {stdio:'pipe'});
@@ -13,6 +14,7 @@ execFileSync(process.execPath, ['--check', new URL('./frontend/v14-release-hotfi
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.2-clinical-navigation.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.3-prostate-pathway.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.4-oncology-pathways.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v14.5-urgent-urology.js', import.meta.url).pathname], {stdio:'pipe'});
 
 assert.ok(nav.includes('Clinical Oracle'));
 assert.ok(nav.includes('Bladder cancer pathway'));
@@ -28,6 +30,12 @@ assert.ok(prostate.includes('STAMPEDE'));
 assert.ok(oncology.includes('Kidney cancer pathway'));
 assert.ok(oncology.includes('Upper tract urothelial cancer pathway'));
 assert.ok(oncology.includes('Testicular cancer pathway'));
+assert.ok(urgent.includes('Urgent urology'));
+assert.ok(urgent.includes('Obstructed infected system'));
+assert.ok(urgent.includes('Testicular torsion'));
+assert.ok(urgent.includes('Fournier'));
+assert.ok(urgent.includes('Ischaemic priapism'));
+assert.ok(urgent.includes('clot retention'));
 assert.ok(oncology.includes('BEP'));
 assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
