@@ -157,6 +157,11 @@
 
   async function copyOpdNote(){
     const note=buildOpdNote();
+    const hasClinicalContent=/\nCLINICAL INPUTS\n|\nASSESSMENT \/ RISK \/ MANAGEMENT OUTPUT\n/.test(note);
+    if(!hasClinicalContent){
+      toast('Nothing to copy — enter clinical data or generate a pathway.',false);
+      return;
+    }
     let copied=false;
     try{
       if(navigator.clipboard && window.isSecureContext){
