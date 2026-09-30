@@ -70,6 +70,7 @@ try {
   assert.match(index.body, /v14\.8-bph-engine\.js/);
   assert.match(index.body, /v14\.9-scores-engine\.js/);
   assert.match(index.body, /v15\.0-operative-atlas\.js/);
+  assert.match(index.body, /v15\.1-operative-atlas-bph-recon\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
