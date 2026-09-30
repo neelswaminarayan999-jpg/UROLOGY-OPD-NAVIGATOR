@@ -16,6 +16,7 @@ for (const file of [
   'frontend/v14.1-core-hardening.js',
   'frontend/v14.2-clinical-navigation.js',
   'frontend/v14.3-prostate-pathway.js',
+  'frontend/v14.4-oncology-pathways.js',
   'v13.9-content-pack.js',
   'v13-clinical-engine.js'
 ]) {
@@ -61,7 +62,7 @@ try {
   assert.match(index.body, /v14\.1-opd-suite\.js/);
   assert.match(index.body, /v14\.1-core-hardening\.js/);
   assert.match(index.body, /v14\.2-clinical-navigation\.js/);
-  assert.match(index.body, /v14\.3-prostate-pathway\.js/);
+  assert.match(index.body, /v14\.3-prostate-pathway\.js/);\n  assert.match(index.body, /v14\.4-oncology-pathways\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
