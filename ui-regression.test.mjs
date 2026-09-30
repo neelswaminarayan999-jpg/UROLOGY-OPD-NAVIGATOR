@@ -12,6 +12,7 @@ const stricture = fs.readFileSync(new URL('./frontend/v14.7-stricture-engine.js'
 const bph = fs.readFileSync(new URL('./frontend/v14.8-bph-engine.js', import.meta.url), 'utf8');
 const scores = fs.readFileSync(new URL('./frontend/v14.9-scores-engine.js', import.meta.url), 'utf8');
 const atlas = fs.readFileSync(new URL('./frontend/v15.0-operative-atlas.js', import.meta.url), 'utf8');
+const atlas2 = fs.readFileSync(new URL('./frontend/v15.1-operative-atlas-bph-recon.js', import.meta.url), 'utf8');
 const hotfix = fs.readFileSync(new URL('./frontend/v14-release-hotfix.js', import.meta.url), 'utf8');
 
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.1-opd-suite.js', import.meta.url).pathname], {stdio:'pipe'});
@@ -25,6 +26,7 @@ execFileSync(process.execPath, ['--check', new URL('./frontend/v14.7-stricture-e
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.8-bph-engine.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.9-scores-engine.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v15.0-operative-atlas.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v15.1-operative-atlas-bph-recon.js', import.meta.url).pathname], {stdio:'pipe'});
 
 assert.ok(nav.includes('Clinical Oracle'));
 assert.ok(nav.includes('Bladder cancer pathway'));
@@ -68,6 +70,10 @@ assert.ok(atlas.includes('RIRS / Flexible Ureteroscopy'));
 assert.ok(atlas.includes('PCNL'));
 assert.ok(atlas.includes('Operative sequence'));
 assert.ok(atlas.includes('Bailout / staging'));
+assert.ok(atlas2.includes('TURP'));
+assert.ok(atlas2.includes('HOLEP'));
+assert.ok(atlas2.includes('URETHROPLASTY'));
+assert.ok(atlas2.includes('Safety checkpoints'));
 assert.ok(oncology.includes('BEP'));
 assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
