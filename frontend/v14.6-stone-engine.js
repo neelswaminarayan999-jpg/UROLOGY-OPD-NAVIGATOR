@@ -39,7 +39,7 @@ function openStone(){
  '<select id="v146BMI"><option value="">Body habitus</option><option value="normal">No major access issue</option><option value="obese">Severe obesity / long skin-to-stone distance</option></select>'+
  '<select id="v146Anticoag"><option value="">Antithrombotic status</option><option value="none">None</option><option value="manageable">Can be safely managed per perioperative plan</option><option value="cannot">Cannot be safely interrupted / high bleeding concern</option></select>'+
  '<select id="v146Preg"><option value="">Pregnancy</option><option value="no">No</option><option value="yes">Yes</option></select>'+
- '<select id="v146Prior'><option value="">Prior treatment</option><option value="none">None</option><option value="stent">Stent / nephrostomy</option><option value="failed">Previous failed SWL/URS/PCNL</option></select>'+
+ '<select id="v146Prior"><option value="">Prior treatment</option><option value="none">None</option><option value="stent">Stent / nephrostomy</option><option value="failed">Previous failed SWL/URS/PCNL</option></select>'+
  '<select id="v146StoneType"><option value="">Stone composition clue</option><option value="unknown">Unknown</option><option value="uric">Likely uric acid</option><option value="cystine">Cystine / resistant stone</option><option value="infection">Infection stone / struvite suspected</option><option value="hard">High-HU / hard stone suspected</option></select>'+
  '</div></div>'+
  '<div class="v146s-row"><h3>4. Complex PCNL / staghorn planning</h3><div class="v146s-grid3">'+
@@ -105,7 +105,7 @@ function render(){
      if(lower==='unfavourable')h+='<div class="v146s-note"><b>Lower-pole anatomy unfavourable:</b> this decreases fragment clearance after SWL and can make RIRS technically harder; review IPA, infundibular length/width and access angles on CT.</div>';
    }
  }
- if(stoneType==='uric')h+='<div class="v146s-note"><b>Composition pathway:</b> if uric-acid stone is strongly suspected/confirmed, assess urine pH and consider oral chemolysis where appropriate and safe; confirm composition whenever stone material is available.';
+ if(stoneType==='uric')h+='<div class="v146s-note"><b>Composition pathway:</b> if uric-acid stone is strongly suspected/confirmed, assess urine pH and consider oral chemolysis where appropriate and safe; confirm composition whenever stone material is available.</div>';
  if(stoneType==='infection')h+='<div class="v146s-note"><b>Infection-stone pathway:</b> culture-directed infection control and complete stone clearance are important; residual infected stone burden increases recurrence risk.</div>';
  h+='<div class="v146s-row"><h3>Perioperative checklist</h3><div class="v146s-grid">'+
  '<div class="v146s-note"><b>Before intervention:</b> urine culture/microscopy; renal function; CBC/coagulation as indicated; review antithrombotics; NCCT for anatomy/stone burden; antibiotics according to culture/local protocol.</div>'+
