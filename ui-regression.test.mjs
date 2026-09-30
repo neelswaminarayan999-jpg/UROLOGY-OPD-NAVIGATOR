@@ -10,6 +10,7 @@ const urgent = fs.readFileSync(new URL('./frontend/v14.5-urgent-urology.js', imp
 const stone = fs.readFileSync(new URL('./frontend/v14.6-stone-engine.js', import.meta.url), 'utf8');
 const stricture = fs.readFileSync(new URL('./frontend/v14.7-stricture-engine.js', import.meta.url), 'utf8');
 const bph = fs.readFileSync(new URL('./frontend/v14.8-bph-engine.js', import.meta.url), 'utf8');
+const scores = fs.readFileSync(new URL('./frontend/v14.9-scores-engine.js', import.meta.url), 'utf8');
 const hotfix = fs.readFileSync(new URL('./frontend/v14-release-hotfix.js', import.meta.url), 'utf8');
 
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.1-opd-suite.js', import.meta.url).pathname], {stdio:'pipe'});
@@ -21,6 +22,7 @@ execFileSync(process.execPath, ['--check', new URL('./frontend/v14.5-urgent-urol
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.6-stone-engine.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.7-stricture-engine.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.8-bph-engine.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v14.9-scores-engine.js', import.meta.url).pathname], {stdio:'pipe'});
 
 assert.ok(nav.includes('Clinical Oracle'));
 assert.ok(nav.includes('Bladder cancer pathway'));
@@ -55,6 +57,11 @@ assert.ok(bph.includes('BPH / male LUTS treatment engine'));
 assert.ok(bph.includes('TUIP'));
 assert.ok(bph.includes('30–80 mL'));
 assert.ok(bph.includes('pressure-flow urodynamics'));
+assert.ok(scores.includes('Urology scores & calculators'));
+assert.ok(scores.includes('STONE'));
+assert.ok(scores.includes('ISUP Grade Group'));
+assert.ok(scores.includes('Clavien–Dindo'));
+assert.ok(scores.includes('race-free modified'));
 assert.ok(oncology.includes('BEP'));
 assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
