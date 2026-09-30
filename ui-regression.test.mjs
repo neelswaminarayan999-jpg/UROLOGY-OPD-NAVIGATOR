@@ -114,3 +114,18 @@ assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
 assert.ok(!hotfix.includes("h.textContent='Urology Oracle V14.0"));
 console.log('UI regression: PASS');
+
+
+const workflow = fs.readFileSync(new URL('./frontend/v15.8-opd-workflow.js', import.meta.url), 'utf8');
+execFileSync(process.execPath, ['--check', new URL('./frontend/v15.8-opd-workflow.js', import.meta.url).pathname], {stdio:'pipe'});
+assert.ok(workflow.includes("VERSION = '15.8.0'"));
+assert.ok(workflow.includes('Copy OPD Note'));
+assert.ok(workflow.includes('Clear Patient'));
+assert.ok(workflow.includes("setAttribute('autocomplete','off')"));
+assert.ok(workflow.includes("setAttribute('spellcheck','false')"));
+assert.ok(workflow.includes("e.ctrlKey"));
+assert.ok(workflow.includes("e.key==='/'"));
+assert.ok(workflow.includes("e.key==='Escape'"));
+assert.ok(workflow.includes('data-oracle-theme'));
+assert.ok(workflow.includes('navigator.clipboard.writeText'));
+console.log('V15.8 OPD workflow regression: PASS');
