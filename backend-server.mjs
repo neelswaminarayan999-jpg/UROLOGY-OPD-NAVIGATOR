@@ -447,7 +447,8 @@ function hotfixHtml(html) {
     '<script src="/v14.2-clinical-navigation.js" defer></script>',
     '<script src="/v14.3-prostate-pathway.js" defer></script>',
     '<script src="/v14.4-oncology-pathways.js" defer></script>',
-    '<script src="/v14.5-urgent-urology.js" defer></script>'
+    '<script src="/v14.5-urgent-urology.js" defer></script>
+    <script src="/v14.6-stone-engine.js" defer></script>'
   ];
   let out = html;
   for (const tag of tags) {
