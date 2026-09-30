@@ -14,6 +14,7 @@ const scores = fs.readFileSync(new URL('./frontend/v14.9-scores-engine.js', impo
 const atlas = fs.readFileSync(new URL('./frontend/v15.0-operative-atlas.js', import.meta.url), 'utf8');
 const atlas2 = fs.readFileSync(new URL('./frontend/v15.1-operative-atlas-bph-recon.js', import.meta.url), 'utf8');
 const atlas3 = fs.readFileSync(new URL('./frontend/v15.2-operative-atlas-oncology-recon.js', import.meta.url), 'utf8');
+const atlas4 = fs.readFileSync(new URL('./frontend/v15.3-operative-atlas-rplnd-ureter-ecirs.js', import.meta.url), 'utf8');
 const hotfix = fs.readFileSync(new URL('./frontend/v14-release-hotfix.js', import.meta.url), 'utf8');
 
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.1-opd-suite.js', import.meta.url).pathname], {stdio:'pipe'});
@@ -80,6 +81,9 @@ assert.ok(atlas3.includes('Radical Prostatectomy'));
 assert.ok(atlas3.includes('Radical Cystectomy'));
 assert.ok(atlas3.includes('Partial Nephrectomy'));
 assert.ok(atlas3.includes('Anderson–Hynes Dismembered Pyeloplasty'));
+assert.ok(atlas4.includes('Retroperitoneal Lymph Node Dissection'));
+assert.ok(atlas4.includes('Ureteric Reconstruction'));
+assert.ok(atlas4.includes('ECIRS / Combined PCNL + RIRS'));
 assert.ok(oncology.includes('BEP'));
 assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
