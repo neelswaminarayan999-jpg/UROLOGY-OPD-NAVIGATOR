@@ -95,21 +95,56 @@
 
   async function copyOpdNote(){
     const note=buildOpdNote();
+    let copied=false;
     try{
-      await navigator.clipboard.writeText(note);
-      toast('OPD note copied to clipboard.');
-    }catch{
-      const ta=document.createElement('textarea');
-      ta.value=note; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.left='-9999px';
-      document.body.appendChild(ta); ta.select();
-      let ok=false; try{ok=document.execCommand('copy');}catch{}
-      ta.remove();
-      toast(ok?'OPD note copied to clipboard.':'Clipboard access was blocked. The note remains available through the console-free fallback selection.', ok);
-      if(!ok){
-        const w=window.open('','_blank','noopener,noreferrer,width=720,height=640');
-        if(w){w.document.title='Urology Oracle OPD Note';w.document.body.innerHTML='<pre style="white-space:pre-wrap;font:14px system-ui;padding:20px">'+esc(note)+'</pre>';}
+      if(navigator.clipboard && window.isSecureContext){
+        await navigator.clipboard.writeText(note);
+        copied=true;
       }
+    }catch{}
+    if(!copied){
+      const ta=document.createElement('textarea');
+      ta.value=note; ta.setAttribute('readonly','');
+      ta.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:.01';
+      document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0,note.length);
+      try{copied=document.execCommand('copy');}catch{}
+      ta.remove();
     }
+    if(copied){
+      toast('OPD note copied to clipboard.');
+      return;
+    }
+    openCopyNoteDialog(note);
+  }
+
+  function openCopyNoteDialog(note){
+    const old=document.getElementById('oracle158CopyDialog'); if(old) old.remove();
+    const back=document.createElement('div');
+    back.id='oracle158CopyDialog';
+    back.className='oracle158-copy-backdrop no-print';
+    back.innerHTML='<div class="oracle158-copy-panel">'+
+      '<div class="oracle158-copy-head"><div><b>OPD note</b><div class="oracle158-copy-sub">Clipboard access was blocked by the browser. Tap and hold the text, then choose Copy.</div></div>'+
+      '<button type="button" class="oracle158-copy-close">Close</button></div>'+
+      '<textarea class="oracle158-copy-text" readonly aria-label="OPD note">'+esc(note)+'</textarea>'+
+      '<div class="oracle158-copy-actions"><button type="button" class="oracle158-copy-now">Copy again</button><button type="button" class="oracle158-copy-select">Select all</button></div>'+
+      '</div>';
+    document.body.appendChild(back);
+    const ta=back.querySelector('.oracle158-copy-text');
+    const selectAll=()=>{ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);};
+    back.querySelector('.oracle158-copy-close').onclick=()=>back.remove();
+    back.querySelector('.oracle158-copy-select').onclick=selectAll;
+    back.querySelector('.oracle158-copy-now').onclick=async()=>{
+      try{
+        await navigator.clipboard.writeText(note);
+        toast('OPD note copied to clipboard.');
+        back.remove();
+      }catch{
+        selectAll();
+        toast('Text selected — use Copy from the device menu.',false);
+      }
+    };
+    back.addEventListener('click',e=>{if(e.target===back)back.remove();});
+    setTimeout(selectAll,50);
   }
 
   function clearPatientData(){
@@ -144,10 +179,17 @@
   }
 
   function setTheme(theme){
-    document.body.dataset.oracleTheme=theme;
-    localStorage.setItem('uroOracleTheme',theme);
+    const next=theme==='light'?'light':'dark';
+    document.documentElement.dataset.oracleTheme=next;
+    document.body.dataset.oracleTheme=next;
+    document.documentElement.style.colorScheme=next;
+    localStorage.setItem('uroOracleTheme',next);
     const b=document.getElementById('oracleThemeToggle');
-    if(b)b.textContent=theme==='light'?'🌙 Dark':'☀ Light';
+    if(b){
+      b.textContent=next==='light'?'🌙 Dark':'☀ Light';
+      b.setAttribute('aria-label',next==='light'?'Switch to dark mode':'Switch to light mode');
+      b.setAttribute('aria-pressed',next==='dark'?'true':'false');
+    }
   }
 
   function toggleTheme(){
@@ -166,11 +208,27 @@
       .oracle158-toast{position:fixed;right:14px;bottom:72px;z-index:10051;max-width:min(92vw,460px);padding:10px 13px;border-radius:9px;background:#0f172a;color:#fff;font:600 13px system-ui;opacity:0;transform:translateY(6px);pointer-events:none;transition:.18s}
       .oracle158-toast.show{opacity:1;transform:none}.oracle158-toast[data-error="1"]{background:#991b1b}
       body[data-oracle-theme="light"]{background:#f7f8fa!important;color:#172033!important}
+      body[data-oracle-theme="light"] header,body[data-oracle-theme="light"] nav,body[data-oracle-theme="light"] main,body[data-oracle-theme="light"] footer{background:#f7f8fa!important;color:#172033!important}
+      body[data-oracle-theme="light"] .card,body[data-oracle-theme="light"] .panel,body[data-oracle-theme="light"] .bg-slate-900,body[data-oracle-theme="light"] .bg-gray-900{background:#fff!important;color:#172033!important;border-color:#cbd5e1!important}
       body[data-oracle-theme="light"] input,body[data-oracle-theme="light"] select,body[data-oracle-theme="light"] textarea{background:#fff!important;color:#172033!important;border-color:#94a3b8!important}
-      body[data-oracle-theme="light"] .card,body[data-oracle-theme="light"] .panel{background:#fff!important;color:#172033!important}
       body[data-oracle-theme="light"] .sub,body[data-oracle-theme="light"] .muted,body[data-oracle-theme="light"] small{color:#475569!important}
+      body[data-oracle-theme="dark"]{background:#0b1220!important;color:#e5edf7!important}
+      body[data-oracle-theme="dark"] header,body[data-oracle-theme="dark"] nav,body[data-oracle-theme="dark"] main,body[data-oracle-theme="dark"] footer{background:#0b1220!important;color:#e5edf7!important}
+      body[data-oracle-theme="dark"] .card,body[data-oracle-theme="dark"] .panel,body[data-oracle-theme="dark"] .bg-white,body[data-oracle-theme="dark"] .bg-slate-50,body[data-oracle-theme="dark"] .bg-slate-100{background:#111827!important;color:#e5edf7!important;border-color:#334155!important}
+      body[data-oracle-theme="dark"] .card *,body[data-oracle-theme="dark"] .panel *{border-color:#334155}
+      body[data-oracle-theme="dark"] input,body[data-oracle-theme="dark"] select,body[data-oracle-theme="dark"] textarea{background:#0f172a!important;color:#e5edf7!important;border-color:#475569!important}
+      body[data-oracle-theme="dark"] input::placeholder,body[data-oracle-theme="dark"] textarea::placeholder{color:#94a3b8!important}
+      body[data-oracle-theme="dark"] .text-slate-900,body[data-oracle-theme="dark"] .text-slate-800,body[data-oracle-theme="dark"] .text-gray-900,body[data-oracle-theme="dark"] .text-gray-800{color:#e5edf7!important}
+      body[data-oracle-theme="dark"] .text-slate-700,body[data-oracle-theme="dark"] .text-slate-600,body[data-oracle-theme="dark"] .text-gray-700,body[data-oracle-theme="dark"] .text-gray-600,body[data-oracle-theme="dark"] .muted,body[data-oracle-theme="dark"] small{color:#aebdce!important}
+      body[data-oracle-theme="dark"] table,body[data-oracle-theme="dark"] th,body[data-oracle-theme="dark"] td{background:#111827!important;color:#e5edf7!important;border-color:#334155!important}
+      .oracle158-copy-backdrop{position:fixed;inset:0;z-index:100060;background:rgba(2,6,23,.72);display:flex;align-items:center;justify-content:center;padding:14px}
+      .oracle158-copy-panel{width:min(760px,96vw);max-height:92vh;background:#fff;color:#172033;border-radius:14px;padding:15px;box-shadow:0 25px 80px rgba(0,0,0,.4)}
+      .oracle158-copy-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.oracle158-copy-head b{font-size:16px}.oracle158-copy-sub{font-size:11px;color:#64748b;margin-top:4px;line-height:1.45}
+      .oracle158-copy-close,.oracle158-copy-actions button{border:0;border-radius:8px;padding:8px 11px;font-weight:800;cursor:pointer;background:#0f172a;color:#fff}
+      .oracle158-copy-text{display:block;width:100%;height:min(62vh,520px);margin-top:10px;border:1px solid #cbd5e1;border-radius:9px;padding:10px;resize:none;font:12px/1.5 ui-monospace,monospace;background:#f8fafc;color:#172033}
+      .oracle158-copy-actions{display:flex;gap:8px;margin-top:9px}.oracle158-copy-actions button+button{background:#475569}
       @media(max-width:700px){#oracle158Toolbar{left:8px;right:8px;bottom:8px;justify-content:center}#oracle158Toolbar button{font-size:11px;padding:7px 9px}}
-      @media print{#oracle158Toolbar,#oracle158Toast{display:none!important}}
+      @media print{#oracle158Toolbar,#oracle158Toast,.oracle158-copy-backdrop{display:none!important}}
     `;
     document.head.appendChild(s);
   }
