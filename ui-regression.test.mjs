@@ -8,6 +8,8 @@ const prostate = fs.readFileSync(new URL('./frontend/v14.3-prostate-pathway.js',
 const oncology = fs.readFileSync(new URL('./frontend/v14.4-oncology-pathways.js', import.meta.url), 'utf8');
 const urgent = fs.readFileSync(new URL('./frontend/v14.5-urgent-urology.js', import.meta.url), 'utf8');
 const stone = fs.readFileSync(new URL('./frontend/v14.6-stone-engine.js', import.meta.url), 'utf8');
+const stricture = fs.readFileSync(new URL('./frontend/v14.7-stricture-engine.js', import.meta.url), 'utf8');
+const bph = fs.readFileSync(new URL('./frontend/v14.8-bph-engine.js', import.meta.url), 'utf8');
 const hotfix = fs.readFileSync(new URL('./frontend/v14-release-hotfix.js', import.meta.url), 'utf8');
 
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.1-opd-suite.js', import.meta.url).pathname], {stdio:'pipe'});
@@ -17,6 +19,8 @@ execFileSync(process.execPath, ['--check', new URL('./frontend/v14.3-prostate-pa
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.4-oncology-pathways.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.5-urgent-urology.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.6-stone-engine.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v14.7-stricture-engine.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v14.8-bph-engine.js', import.meta.url).pathname], {stdio:'pipe'});
 
 assert.ok(nav.includes('Clinical Oracle'));
 assert.ok(nav.includes('Bladder cancer pathway'));
@@ -44,6 +48,13 @@ assert.ok(stone.includes('PCNL'));
 assert.ok(stone.includes('RIRS'));
 assert.ok(stone.includes('staghorn'));
 assert.ok(stone.includes('simultaneous multi-access workflow'));
+assert.ok(stricture.includes('Urethral stricture reconstruction pathway'));
+assert.ok(stricture.includes('transecting EPA'));
+assert.ok(stricture.includes('free-graft urethroplasty'));
+assert.ok(bph.includes('BPH / male LUTS treatment engine'));
+assert.ok(bph.includes('TUIP'));
+assert.ok(bph.includes('30–80 mL'));
+assert.ok(bph.includes('pressure-flow urodynamics'));
 assert.ok(oncology.includes('BEP'));
 assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
