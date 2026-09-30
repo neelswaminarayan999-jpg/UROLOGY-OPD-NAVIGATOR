@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '15.8.0';
+  const VERSION = '15.9.0';
   const EXCLUDE_IDS = new Set([
     'globalSearch','stRef','stDate','stPreset','stDays',
     'oracleThemeToggle','oracleCopyNote','oracleClearPatient'
@@ -38,39 +38,73 @@
     return String(el.value ?? '').trim();
   }
 
+  function activeRoots(){
+    const preferred=[
+      '#oracleView','#diseaseView','#calcView','#procedureView','#drugView','#trialView','#searchView',
+      '#v141ToolkitPanel','#bookLabView'
+    ];
+    const roots=preferred.map(s=>document.querySelector(s)).filter(visible);
+    return roots.length ? [...new Set(roots)] : [document.body];
+  }
+
   function clinicalInputs(){
-    return [...document.querySelectorAll('input,select,textarea')]
-      .filter(el=>visible(el) && !EXCLUDE_IDS.has(el.id) && !el.disabled &&
-        !['button','submit','reset','file','hidden'].includes(String(el.type).toLowerCase()));
+    const seen=new Set(), out=[];
+    for(const root of activeRoots()){
+      root.querySelectorAll('input,select,textarea').forEach(el=>{
+        if(seen.has(el)||!visible(el)||!el.isConnected||!el.disabled||EXCLUDE_IDS.has(el.id)){}
+        if(seen.has(el)||!visible(el)||!el.isConnected||el.disabled||EXCLUDE_IDS.has(el.id)) return;
+        const type=String(el.type||'').toLowerCase();
+        if(['button','submit','reset','file','hidden'].includes(type)) return;
+        seen.add(el); out.push(el);
+      });
+    }
+    return out;
+  }
+
+  function oracleStateRows(){
+    const rows=[];
+    try{
+      const disease=document.getElementById('oracleDisease')?.value||'';
+      const state=(typeof oracleState!=='undefined' && oracleState) ? oracleState : null;
+      const defs=(typeof ORACLE_FIELDS!=='undefined' && disease && ORACLE_FIELDS[disease]) ? ORACLE_FIELDS[disease] : [];
+      if(state && defs.length){
+        defs.forEach(f=>{
+          const v=state[f.id];
+          if(v===undefined||v===null||v==='') return;
+          rows.push({label:f.label||f.id,value:String(v)});
+        });
+      }
+    }catch{}
+    return rows;
   }
 
   function collectTextOutputs(){
     const selectors=[
-      '#oracleView .result','#oracleView .v141-result','#oracleView .result-card',
-      '#oracleView .treatment-plan','#oracleView .pathway-result',
-      '#oracleView .decision-output','#oracleView .oracle-result',
-      '#v141ToolkitPanel .v141-result','#v141ToolkitPanel .row'
+      '#oracleView #oracleOutput','#oracleView #riskPanelContent','#oracleView .result',
+      '#oracleView .v141-result','#oracleView .result-card','#oracleView .treatment-plan',
+      '#oracleView .pathway-result','#oracleView .decision-output','#oracleView .oracle-result',
+      '#v141ToolkitPanel .v141-result','#v141ToolkitPanel .row',
+      '#calcView .result','#procedureView .result','#bookLabView .v10-result'
     ];
     const seen=new Set(), out=[];
-    for(const sel of selectors){
-      document.querySelectorAll(sel).forEach(el=>{
-        if(!visible(el)||seen.has(el)) return;
-        const t=el.innerText?.trim();
-        if(t){seen.add(el);out.push(t);}
-      });
+    for(const root of activeRoots()){
+      for(const sel of selectors){
+        root.querySelectorAll(sel).forEach(el=>{
+          if(!visible(el)||seen.has(el)) return;
+          const t=el.innerText?.trim();
+          if(t && t.length>1){seen.add(el);out.push(t);}
+        });
+      }
     }
     return out;
   }
 
   function buildOpdNote(){
     const lines=[];
-    lines.push('UROLOGY OPD DECISION SUMMARY');
-    lines.push('Generated locally by Urology Oracle '+VERSION+'.');
-    lines.push('Clinical decision support only — clinician verification and local/institutional protocol remain controlling.');
-    lines.push('');
-    const disease=document.getElementById('oracleDisease');
-    if(disease?.value) lines.push('Module: '+disease.value);
+    const now=new Date();
+    const disease=document.getElementById('oracleDisease')?.value||'';
     const inputs=clinicalInputs();
+    const stateRows=oracleStateRows();
     const rows=[];
     for(const el of inputs){
       const v=valueOf(el);
@@ -78,19 +112,47 @@
       const label=fieldLabel(el).replace(/\s+/g,' ').trim();
       if(!rows.some(x=>x.label===label && x.value===v)) rows.push({label,value:v});
     }
-    if(rows.length){
-      lines.push('Clinical inputs:');
-      rows.slice(0,100).forEach(x=>lines.push('- '+x.label+': '+x.value));
+    const merged=[...stateRows];
+    rows.forEach(x=>{if(!merged.some(y=>y.label===x.label&&y.value===x.value)) merged.push(x);});
+
+    lines.push('UROLOGY OPD CLINICAL SUMMARY');
+    lines.push('Generated: '+now.toLocaleString());
+    lines.push('Oracle workflow: '+VERSION);
+    lines.push('Clinical decision support only — verify patient-specific factors, current product labels, institutional protocols and MDT requirements before treatment.');
+    lines.push('');
+    if(disease) lines.push('Clinical module: '+disease);
+
+    if(merged.length){
+      lines.push('');
+      lines.push('CLINICAL INPUTS');
+      merged.slice(0,160).forEach(x=>lines.push('- '+x.label+': '+x.value));
     }
+
     const outputs=collectTextOutputs();
     if(outputs.length){
       lines.push('');
-      lines.push('Oracle output / decision context:');
-      outputs.join('\n').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,120)
-        .forEach(x=>lines.push('- '+x));
+      lines.push('ASSESSMENT / RISK / MANAGEMENT OUTPUT');
+      outputs.join('\n').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,220)
+        .forEach(x=>lines.push(x));
     }
-    if(lines.length<=4) lines.push('No populated clinical fields or visible decision output were found.');
-    return lines.join('\n').slice(0,14000);
+
+    const patientFields=rows.filter(x=>/^(patient|name|age|sex|gender|uhid|mrn|registration|hospital|date of birth|dob)\b/i.test(x.label));
+    if(patientFields.length){
+      lines.push('');
+      lines.push('PATIENT IDENTIFIERS ENTERED IN ORACLE');
+      patientFields.forEach(x=>lines.push('- '+x.label+': '+x.value));
+    }else{
+      lines.push('');
+      lines.push('PATIENT IDENTIFIERS');
+      lines.push('- No patient name / UHID / demographic identifier was entered in the Oracle workspace.');
+    }
+
+    if(!merged.length && !outputs.length){
+      lines.push('');
+      lines.push('No populated clinical inputs or decision output were found.');
+    }
+
+    return lines.join('\n').slice(0,20000);
   }
 
   async function copyOpdNote(){
@@ -148,27 +210,71 @@
   }
 
   function clearPatientData(){
-    const keepActiveSearch=document.activeElement;
     let count=0;
+    try{
+      if(typeof oracleState!=='undefined'){
+        const keys=Object.keys(oracleState||{});
+        if(keys.length) count+=keys.length;
+        oracleState={};
+      }
+    }catch{}
+
     document.querySelectorAll('input,select,textarea').forEach(el=>{
       if(!el.isConnected || EXCLUDE_IDS.has(el.id) || el.disabled) return;
       const type=String(el.type||'').toLowerCase();
       if(['button','submit','reset','hidden'].includes(type)) return;
-      if(type==='file'){ try{el.value='';count++;}catch{}; return; }
-      if(type==='checkbox' || type==='radio'){ if(el.checked){el.checked=false;count++;} return; }
-      if(el.tagName==='SELECT'){
-        if(el.selectedIndex!==0){el.selectedIndex=0;count++;}
+      if(type==='file'){try{if(el.value){el.value='';count++;}}catch{};return;}
+      if(type==='checkbox'||type==='radio'){
+        if(el.checked){el.checked=false;count++;}
         el.dispatchEvent(new Event('change',{bubbles:true}));
         return;
       }
-      if(el.value){el.value='';count++;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}
+      if(el.tagName==='SELECT'){
+        const blank=[...el.options].findIndex(o=>o.value==='' || /^select\b/i.test(o.textContent.trim()));
+        const next=blank>=0?blank:0;
+        if(el.selectedIndex!==next) count++;
+        el.selectedIndex=next;
+        el.dispatchEvent(new Event('change',{bubbles:true}));
+        return;
+      }
+      if(el.value){
+        el.value='';
+        count++;
+        el.dispatchEvent(new Event('input',{bubbles:true}));
+        el.dispatchEvent(new Event('change',{bubbles:true}));
+      }
     });
+
     const disease=document.getElementById('oracleDisease');
-    if(disease && !EXCLUDE_IDS.has(disease.id)){disease.selectedIndex=0;disease.dispatchEvent(new Event('change',{bubbles:true}));}
-    document.querySelectorAll('#oracleView .result,#oracleView .v141-result,#oracleView .result-card,#oracleView .treatment-plan,#oracleView .pathway-result,#oracleView .decision-output,#oracleView .oracle-result')
-      .forEach(el=>{if(visible(el)) el.innerHTML='';});
-    if(keepActiveSearch?.isConnected) keepActiveSearch.focus();
-    toast(count ? 'Current clinical inputs cleared.' : 'No populated clinical inputs found.');
+    if(disease){
+      disease.selectedIndex=0;
+      disease.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+
+    try{
+      if(typeof renderOracleForm==='function' && disease?.value) renderOracleForm();
+    }catch{}
+    try{
+      if(typeof renderOracleRisk==='function' && disease?.value){
+        renderOracleRisk(disease.value, (typeof oracleState!=='undefined') ? oracleState : {});
+      }
+    }catch{}
+
+    document.querySelectorAll(
+      '#oracleView #oracleOutput,#oracleView #riskPanelContent,#oracleView .result,#oracleView .v141-result,'+
+      '#oracleView .result-card,#oracleView .treatment-plan,#oracleView .pathway-result,'+
+      '#oracleView .decision-output,#oracleView .oracle-result,#v141ToolkitPanel .v141-result'
+    ).forEach(el=>{
+      if(visible(el)) el.innerHTML='';
+    });
+
+    document.querySelectorAll(
+      '#oracle158CopyDialog,#v141ToolkitModal,.oracle-modal,[role="dialog"]'
+    ).forEach(el=>{
+      if(el.id==='oracle158CopyDialog'||el.id==='v141ToolkitModal') el.remove();
+    });
+
+    toast(count ? 'Current patient clinical state cleared.' : 'No patient clinical data found to clear.');
   }
 
   function toast(msg,success=true){
@@ -229,6 +335,36 @@
       .oracle158-copy-actions{display:flex;gap:8px;margin-top:9px}.oracle158-copy-actions button+button{background:#475569}
       @media(max-width:700px){#oracle158Toolbar{left:8px;right:8px;bottom:8px;justify-content:center}#oracle158Toolbar button{font-size:11px;padding:7px 9px}}
       @media print{#oracle158Toolbar,#oracle158Toast,.oracle158-copy-backdrop{display:none!important}}
+      /* V15.9 theme hardening: these selectors intentionally sit last so the toggle overrides earlier UI !important rules. */
+      html[data-oracle-theme="light"] body,
+      html[data-oracle-theme="light"] body>div.max-w-7xl{
+        background:#f7f8fa!important;color:#172033!important;
+      }
+      html[data-oracle-theme="light"] body>div.max-w-7xl header.sticky-top{
+        background:#ffffff!important;color:#172033!important;border-color:#cbd5e1!important;
+      }
+      html[data-oracle-theme="light"] body>div.max-w-7xl header.sticky-top .text-lg,
+      html[data-oracle-theme="light"] body>div.max-w-7xl header.sticky-top .text-slate-300{
+        color:#172033!important;
+      }
+      html[data-oracle-theme="light"] body>div.max-w-7xl .card,
+      html[data-oracle-theme="light"] body>div.max-w-7xl .panel,
+      html[data-oracle-theme="light"] body>div.max-w-7xl [class*="bg-slate-"],
+      html[data-oracle-theme="light"] body>div.max-w-7xl [class*="bg-gray-"]{
+        color:#172033!important;border-color:#cbd5e1!important;
+      }
+      html[data-oracle-theme="dark"] body,
+      html[data-oracle-theme="dark"] body>div.max-w-7xl{
+        background:#0b1220!important;color:#e5edf7!important;
+      }
+      html[data-oracle-theme="dark"] body>div.max-w-7xl .card,
+      html[data-oracle-theme="dark"] body>div.max-w-7xl .panel{
+        background:#111827!important;color:#e5edf7!important;border-color:#334155!important;
+      }
+      @media(max-width:700px){
+        #oracle158Toolbar{max-width:100vw}
+        #oracle158Toolbar button{min-height:38px}
+      }
     `;
     document.head.appendChild(s);
   }
