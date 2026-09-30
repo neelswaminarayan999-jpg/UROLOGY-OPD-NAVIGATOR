@@ -73,6 +73,7 @@ try {
   assert.match(index.body, /v15\.1-operative-atlas-bph-recon\.js/);
   assert.match(index.body, /v15\.2-operative-atlas-oncology-recon\.js/);
   assert.match(index.body, /v15\.3-operative-atlas-rplnd-ureter-ecirs\.js/);
+  assert.match(index.body, /v15\.4-operative-atlas-advanced-stone\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
