@@ -26,7 +26,8 @@ for (const file of [
   'frontend/v15.4-operative-atlas-advanced-stone.js',
   'frontend/v15.5-operative-atlas-bph-testis-penile.js',
   'frontend/v15.6-operative-atlas-trauma.js',
-  'frontend/v15.7-operative-atlas-unified-launcher.js'
+  'frontend/v15.7-operative-atlas-unified-launcher.js',
+  'frontend/v15.8-opd-workflow.js'
 ]) {
   execFileSync(process.execPath, ['--check', path.join(ROOT, file)], { stdio: 'inherit' });
 }
@@ -60,7 +61,7 @@ try {
   await new Promise(r => setTimeout(r, 400));
   const health = await get('/health');
   assert.equal(health.status, 200);
-  assert.match(health.body, /"version":"15.7.0"/);
+  assert.match(health.body, /"version":"15.8.0"/);
   assert.match(health.body, /"provider":"OpenRouter"/);
   assert.match(health.body, /"freeTier":true/);
 
@@ -85,6 +86,7 @@ try {
   assert.match(index.body, /v15\.5-operative-atlas-bph-testis-penile\.js/);
   assert.match(index.body, /v15\.6-operative-atlas-trauma\.js/);
   assert.match(index.body, /v15\.7-operative-atlas-unified-launcher\.js/);
+  assert.match(index.body, /v15\.8-opd-workflow\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
@@ -96,7 +98,7 @@ try {
   assert.equal(icon.status, 200);
   assert.match(String(icon.headers['content-type'] || ''), /image\/svg\+xml/);
 
-  console.log('V15.7 full regression smoke: PASS');
+  console.log('V15.8 full regression smoke: PASS');
 } finally {
   child.kill('SIGTERM');
 }
