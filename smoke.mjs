@@ -66,6 +66,8 @@ try {
   assert.match(index.body, /v14\.4-oncology-pathways\.js/);
   assert.match(index.body, /v14\.5-urgent-urology\.js/);
   assert.match(index.body, /v14\.6-stone-engine\.js/);
+  assert.match(index.body, /v14\.7-stricture-engine\.js/);
+  assert.match(index.body, /v14\.8-bph-engine\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
