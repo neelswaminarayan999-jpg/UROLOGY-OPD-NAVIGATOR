@@ -454,6 +454,7 @@ function hotfixHtml(html) {
     '<script src="/v14.9-scores-engine.js" defer></script>',
     '<script src="/v15.0-operative-atlas.js" defer></script>',
     '<script src="/v15.1-operative-atlas-bph-recon.js" defer></script>',
+    '<script src="/v15.2-operative-atlas-oncology-recon.js" defer></script>',
   ];
   let out = html;
   for (const tag of tags) {
