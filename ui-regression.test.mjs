@@ -7,6 +7,7 @@ const nav = fs.readFileSync(new URL('./frontend/v14.2-clinical-navigation.js', i
 const prostate = fs.readFileSync(new URL('./frontend/v14.3-prostate-pathway.js', import.meta.url), 'utf8');
 const oncology = fs.readFileSync(new URL('./frontend/v14.4-oncology-pathways.js', import.meta.url), 'utf8');
 const urgent = fs.readFileSync(new URL('./frontend/v14.5-urgent-urology.js', import.meta.url), 'utf8');
+const stone = fs.readFileSync(new URL('./frontend/v14.6-stone-engine.js', import.meta.url), 'utf8');
 const hotfix = fs.readFileSync(new URL('./frontend/v14-release-hotfix.js', import.meta.url), 'utf8');
 
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.1-opd-suite.js', import.meta.url).pathname], {stdio:'pipe'});
@@ -15,6 +16,7 @@ execFileSync(process.execPath, ['--check', new URL('./frontend/v14.2-clinical-na
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.3-prostate-pathway.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.4-oncology-pathways.js', import.meta.url).pathname], {stdio:'pipe'});
 execFileSync(process.execPath, ['--check', new URL('./frontend/v14.5-urgent-urology.js', import.meta.url).pathname], {stdio:'pipe'});
+execFileSync(process.execPath, ['--check', new URL('./frontend/v14.6-stone-engine.js', import.meta.url).pathname], {stdio:'pipe'});
 
 assert.ok(nav.includes('Clinical Oracle'));
 assert.ok(nav.includes('Bladder cancer pathway'));
@@ -36,6 +38,12 @@ assert.ok(urgent.includes('Testicular torsion'));
 assert.ok(urgent.includes('Fournier'));
 assert.ok(urgent.includes('Ischaemic priapism'));
 assert.ok(urgent.includes('clot retention'));
+assert.ok(stone.includes('Stone disease decision engine'));
+assert.ok(stone.includes('infected obstructed system'));
+assert.ok(stone.includes('PCNL'));
+assert.ok(stone.includes('RIRS'));
+assert.ok(stone.includes('staghorn'));
+assert.ok(stone.includes('simultaneous multi-access workflow'));
 assert.ok(oncology.includes('BEP'));
 assert.ok(suite.includes('OPD quick tools'));
 assert.ok(!hotfix.includes("document.title='Urology Oracle V14.0"));
