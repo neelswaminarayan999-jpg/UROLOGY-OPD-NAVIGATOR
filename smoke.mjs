@@ -96,7 +96,7 @@ try {
   assert.equal(icon.status, 200);
   assert.match(String(icon.headers['content-type'] || ''), /image\/svg\+xml/);
 
-  console.log('V14 regression smoke: PASS');
+  console.log('V15.7 full regression smoke: PASS');
 } finally {
   child.kill('SIGTERM');
 }
