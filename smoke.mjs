@@ -62,7 +62,8 @@ try {
   assert.match(index.body, /v14\.1-opd-suite\.js/);
   assert.match(index.body, /v14\.1-core-hardening\.js/);
   assert.match(index.body, /v14\.2-clinical-navigation\.js/);
-  assert.match(index.body, /v14\.3-prostate-pathway\.js/);\n  assert.match(index.body, /v14\.4-oncology-pathways\.js/);
+  assert.match(index.body, /v14\.3-prostate-pathway\.js/);
+  assert.match(index.body, /v14\.4-oncology-pathways\.js/);
 
   const manifestRes = await get('/manifest.webmanifest');
   assert.equal(manifestRes.status, 200);
