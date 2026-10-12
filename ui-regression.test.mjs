@@ -118,7 +118,7 @@ console.log('UI regression: PASS');
 
 const workflow = fs.readFileSync(new URL('./frontend/v15.8-opd-workflow.js', import.meta.url), 'utf8');
 execFileSync(process.execPath, ['--check', new URL('./frontend/v15.8-opd-workflow.js', import.meta.url).pathname], {stdio:'pipe'});
-assert.ok(workflow.includes("VERSION = '15.8.0'"));
+assert.ok(workflow.includes("VERSION = '15.9.0'"));
 assert.ok(workflow.includes('Copy OPD Note'));
 assert.ok(workflow.includes('Clear Patient'));
 assert.ok(workflow.includes("setAttribute('autocomplete','off')"));
