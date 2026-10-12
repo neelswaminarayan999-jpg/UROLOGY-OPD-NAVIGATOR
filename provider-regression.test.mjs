@@ -9,6 +9,11 @@ assert.ok(s.includes('OPENROUTER_FALLBACK_MODELS'));
 assert.ok(s.includes('if (!hasImageParts)'));
 assert.ok(s.includes("response_format: { type: 'json_object' }"));
 assert.ok(s.includes('pathway_link.requires_clinician_confirmation'));
-assert.ok(s.includes("provider: 'OpenRouter'"));
+assert.ok(s.includes("provider: 'Multi-provider fallback'"));
+assert.ok(s.includes("if (GROQ_API_KEY)"));
+assert.ok(s.includes("if (CEREBRAS_API_KEY && !image)"));
+assert.ok(s.includes("if (API_KEY)"));
+assert.ok(s.includes("All configured AI providers failed."));
+assert.ok(s.includes("fallback_count: attempts.length"));
 
-console.log('provider regression: PASS — OpenRouter/Qwen free-vision pathway');
+console.log('provider regression: PASS — configured multi-provider fallback and Oracle JSON contract');
