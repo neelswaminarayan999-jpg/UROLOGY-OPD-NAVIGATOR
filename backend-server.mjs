@@ -413,30 +413,61 @@ async function callOpenAICompatible(body, cfg) {
 
 const PROVIDERS = [];
 
+function hasImages(body) {
+  if ((body?.images || []).some(x => typeof x === 'string' && x.startsWith('data:image/'))) return true;
+  const messages = extractInputMessages(body);
+  return Array.isArray(messages) && messages.some(m => Array.isArray(m?.content) && m.content.some(p => p?.type === 'image_url' || p?.type === 'input_image'));
+}
 
+function configuredProviderChain(body) {
+  const image = hasImages(body);
+  const chain = [];
+  if (OPENROUTER_API_KEY) {
+    const models = [OPENROUTER_MODEL, ...OPENROUTER_FALLBACK_MODELS].filter((x,i,a) => x && a.indexOf(x) === i);
+    chain.push({ name:'OpenRouter', models, run:model=>callOpenAICompatible(body,{name:'OpenRouter',apiKey:OPENROUTER_API_KEY,model,url:`${OPENROUTER_API_BASE_URL}/chat/completions`}) });
+  }
+  if (GROQ_API_KEY) {
+    const model = image ? GROQ_VISION_MODEL : GROQ_MODEL;
+    chain.push({ name:'Groq', models:[model], run:()=>callOpenAICompatible(body,{name:'Groq',apiKey:GROQ_API_KEY,model,url:`${GROQ_API_BASE_URL}/chat/completions`}) });
+  }
+  if (CEREBRAS_API_KEY && !image) {
+    chain.push({ name:'Cerebras', models:[CEREBRAS_MODEL], run:()=>callOpenAICompatible(body,{name:'Cerebras',apiKey:CEREBRAS_API_KEY,model:CEREBRAS_MODEL,url:`${CEREBRAS_API_BASE_URL}/chat/completions`}) });
+  }
+  if (API_KEY) {
+    const models = [MODEL, ...GEMINI_FALLBACK_MODELS].filter((x,i,a)=>x && a.indexOf(x)===i);
+    chain.push({ name:'Gemini', models, run:model=>callGemini(body,model) });
+  }
+  return chain;
+}
 
 async function callWithFallback(body) {
   const attempts = [];
-  const models = [OPENROUTER_MODEL, ...OPENROUTER_FALLBACK_MODELS.filter(x => x !== OPENROUTER_MODEL)];
-  if (!OPENROUTER_API_KEY) {
-    const err = new Error('OPENROUTER_API_KEY is not configured.'); err.status = 503; err.attempts = []; throw err;
+  const chain = configuredProviderChain(body);
+  if (!chain.length) {
+    const err = new Error('No AI provider is configured. Set at least one server-side provider key (OpenRouter, Groq, Gemini; Cerebras supports text-only requests).');
+    err.status = 503; err.attempts = []; throw err;
   }
-  for (const model of models) {
-    const cfg = { name: 'OpenRouter', apiKey: OPENROUTER_API_KEY, model, url: `${OPENROUTER_API_BASE_URL}/chat/completions` };
-    try {
-      const result = await callOpenAICompatible(body, cfg);
-      return { ...result, fallback_attempts: attempts };
-    } catch (e) {
-      attempts.push({ provider: 'OpenRouter', model, status: e?.status || 0, code: e?.code || '', error: String(e?.message || e).slice(0, 500) });
-      if (e?.status && ![400, 404, 408, 429, 502, 503, 504].includes(e.status) && e?.code !== 'INVALID_ORACLE_RESPONSE') {
-        // A permanent HTTP/authentication error should not be hidden by model fallback.
-        break;
+  for (const provider of chain) {
+    for (const model of provider.models) {
+      try {
+        const result = provider.name === 'Gemini'
+          ? await provider.run(model)
+          : await provider.run(model);
+        return { ...result, fallback_attempts: attempts, fallback_count: attempts.length };
+      } catch (e) {
+        attempts.push({ provider:provider.name, model, status:e?.status||0, code:e?.code||'', error:String(e?.message||e).slice(0,500) });
+        // Retry another model for transient, routing, model-availability, or schema failures.
+        // Authentication/configuration failures skip the remaining models for this provider,
+        // but do not prevent trying a different configured provider.
+        if (e?.status && ![400,404,408,429,502,503,504].includes(e.status) && e?.code !== 'INVALID_ORACLE_RESPONSE') break;
       }
     }
   }
-  const summary = attempts.map(a => `${a.provider} / ${a.model}${a.status ? ` (${a.status})` : ''}: ${a.error}`).join(' | ');
-  const status = attempts.find(a => a.status === 429)?.status || attempts.find(a => a.status === 503)?.status || 503;
-  const err = new Error(`OpenRouter AI failed. ${summary}`); err.status = status; err.attempts = attempts; throw err;
+  const summary = attempts.map(a=>`${a.provider} / ${a.model}${a.status?` (${a.status})`:''}: ${a.error}`).join(' | ');
+  const err = new Error(`All configured AI providers failed. ${summary}`);
+  err.status = attempts.some(a=>a.status===429)?429:(attempts.some(a=>a.status===503)?503:502);
+  err.attempts = attempts;
+  throw err;
 }
 
 function hotfixHtml(html) {
@@ -480,7 +511,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '15.8.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'OpenRouter', model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '15.8.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'Multi-provider fallback', model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), Gemini: Boolean(API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
@@ -507,7 +538,7 @@ const server = http.createServer(async (req, res) => {
     return json(res, 405, { error: 'Method not allowed' }, origin);
   } catch (e) {
     const status = Number.isInteger(e?.status) && e.status >= 400 && e.status < 600 ? e.status : 500;
-    return json(res, status, { error: e?.message || String(e), provider: 'OpenRouter', attempts: e?.attempts || undefined }, origin);
+    return json(res, status, { error: e?.message || String(e), provider: 'Multi-provider fallback', attempts: e?.attempts || undefined }, origin);
   }
 });
 
