@@ -62,7 +62,8 @@ try {
   const health = await get('/health');
   assert.equal(health.status, 200);
   assert.match(health.body, /"version":"15.8.0"/);
-  assert.match(health.body, /"provider":"OpenRouter"/);
+  assert.match(health.body, /"provider":"Multi-provider fallback"/);
+  assert.match(health.body, /"configured":\{"OpenRouter":/);
   assert.match(health.body, /"freeTier":true/);
 
   const index = await get('/');
