@@ -32,8 +32,8 @@ const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || '';
 const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'gpt-oss-120b';
 const CEREBRAS_API_BASE_URL = (process.env.CEREBRAS_API_BASE_URL || 'https://api.cerebras.ai/v1').replace(/\/$/, '');
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'qwen/qwen3.8-27b:free';
-const OPENROUTER_FALLBACK_MODELS = String(process.env.OPENROUTER_FALLBACK_MODELS || 'google/gemma-4-26b-a4b-it:free,openrouter/free').split(',').map(x => x.trim()).filter(Boolean);
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'thinkingmachines/inkling:free';
+const OPENROUTER_FALLBACK_MODELS = String(process.env.OPENROUTER_FALLBACK_MODELS || 'google/gemma-4-31b-it:free,thinkingmachines/inkling-small:free,nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free,openrouter/free').split(',').map(x => x.trim()).filter(Boolean);
 const OPENROUTER_API_BASE_URL = (process.env.OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
@@ -428,7 +428,7 @@ async function callWithFallback(body) {
       return { ...result, fallback_attempts: attempts };
     } catch (e) {
       attempts.push({ provider: 'OpenRouter', model, status: e?.status || 0, code: e?.code || '', error: String(e?.message || e).slice(0, 500) });
-      if (e?.status && ![429, 502, 503, 504].includes(e.status) && e?.code !== 'INVALID_ORACLE_RESPONSE') {
+      if (e?.status && ![400, 404, 408, 429, 502, 503, 504].includes(e.status) && e?.code !== 'INVALID_ORACLE_RESPONSE') {
         // A permanent HTTP/authentication error should not be hidden by model fallback.
         break;
       }
