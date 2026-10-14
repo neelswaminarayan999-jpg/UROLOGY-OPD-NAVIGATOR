@@ -69,5 +69,11 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   for (const requiredId of ['clinicalworkup','surgicalprinciples','stones','bladder','prostate','bph','stricture','utuc','testis','penis','urethralcancer','upperobstruction','lutf','continence','andrology','infertility','transplant','adrenal','trauma','pediatric','genderaffirming','geriatric','femalesexual']) {
     assert.ok(modules.some(m => m.id === requiredId), 'required module mapping: ' + requiredId);
   }
+  const mod = id => modules.find(m => m.id === id);
+  assert.ok(mod('prostate').chapters.includes(148), 'prostate anatomy chapter is mapped to prostate content');
+  assert.ok(mod('bph').chapters.includes(148), 'prostate anatomy chapter is mapped to BPH content');
+  assert.ok(!mod('adrenal').chapters.includes(148), 'prostate anatomy chapter is not misclassified as adrenal content');
+  assert.ok(mod('lutf').chapters.includes(115), 'neuromodulation chapter is mapped to LUT dysfunction');
+  assert.ok(mod('trauma').chapters.includes(125), 'genital/lower tract trauma chapter is mapped');
   assert.equal((js.match(/title:'EAU /g) || []).length, 6, 'six current guideline checkpoints are rendered');
 });
