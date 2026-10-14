@@ -49,9 +49,53 @@ function open(){
   $('cw13Body').innerHTML='<div class="cw13-topicgrid">'+GUIDELINE_AUDIT.map(g=>'<article class="cw13-topic"><h3>'+esc(g.title)+'</h3><p>'+esc(g.update)+'</p><div class="cw13-meta"><a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer">Open official guideline update ↗</a></div></article>').join('')+'</div>'+(selected.length?'<div class="cw13-topicgrid">'+moduleCards+'</div>':'<p>No mapped topic matched that search. Try a chapter title, disease or procedure.</p>')+(list?'<h3>Chapter index ('+CHAPTERS.length+' entries)</h3><table class="cw13-table"><thead><tr><th>Ch.</th><th>Title</th><th>Printed page range</th><th>Volume</th></tr></thead><tbody>'+list+'</tbody></table>':'');
  }
 }
+function activeModule(){
+ const sel=$('oracleDisease');const raw=String(sel&&sel.value||'').trim().toLowerCase();
+ if(!raw)return null;
+ let m=MODULES.find(x=>x.name.toLowerCase()===raw||x.aliases.some(a=>a.toLowerCase()===raw));
+ if(m)return m;
+ const compact=raw.replace(/[^a-z0-9]+/g,'');
+ const aliases={
+  stones:['stonedisease','urolithiasis','renalstone','uretericstone','kidneystone','calculi'],
+  bladder:['cabl adder','bladdercancer','nmibc','mibc','urothelialbladder'],
+  kidney:['cakidney','rcc','renalcellcarcinoma','renalmass'],
+  prostate:['caprostate','prostatecancer','pc a','pc'],
+  bph:['bph','bphmaleluts','maleluts','benignprostatichyperplasia'],
+  stricture:['urethralstricture','urethralstricture disease','urethroplasty'],
+  utuc:['utuc','uppertracturothelialcarcinoma'],
+  testis:['catestis','testicularcancer','germcelltumour'],
+  penis:['capenis','penilecancer'],
+  infection:['uti','urosepsis','pyelonephritis','prostatitis','epididymitis'],
+  hematuria:['hematuria','haematuria','visiblehaematuria']
+ };
+ for(const item of MODULES){
+  const norm=item.id.replace(/[^a-z0-9]+/g,'');
+  if(norm===compact||item.aliases.some(a=>a.toLowerCase().replace(/[^a-z0-9]+/g,'')===compact))return item;
+ }
+ return MODULES.find(x=>x.aliases.some(a=>raw.includes(a.toLowerCase())||a.toLowerCase().includes(raw)))||null;
+}
+function renderActiveClinicalContext(){
+ const out=$('oracleOutput');if(!out)return;
+ const mod=activeModule();let box=$('cw13ActivePlanContext');
+ if(!mod){if(box)box.remove();return;}
+ if(!box){box=document.createElement('section');box.id='cw13ActivePlanContext';box.className='cw13-topic';box.style.marginTop='14px';box.style.borderColor='#9bb3c8';out.appendChild(box);}
+ const chapterRows=mod.chapters.map(n=>{const c=CHAPTERS.find(x=>x.chapter===n);return c?'<li><b>Chapter '+esc(c.chapter)+':</b> '+esc(c.title)+' — '+esc(c.printedPages)+' (Vol. '+esc(c.volume)+')</li>':'<li>Chapter '+esc(n)+'</li>';}).join('');
+ const signature=mod.id+'|'+mod.summary+'|'+mod.sourcePages;
+ if(box.dataset.signature===signature)return;
+ box.dataset.signature=signature;
+ box.innerHTML='<div class="cw13-kicker">REFERENCE LAYER • 13TH EDITION</div><h3>Campbell 13e context: '+esc(mod.name)+'</h3><p>'+esc(mod.summary)+'</p><div class="cw13-meta"><b>Mapped source locations:</b> '+esc(mod.sourcePages)+'</div><details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Chapter references ('+mod.chapters.length+')</summary><ul style="margin:8px 0 0;padding-left:20px;line-height:1.6">'+chapterRows+'</ul></details>'+(mod.safety?'<div class="cw13-safety"><b>Safety gate:</b> '+esc(mod.safety)+'</div>':'')+'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button id="cw13OpenFromPlan" type="button" style="padding:8px 10px;border:1px solid #bdcad5;border-radius:8px;background:#f4f7fa;font-weight:700;cursor:pointer">Open full Campbell 13e index</button><span class="cw13-meta" style="align-self:center">Supplementary context; existing treatment engine is unchanged.</span></div>';
+ const openBtn=$('cw13OpenFromPlan');if(openBtn)openBtn.onclick=()=>window.CAMPBELL_WEIN_13E?.open();
+}
+function mountPlanContext(){
+ const sel=$('oracleDisease'),out=$('oracleOutput');if(!sel||!out)return;
+ sel.addEventListener('change',()=>setTimeout(renderActiveClinicalContext,0));
+ const obs=new MutationObserver(()=>renderActiveClinicalContext());
+ obs.observe(out,{childList:true,subtree:true,characterData:true});
+ setTimeout(renderActiveClinicalContext,0);
+}
 function mount(){
  if(!$('cw13Open')){const b=document.createElement('button');b.id='cw13Open';b.type='button';b.textContent='Campbell 13e';b.title='Open 13th-edition chapter index and clinical context';b.onclick=open;document.body.appendChild(b);}
- sourceUpdate();updateLegacyLabels(document.body);
+ sourceUpdate();updateLegacyLabels(document.body);mountPlanContext();
  const obs=new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1)updateLegacyLabels(n);});
  obs.observe(document.body,{childList:true,subtree:true});
  if(window.URO_ORACLE_V14){window.URO_ORACLE_V14.campbell13=true;window.URO_ORACLE_V14.campbellChapterCount=CHAPTERS.length;window.URO_ORACLE_V14.campbellMigrationStatus=META.migrationStatus;}
