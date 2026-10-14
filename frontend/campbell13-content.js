@@ -40,6 +40,8 @@ function open(){
  if(!modal)return;
  const sel=$('cw13Module');
  if(!sel.options.length){sel.innerHTML='<option value="all">All mapped clinical modules</option>'+MODULES.map(m=>'<option value="'+esc(m.id)+'">'+esc(m.name)+'</option>').join('')+'<option value="index">Full chapter index</option>';sel.value='all';}
+ const status=$('cw13Status');
+ if(status){const mapped=CHAPTERS.filter(c=>COVERED_CHAPTERS.has(c.chapter)&&!c.electronicOnly&&c.chapter!==96).length;const tocOnly=CHAPTERS.filter(c=>(c.coverageStatus||'').startsWith('TOC index only')).length;status.textContent=CHAPTERS.length+' chapters indexed • '+MODULES.length+' topic modules • '+mapped+' chapters linked to original summaries/checklists • '+tocOnly+' chapters currently TOC-only.';}
  $('cw13Search').oninput=render;$('cw13Module').onchange=render;
  modal.querySelectorAll('[data-cwclose]').forEach(el=>el.onclick=()=>modal.classList.remove('cw13-show'));
  render();modal.classList.add('cw13-show');
