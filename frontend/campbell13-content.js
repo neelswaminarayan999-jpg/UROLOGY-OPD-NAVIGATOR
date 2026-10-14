@@ -95,6 +95,7 @@
       summary:[
         "Characterise stricture location, length, calibre, aetiology, number of segments, previous endoscopic/open procedures, continence status and associated trauma or lichen sclerosus.",
         "Use retrograde urethrography with complementary voiding imaging/endoscopy when indicated to define anatomy; distinguish anatomic description from functional symptom severity.",
+        "Chapter 86 emphasises reconstructive fundamentals: careful diagnosis and planning, excellent exposure/retraction, delicate tissue handling, minimal tissue injury and tension-free tissue alignment with appropriately selected small absorbable sutures.",
         "The choice between endoscopic treatment and reconstruction depends on phenotype, prior treatment, tissue quality, location, patient goals and likelihood of durable success."
       ],
       appUse:"The stricture pathway should explicitly capture anatomy and prior interventions before recommending a technique. Keep EPA, graft, staged reconstruction and PFUDD pathways distinct and evidence-linked."
@@ -148,6 +149,8 @@
       ],
       summary:[
         "The diagnostic/staging quality of TURBT and the presence of detrusor muscle when required are foundational to a reliable pathway; identify when repeat resection is indicated using the current risk-based guideline.",
+        "For NMIBC, record stage, grade and CIS explicitly. The 13e chapter stresses grade as a major progression factor and identifies prior recurrence, tumour number and size as recurrence variables; stage, CIS and grade contribute to progression risk.",
+        "Published recurrence/progression models such as EORTC and CUETO were built in cohorts with different use of maintenance BCG, perioperative chemotherapy and restaging TURBT. Keep model limitations visible and do not treat their outputs as interchangeable with the current guideline risk groups.",
         "Keep NMIBC risk stratification, intravesical treatment, BCG response/adequacy and cystectomy discussions separate from the MIBC/metastatic pathway.",
         "For MIBC, connect stage, cisplatin fitness, perioperative systemic-treatment eligibility, surgical candidacy and patient preference; evaluate diversion choice as a distinct reconstructive decision.",
         "Variant histology, lymphovascular invasion, CIS, resection quality and treatment response can change risk and should not be buried in free-text notes."
@@ -167,6 +170,7 @@
       summary:[
         "For renal masses, integrate multiphasic imaging, tumour size/location, anatomy/nephrometry, renal function, contralateral kidney, histology and patient comorbidity.",
         "Distinguish active surveillance, biopsy, ablation, partial nephrectomy and radical nephrectomy by oncologic risk and functional trade-offs rather than size alone.",
+        "Renal-mass biopsy can provide histology when the result is likely to change management; nephron-sparing treatment is an important functional-preservation principle when oncologically and technically appropriate.",
         "Surgical approach is not the same as oncologic indication; access choice should not obscure appropriate margins, lymph-node strategy when indicated or renal preservation.",
         "Advanced disease decisions require histology, risk stratification, disease burden, performance status, comorbidity and review of current systemic-treatment evidence."
       ],
@@ -197,6 +201,8 @@
       ],
       summary:[
         "BPH-related obstruction is not synonymous with every cause of male LUTS. Combine symptom burden, urinalysis, flow/PVR, gland anatomy, complications and patient priorities.",
+        "Baseline symptom quantification (for example, IPSS/AUA Symptom Score), history, examination and urinalysis provide a consistent starting point; reassess the same symptom/outcome measures after treatment.",
+        "Before BPH surgery, reassess whether the prostate explains the voiding pattern and evaluate possible prostate cancer when indicated; counselling should include comorbidities, likelihood of success, treatment risks and the patient’s goals.",
         "Medical treatment, minimally invasive procedures, endoscopic enucleation/resection and simple prostatectomy differ in durability, retreatment, bleeding/ejaculatory effects, anaesthetic requirements and suitability across gland sizes.",
         "Before procedural selection, document gland volume and configuration, median lobe/IPP where relevant, anticoagulation/comorbidity, retention, renal/upper-tract consequences and the patient's goals."
       ],
@@ -222,6 +228,8 @@
       ],
       summary:[
         "Maintain a clear chain from PSA and risk assessment to MRI/biopsy, pathology and staging. Record ISUP Grade Group, pattern information, stage, PSA and relevant imaging consistently.",
+        "PSA is prostate-specific rather than cancer-specific: enlargement, inflammation and other benign conditions may raise it. Interpret it in the full clinical context rather than as a standalone diagnosis.",
+        "Family history and inherited risk belong in the initial assessment; preserve pathology details and disease state because these determine risk classification and the downstream pathway.",
         "Localized disease decisions require risk classification, life expectancy, comorbidity, patient preference and a balanced comparison of surveillance, surgery and radiation.",
         "Biochemical recurrence, hormone-sensitive metastatic disease, nonmetastatic CRPC and metastatic CRPC are distinct disease states; avoid collapsing them into one systemic-treatment branch.",
         "In advanced disease, prior androgen-receptor pathway inhibitor/taxane exposure, genomic findings, disease distribution, symptoms and treatment fitness influence sequencing."
