@@ -53,7 +53,8 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   }
 
   assert.match(js, /COVERED_CHAPTERS/, 'chapter coverage states are computed from topic mappings');
-  assert.match(js, /TOC index only; detailed synthesis not yet completed/, 'unreviewed chapters are clearly distinguished from synthesized content');
+  assert.match(js, /Referenced by a broader topic summary\/checklist; chapter-specific synthesis not yet complete/, 'broader module mapping is not overstated as chapter-by-chapter synthesis');
+  assert.match(js, /TOC index only; detailed synthesis not yet completed/, 'unmapped chapters are clearly distinguished from synthesized content');
   assert.match(js, /eBook-only; full chapter not present in the supplied inspection PDFs/, 'eBook-only content is clearly marked');
   const moduleMatch = js.match(/const MODULES=(\[[\s\S]*?\]);\nconst COVERED_CHAPTERS=/);
   assert.ok(moduleMatch, 'clinical module mapping is embedded as valid JSON');
