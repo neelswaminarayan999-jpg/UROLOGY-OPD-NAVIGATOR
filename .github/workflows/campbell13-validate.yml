@@ -18,3 +18,69 @@ jobs:
           node --check frontend/campbell13-content.js
       - name: Smoke-test server injection and content coverage
         run: node --test tests/campbell13.test.mjs
+      - name: Browser-test active plan integration and chapter search
+        shell: bash
+        run: |
+          set -euo pipefail
+          BROWSER="$(command -v chromium || command -v chromium-browser || command -v google-chrome || command -v google-chrome-stable || true)"
+          if [ -z "$BROWSER" ]; then
+            echo "A Chromium-compatible browser is required for the UI smoke test."
+            exit 1
+          fi
+          PORT=18765
+          cat > frontend/cw13-smoke-test.html <<'HTML'
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>Campbell 13e smoke test</title></head>
+          <body>
+            <select id="oracleDisease"><option value="Stone Disease">Stone Disease</option></select>
+            <div id="oracleOutput">Original management output</div>
+            <script src="/campbell13-content.js" defer></script>
+            <script>
+              document.addEventListener('DOMContentLoaded', () => setTimeout(() => {
+                const sel = document.getElementById('oracleDisease');
+                sel.value = 'Stone Disease';
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                document.getElementById('oracleOutput').innerHTML = '<p>Rendered test treatment plan</p>';
+                setTimeout(() => {
+                  const panel = document.getElementById('cw13ActivePlanContext');
+                  document.body.setAttribute('data-cw13-plan',
+                    panel && panel.textContent.includes('Chapter 95') && panel.textContent.includes('Chapter 96') ? 'pass' : 'fail');
+                  const open = document.getElementById('cw13Open');
+                  if (open) open.click();
+                  setTimeout(() => {
+                    const modal = document.getElementById('cw13Modal');
+                    document.body.setAttribute('data-cw13-modal',
+                      modal && modal.classList.contains('cw13-show') ? 'pass' : 'fail');
+                    const search = document.getElementById('cw13Search');
+                    if (search) {
+                      search.value = 'Chapter 96';
+                      search.dispatchEvent(new Event('input', { bubbles: true }));
+                      setTimeout(() => {
+                        const body = document.getElementById('cw13Body');
+                        document.body.setAttribute('data-cw13-search',
+                          body && body.textContent.includes('Acute Care of Urinary Lithiasis') && body.textContent.includes('full content') ? 'pass' : 'fail');
+                      }, 50);
+                    } else document.body.setAttribute('data-cw13-search', 'fail');
+                  }, 50);
+                }, 50);
+              }, 50));
+            </script>
+          </body></html>
+          HTML
+          WEB_ROOT="$PWD/frontend" PORT="$PORT" HOST=127.0.0.1 node backend/server.mjs >/tmp/cw13-server.log 2>&1 &
+          SERVER_PID=$!
+          cleanup() {
+            kill "$SERVER_PID" 2>/dev/null || true
+            rm -f frontend/cw13-smoke-test.html
+          }
+          trap cleanup EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null; then break; fi
+            sleep 0.25
+          done
+          curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null
+          "$BROWSER" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --no-first-run --no-default-browser-check --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:$PORT/cw13-smoke-test.html" > /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-plan="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-modal="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-search="pass"' /tmp/cw13-test-dom.html
+          echo "Browser smoke test passed: active plan context, modal open and Chapter 96 search."
