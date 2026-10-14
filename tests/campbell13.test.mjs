@@ -52,7 +52,8 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
     assert.ok(chapters.find(c => c.chapter === n && c.title && c.printedPage), 'chapter ' + n + ' has title and print page');
   }
 
-  const moduleMatch = js.match(/const MODULES=(\[[\s\S]*?\]);\nconst GUIDELINE_AUDIT=/);
+  assert.match(js, /COVERED_CHAPTERS/, 'chapter coverage states are computed from topic mappings');
+  const moduleMatch = js.match(/const MODULES=(\[[\s\S]*?\]);\nconst COVERED_CHAPTERS=/);
   assert.ok(moduleMatch, 'clinical module mapping is embedded as valid JSON');
   const modules = JSON.parse(moduleMatch[1]);
   assert.ok(modules.length >= 20, 'core disease and non-oncology reference modules are included');
@@ -63,7 +64,7 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
     assert.ok(Array.isArray(module.checkpoints) && module.checkpoints.length >= 3, module.name + ' should include practical decision checks');
     for (const n of module.chapters) assert.ok(chapters.some(c => c.chapter === n), module.name + ' references absent chapter ' + n);
   }
-  for (const requiredId of ['stones','bladder','prostate','bph','stricture','utuc','testis','penis','urethralcancer','upperobstruction','lutf','andrology','infertility','transplant','adrenal','trauma','pediatric']) {
+  for (const requiredId of ['clinicalworkup','surgicalprinciples','stones','bladder','prostate','bph','stricture','utuc','testis','penis','urethralcancer','upperobstruction','lutf','continence','andrology','infertility','transplant','adrenal','trauma','pediatric','genderaffirming','geriatric','femalesexual']) {
     assert.ok(modules.some(m => m.id === requiredId), 'required module mapping: ' + requiredId);
   }
   assert.equal((js.match(/title:'EAU /g) || []).length, 6, 'six current guideline checkpoints are rendered');
