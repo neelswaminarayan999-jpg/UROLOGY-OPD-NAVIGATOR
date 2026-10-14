@@ -252,6 +252,22 @@ const server = http.createServer(async (req, res) => {
       if (!file.startsWith(WEB_ROOT) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return json(res, 404, { error: 'Not found' }, origin);
       const ext = path.extname(file).toLowerCase();
       const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
+      if (ext === '.html' && path.basename(file) === 'index.html') {
+        // Render-only bootstrap: keeps the large, stable Oracle HTML untouched while
+        // loading the independently versioned Campbell 13e reference layer.
+        let html = fs.readFileSync(file, 'utf8');
+        const loader = '<script src="/campbell13-content.js" defer></script>';
+        if (!html.includes(loader)) {
+          if (/<\\/body>/i.test(html)) html = html.replace(/<\\/body>/i, loader + '\\n</body>');
+          else html += '\\n' + loader;
+        }
+        res.writeHead(200, {
+          'Content-Type': types[ext] || 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'Content-Length': Buffer.byteLength(html)
+        });
+        return res.end(html);
+      }
       res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
       return fs.createReadStream(file).pipe(res);
     }
