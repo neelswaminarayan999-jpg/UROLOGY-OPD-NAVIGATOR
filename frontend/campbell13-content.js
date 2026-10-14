@@ -280,6 +280,175 @@
     }
   ];
 
+  var ALL_CHAPTERS = [
+    [1,"Personal and Professional Development of the Urologist",1],
+    [2,"Evaluation of the Urologic Patient: History and Physical Examination",8],
+    [3,"Indications and Interpretation of Laboratory Testing",24],
+    [4,"Urinary Tract Imaging: Basic Principles of Urologic Ultrasonography",40],
+    [5,"Principles of CT and Radiographic Imaging",66],
+    [6,"Magnetic Resonance Imaging",92],
+    [7,"Genitourinary Tract Imaging: Basic Principles of Nuclear Medicine",109],
+    [8,"Evaluation and Management of Hematuria",120],
+    [9,"Occupational Health in Urology",137],
+    [10,"Ethics and Informed Consent",145],
+    [11,"Perioperative Care in Urologic Surgery",150],
+    [12,"Fundamentals of Intraoperative Patient Safety",167],
+    [13,"Incisions, Exposure, and Drains",175],
+    [14,"Sutures and Suturing",185],
+    [15,"Lower Urinary Tract Catheterization",191],
+    [16,"Fundamentals of Upper Urinary Tract Drainage",199],
+    [17,"Principles of Urologic Endoscopy",215],
+    [18,"Fundamentals of Laparoscopic and Robotic Urologic Surgery",229],
+    [19,"Energy Modalities in Urology",262],
+    [20,"Complications of Urologic Surgery",283],
+    [21,"Urologic Considerations in Pregnancy",307],
+    [22,"Intraoperative Consultations",322],
+    [23,"Assessment of Urologic and Surgical Outcomes",331],
+    [24,"Basic Principles of Immunology and Immunotherapy in Urologic Oncology",346],
+    [25,"Molecular Genetics and Cancer Biology",360],
+    [26,"Infections of the Urinary Tract",388],
+    [27,"Inflammatory and Pain Conditions of the Lower Genitourinary Tract: Prostatitis and Related Pain Conditions, Orchitis, and Epididymitis",459],
+    [28,"Interstitial Cystitis/Bladder Pain Syndrome and Related Disorders",480],
+    [29,"Sexually Transmitted Diseases",511],
+    [30,"Cutaneous Diseases of the External Genitalia",530],
+    [31,"Tuberculosis and Parasitic Infections of the Genitourinary Tract",558],
+    [32,"Embryology of the Human Genitourinary Tract",584],
+    [33,"Urologic Aspects of Pediatric Nephrology",618],
+    [34,"Perinatal Urology",628],
+    [35,"Urologic Evaluation of the Child",658],
+    [36,"Pediatric Urogenital Imaging",672],
+    [37,"Infection and Inflammation of the Pediatric Genitourinary Tract",696],
+    [38,"Core Principles of Perioperative Management in Children",718],
+    [39,"Principles of Laparoscopic and Robotic Surgery in Children",731],
+    [40,"Clinical and Urodynamic Evaluation of Lower Urinary Tract Dysfunction in Children",744],
+    [41,"Management Strategies for Vesicoureteral Reflux",760],
+    [42,"Bladder Anomalies in Children",785],
+    [43,"Exstrophy-Epispadias Complex",795],
+    [44,"Prune-Belly Syndrome",855],
+    [45,"Posterior Urethral Valves",877],
+    [46,"Neuromuscular Dysfunction of the Lower Urinary Tract in Children",900],
+    [47,"Functional Disorders of the Bladder and Bowel in Children",921],
+    [48,"Lower Urinary Tract Reconstruction in Children",941],
+    [49,"Anomalies of the Kidney and Collecting System",974],
+    [50,"Renal Dysgenesis and Cystic Disease of the Kidney",1001],
+    [51,"Pathophysiology of Urinary Tract Obstruction",1027],
+    [52,"Ectopic Ureter, Ureterocele, and Ureteral Anomalies",1038],
+    [53,"Surgery of the Ureter in Children: Ureteropelvic Junction, Megaureter, and Vesicoureteral Reflux",1064],
+    [54,"Management of Pediatric Kidney Stone Disease",1091],
+    [55,"Management of Abnormalities of the External Genitalia in Males",1107],
+    [56,"Hypospadias",1141],
+    [57,"Etiology, Diagnosis, and Management of the Undescended Testis",1186],
+    [58,"Management of Abnormalities of the Genitalia in Girls",1211],
+    [59,"Differences of Sexual Development: Etiology, Evaluation, and Medical Management",1230],
+    [60,"Surgical Management of Differences of Sexual Differentiation and Cloacal and Anorectal Malformations",1254],
+    [61,"Urologic Considerations in Pediatric Renal Transplantation",1279],
+    [62,"Pediatric Genitourinary Trauma",1289],
+    [63,"Pediatric Urologic Oncology: Renal and Adrenal",1311],
+    [64,"Pediatric Urologic Oncology: Pelvis, Bladder, Testis, and Genitalia",1333],
+    [65,"Adolescent and Transitional Urology",1348],
+    [66,"Surgical, Radiographic, and Endoscopic Anatomy of the Male Reproductive System",1365],
+    [67,"Male Reproductive Physiology",1388],
+    [68,"Integrated Men’s Health: Androgen Deficiency, Cardiovascular Risk, and Metabolic Syndrome",1409],
+    [69,"Male Infertility",1418],
+    [70,"Surgical Management of Male Infertility",1437],
+    [71,"Physiology of Penile Erection and Pathophysiology of Erectile Dysfunction",1470],
+    [72,"Evaluation and Management of Erectile Dysfunction",1497],
+    [73,"Priapism",1523],
+    [74,"Disorders of Male Orgasm and Ejaculation",1541],
+    [75,"Surgery for Erectile Dysfunction",1561],
+    [76,"Diagnosis and Management of Peyronie Disease",1579],
+    [77,"Sexual Function and Dysfunction in the Female",1602],
+    [78,"Surgical, Radiographic, and Endoscopic Anatomy of the Retroperitoneum",1634],
+    [79,"Neoplasms of the Testis",1658],
+    [80,"Surgery of Testicular Tumors",1683],
+    [81,"Minimally Invasive Retroperitoneal Lymph Node Dissection",1706],
+    [82,"Tumors of the Penis",1715],
+    [83,"Tumors of the Urethra",1749],
+    [84,"Inguinal Node Dissection",1764],
+    [85,"Benign Disorders of the Penis and Urethra",1774],
+    [86,"Urethral Stricture Disease",1794],
+    [87,"Surgery of the Scrotum and Seminal Vesicles",1817],
+    [88,"Surgical, Radiologic, and Endoscopic Anatomy of the Kidney and Ureter",1838],
+    [89,"Physiology and Pharmacology of the Renal Pelvis and Ureter",null],
+    [90,"Fundamentals of Nephrology",1854],
+    [91,"Renal Transplantation",1883],
+    [92,"Urologic Complications of Renal Transplantation",1896],
+    [93,"Management of Upper Urinary Tract Obstruction",1903],
+    [94,"Upper Urinary Tract Trauma",1942],
+    [95,"Urinary Lithiasis: Etiology, Epidemiology, and Pathogenesis",1972],
+    [96,"Acute Care of Urinary Lithiasis",2004],
+    [97,"Surgical Management of Ureteral Calculi",2011],
+    [98,"Surgical Management of Upper Urinary Tract Calculi",2027],
+    [99,"Prevention of Urinary Stone Disease",2049],
+    [100,"Lower Urinary Tract Calculi",2059],
+    [101,"Surgical, Radiographic, and Endoscopic Anatomy of the Female Pelvis",2067],
+    [102,"Surgical, Radiographic, and Endoscopic Anatomy of the Male Pelvis",2084],
+    [103,"Physiology and Pharmacology of the Bladder and Urethra",2104],
+    [104,"Pathophysiology and Classification of Lower Urinary Tract Dysfunction",2157],
+    [105,"Evaluation and Management of Women With Urinary Incontinence and Pelvic Organ Prolapse",2166],
+    [106,"Evaluation and Management of Males With Urinary Incontinence",2180],
+    [107,"Urodynamic and Videourodynamic Evaluation of the Lower Urinary Tract",2192],
+    [108,"Urinary Incontinence and Pelvic Prolapse: Epidemiology and Pathophysiology",2218],
+    [109,"Neuromuscular Dysfunction of the Lower Urinary Tract",2238],
+    [110,"Overactive Bladder",2276],
+    [111,"Underactive Detrusor",2290],
+    [112,"Nocturia",2304],
+    [113,"Pharmacologic Management of Lower Urinary Tract Storage and Emptying Failure",2337],
+    [114,"Conservative Management of Urinary Incontinence: Behavioral and Pelvic Floor Therapy, Urethral and Pelvic Devices",2373],
+    [115,"Electrical Stimulation and Neuromodulation in Storage and Emptying Failure",2404],
+    [116,"Retropubic Suspension Surgery for Incontinence in Females",2416],
+    [117,"Vaginal and Abdominal Reconstructive Surgery for Pelvic Organ Prolapse",2426],
+    [118,"Slings: Autologous, Biologic, Synthetic, and Mid-Urethral",2460],
+    [119,"Genitourinary Complications of Mesh and Their Repair",2490],
+    [120,"Aging and Geriatric Urology",2503],
+    [121,"Urinary Tract Fistulae",2515],
+    [122,"Bladder and Female Urethral Diverticula",2555],
+    [123,"Surgical Procedures for Sphincteric Incontinence in the Male: The Artificial Urinary Sphincter and Perineal Sling Procedures",2584],
+    [124,"Bladder Surgery for Benign Disease",2601],
+    [125,"Genital and Lower Urinary Tract Trauma",2642],
+    [126,"Management and Considerations in Transgender and Nonbinary Individuals",2655],
+    [127,"Male-to-Female Gender-Affirming Surgery: Vaginoplasty",2664],
+    [128,"Special Urologic Considerations in Transmasculine Individuals",2677],
+    [129,"Tumors of the Urinary Bladder",2687],
+    [130,"Management Strategies for Non–Muscle-Invasive Bladder Cancer (Ta, T1, and CIS)",2707],
+    [131,"Management of Muscle-Invasive and Metastatic Bladder Cancer",2730],
+    [132,"Surgical Management of Bladder Cancer: Transurethral, Open, and Robotic",2756],
+    [133,"Use of Intestinal Segments in Urinary Diversion",2784],
+    [134,"Continent Urinary Diversion",2812],
+    [135,"Minimally Invasive Urinary Diversion",2843],
+    [136,"Benign Renal Tumors",2860],
+    [137,"Malignant Renal Tumors",2872],
+    [138,"Urothelial Tumors of the Upper Urinary Tract and Ureter",2924],
+    [139,"Surgical Management of Upper Urinary Tract Urothelial Tumors",2940],
+    [140,"Retroperitoneal Tumors",2968],
+    [141,"Contemporary Open Surgery of the Kidney",2990],
+    [142,"Laparoscopic and Robotic Surgery of the Kidney",3027],
+    [143,"Focal Therapy for Renal Tumors",3059],
+    [144,"Treatment of Advanced Renal Cell Carcinoma",3078],
+    [145,"Surgical and Radiographic Anatomy of the Adrenals",3102],
+    [146,"Pathophysiology, Evaluation, and Medical Management of Adrenal Disorders",3111],
+    [147,"Surgery of the Adrenal Glands",3161],
+    [148,"Anatomy and Development of the Prostate",3172],
+    [149,"Benign Prostatic Hyperplasia: Etiology, Pathophysiology, Epidemiology, and Natural History",3180],
+    [150,"Evaluation and Nonsurgical Management of Benign Prostatic Hyperplasia",3221],
+    [151,"Minimally Invasive and Endoscopic Management of Benign Prostatic Hyperplasia",3283],
+    [152,"Simple Prostatectomy—Open, Laparoscopic, and Robotic Approaches",3318],
+    [153,"Epidemiology, Etiology, and Prevention of Prostate Cancer",3334],
+    [154,"Prostate Cancer Biomarkers",3353],
+    [155,"Prostate Biopsy: Techniques and Imaging",3364],
+    [156,"Pathology of Prostatic Neoplasia",3382],
+    [157,"Diagnosis and Staging of Prostate Cancer",3390],
+    [158,"Active Management Strategies for Localized Prostate Cancer",3398],
+    [159,"Active Surveillance of Prostate Cancer",3417],
+    [160,"Open Radical Prostatectomy",3431],
+    [161,"Laparoscopic and Robotic-Assisted Laparoscopic Radical Prostatectomy and Pelvic Lymphadenectomy",3449],
+    [162,"Radiation Therapy for Prostate Cancer",3474],
+    [163,"Focal Therapy of Prostate Cancer",3505],
+    [164,"Treatment of Locally Advanced Prostate Cancer",3543],
+    [165,"Management of Recurrent and Newly Metastatic Prostate Cancer",3562],
+    [166,"Management of Castration-Resistant Prostate Cancer",3588],
+  ];
+
   var ROUTE_TOPIC = {
     "Ca Prostate":"prostate-cancer",
     "Ca Bladder":"bladder-cancer",
@@ -317,6 +486,34 @@
       '<button class="c13-link" data-open-topic="' + esc(topic.id) + '" type="button">Open in focus</button></div>' +
       '<div class="c13-columns"><div><h4>13th-edition chapter map</h4>' + chaptersHtml(topic) + '</div><div><h4>Clinical synthesis for Oracle</h4><ul class="c13-bullets">' + topic.summary.map(function(s){return "<li>"+esc(s)+"</li>";}).join("") + '</ul><div class="c13-use"><b>Where this fits in Oracle</b><p>' + esc(topic.appUse) + '</p></div></div></div></article>';
   }
+  function partForChapter(n) {
+    if(n<=8)return "Clinical decision making";
+    if(n<=23)return "Basics of urologic surgery";
+    if(n<=25)return "Molecular and cellular biology";
+    if(n<=31)return "Infections and inflammation";
+    if(n<=65)return "Pediatric urology";
+    if(n<=77)return "Reproductive and sexual function";
+    if(n<=87)return "Male genitalia";
+    if(n<=92)return "Renal physiology and pathophysiology";
+    if(n<=94)return "Upper urinary tract obstruction and trauma";
+    if(n<=100)return "Urinary lithiasis and endourology";
+    if(n<=128)return "Urine transport, storage and emptying";
+    if(n<=135)return "Benign and malignant bladder disorders";
+    if(n<=144)return "Neoplasms of the upper urinary tract";
+    if(n<=147)return "The adrenals";
+    return "The prostate";
+  }
+  function allContentsHtml(query) {
+    var q = String(query || "").trim().toLowerCase();
+    var matches = ALL_CHAPTERS.filter(function(ch) {
+      return !q || (String(ch[0]) + " " + ch[1] + " " + String(ch[2] || "") + " " + partForChapter(ch[0])).toLowerCase().indexOf(q) !== -1;
+    });
+    return '<div class="c13-full-count">Showing ' + matches.length + ' of 166 chapters</div><div class="c13-table-scroll"><table class="c13-table"><thead><tr><th>Chapter</th><th>Chapter title</th><th>Section</th><th>Printed page</th><th></th></tr></thead><tbody>' +
+      matches.map(function(ch) {
+        var related = DATA.find(function(topic){return topic.chapters.some(function(ref){return ref[0]===ch[0];});});
+        return '<tr><td><b>' + ch[0] + '</b></td><td>' + esc(ch[1]) + '</td><td>' + esc(partForChapter(ch[0])) + '</td><td>' + (ch[2]===null?'Digital chapter':ch[2]) + '</td><td>' + (related?'<button type="button" class="c13-small-link" data-full-topic="' + esc(related.id) + '">Synthesis</button>':'') + '</td></tr>';
+      }).join("") + '</tbody></table></div>';
+  }
   function filteredTopics() {
     var q = state.query.trim().toLowerCase();
     return DATA.filter(function(topic) {
@@ -336,7 +533,7 @@
       CATEGORY_NAMES.map(function(cat){return '<button type="button" class="c13-chip '+(state.category===cat?'active':'')+'" data-category="'+esc(cat)+'">'+esc(cat)+'</button>';}).join("") +
       '</div></div><div class="c13-results"><div class="c13-result-count">Showing ' + topics.length + ' of ' + DATA.length + ' curated chapter groups</div>' +
       (topics.length ? topics.map(topicHtml).join("") : '<div class="c13-empty">No matching chapter group. Try a different search term.</div>') +
-      '</div><div class="c13-footer">Bibliographic reference: Campbell-Walsh-Wein Urology, 13th edition, 3 volumes; Elsevier. Printed page numbers below follow the table of contents in the supplied PDF parts. Confirm exact passages in the source chapter before clinical implementation.</div>';
+      '</div><details class="c13-fullcontents"><summary>Full table of contents · all 166 chapters</summary><div class="c13-full-intro">Search the full 13th-edition contents by chapter number, title or section. Printed pages are from the supplied table of contents; Chapter 89 is an electronic chapter without a printed page entry.</div><input id="c13AllSearch" class="c13-all-search" type="search" placeholder="Search all 166 chapters…" aria-label="Search all Campbell 13th edition chapters"><div id="c13AllResults">' + allContentsHtml("") + '</div></details><div class="c13-footer">Bibliographic reference: Campbell-Walsh-Wein Urology, 13th edition, 3 volumes; Elsevier. Printed page numbers below follow the table of contents in the supplied PDF parts. Confirm exact passages in the source chapter before clinical implementation.</div>';
     view.innerHTML = content;
     var search = document.getElementById("c13Search");
     if (search) search.addEventListener("input", function(){ state.query = search.value; var pos = search.selectionStart; renderIndex(); var next = document.getElementById("c13Search"); if(next){next.focus();next.setSelectionRange(pos,pos);} });
@@ -346,6 +543,22 @@
     view.querySelectorAll("[data-open-topic]").forEach(function(btn){
       btn.addEventListener("click", function(){ state.selected = btn.getAttribute("data-open-topic"); state.category = "All topics"; state.query = ""; openCampbell13(state.selected); });
     });
+    var allSearch = document.getElementById("c13AllSearch");
+    var allResults = document.getElementById("c13AllResults");
+    if (allSearch && allResults) {
+      allSearch.addEventListener("input", function() {
+        var cursor = allSearch.selectionStart;
+        allResults.innerHTML = allContentsHtml(allSearch.value);
+        allResults.querySelectorAll("[data-full-topic]").forEach(function(btn) {
+          btn.addEventListener("click", function(){openCampbell13(btn.getAttribute("data-full-topic"));});
+        });
+        allSearch.focus();
+        allSearch.setSelectionRange(cursor,cursor);
+      });
+      allResults.querySelectorAll("[data-full-topic]").forEach(function(btn) {
+        btn.addEventListener("click", function(){openCampbell13(btn.getAttribute("data-full-topic"));});
+      });
+    }
     var back = document.getElementById("c13BackHome");
     if (back) back.addEventListener("click", function(){ showHomeSafe(); });
   }
@@ -388,6 +601,16 @@
       "#campbell13OracleContext p,#campbell13OracleContext li{font-size:11px;line-height:1.55;color:#334155;}",
       ".c13-context-chapters{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 9px;}",
       ".c13-context-chapters button{border:1px solid #99f6e4;background:white;color:#115e59;border-radius:8px;padding:5px 7px;font-size:10px;font-weight:800;cursor:pointer;}",
+      ".c13-fullcontents{margin:18px 0;background:white;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;}",
+      ".c13-fullcontents>summary{cursor:pointer;padding:15px;font-weight:900;font-size:13px;background:#f1f5f9;color:#0f172a;}",
+      ".c13-full-intro{padding:12px 14px 0;font-size:11px;line-height:1.5;color:#64748b;}",
+      ".c13-all-search{margin:12px 14px;width:calc(100% - 28px);padding:10px;border:1px solid #cbd5e1;border-radius:9px;font-size:12px;background:white;color:#0f172a;}",
+      ".c13-full-count{font-size:10px;color:#64748b;font-weight:800;padding:4px 14px 8px;}",
+      ".c13-table-scroll{overflow-x:auto;max-height:65vh;overflow-y:auto;}",
+      ".c13-table{width:100%;border-collapse:collapse;min-width:680px;}",
+      ".c13-table th{position:sticky;top:0;background:#ecfeff;color:#155e75;text-align:left;font-size:10px;padding:9px;border-bottom:1px solid #cbd5e1;}",
+      ".c13-table td{font-size:11px;line-height:1.4;padding:8px 9px;border-bottom:1px solid #edf2f7;vertical-align:top;color:#334155;}",
+      ".c13-small-link{border:1px solid #99f6e4;background:#f0fdfa;color:#115e59;border-radius:6px;padding:4px 6px;font-size:9px;font-weight:900;cursor:pointer;white-space:nowrap;}",
       "@media(max-width:760px){.c13-header{display:block}.c13-head-actions{margin-top:14px}.c13-columns{grid-template-columns:1fr}.c13-topic-head{align-items:flex-start}.c13-link{font-size:10px;padding:7px}.c13-chapters li{grid-template-columns:44px 1fr 38px;gap:6px}}"
     ].join("");
     document.head.appendChild(style);
