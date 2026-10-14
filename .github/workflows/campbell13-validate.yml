@@ -16,6 +16,7 @@ jobs:
         run: |
           node --check backend-server.mjs
           node --check frontend/campbell13-content.js
+          node --check frontend/sw.js
       - name: Smoke-test server injection and content coverage
         run: node --test tests/campbell13.test.mjs
       - name: Browser-test active plan integration and chapter search
