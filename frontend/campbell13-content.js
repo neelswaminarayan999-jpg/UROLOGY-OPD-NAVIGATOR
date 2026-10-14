@@ -637,6 +637,10 @@
       var item = getTopic(topicId);
       state.category = item.category;
       state.query = "";
+    } else {
+      state.selected = "";
+      state.category = "All topics";
+      state.query = "";
     }
     if (typeof window.showHome === "function") {
       // Keep the app's established view state, then open the source index.
