@@ -45,7 +45,7 @@ function open(){
   const query=$('cw13Search').value.trim().toLowerCase(), chosen=sel.value;
   const selected=MODULES.filter(m=>(chosen==='all'||m.id===chosen)&&(!query||[m.name,m.summary,m.sourcePages,...m.aliases].join(' ').toLowerCase().includes(query)||m.chapters.some(n=>{const c=CHAPTERS.find(x=>x.chapter===n);return c&&('chapter '+n+' '+c.title).toLowerCase().includes(query)})));
   const moduleCards=selected.map(m=>'<article class="cw13-topic"><h3>'+esc(m.name)+'</h3><p>'+esc(m.summary)+'</p><div class="cw13-meta"><b>13e source:</b> '+esc(m.sourcePages)+'<br><b>Mapped chapters:</b> '+m.chapters.map(n=>{const c=CHAPTERS.find(x=>x.chapter===n);return 'Ch '+n+(c?' — '+c.title:'')}).map(esc).join('; ')+'</div>'+(m.safety?'<div class="cw13-safety"><b>Safety gate:</b> '+esc(m.safety)+'</div>':'')+'</article>').join('');
-  const list=(chosen==='index'||chosen==='all'||query)&&((chosen==='index')||query||chosen==='all')?CHAPTERS.filter(c=>!query||('chapter '+c.chapter+' '+c.title+' page '+c.printedPages+' volume '+c.volume).toLowerCase().includes(query)).map(c=>'<tr><td class="cw13-num">'+esc(c.chapter)+'</td><td>'+esc(c.title)+(c.electronicOnly?' <i>(eBook-only)</i>':'')+'</td><td>'+esc(c.printedPages||'eBook-only')+'</td><td>'+esc(c.volume)+'</td></tr>').join(''):'';
+  const list=(chosen==='index'||chosen==='all'||query)&&((chosen==='index')||query||chosen==='all')?CHAPTERS.filter(c=>!query||('chapter '+c.chapter+' '+c.title+' page '+c.printedPages+' volume '+c.volume+' '+(c.contentAvailability||'')).toLowerCase().includes(query)).map(c=>'<tr><td class="cw13-num">'+esc(c.chapter)+'</td><td>'+esc(c.title)+(c.electronicOnly?' <i>(eBook-only)</i>':'')+'</td><td>'+esc(c.printedPages||'eBook-only')+(c.contentAvailability?'<br><small>'+esc(c.contentAvailability)+'</small>':'')+'</td><td>'+esc(c.volume)+'</td></tr>').join(''):'';
   $('cw13Body').innerHTML='<div class="cw13-topicgrid">'+GUIDELINE_AUDIT.map(g=>'<article class="cw13-topic"><h3>'+esc(g.title)+'</h3><p>'+esc(g.update)+'</p><div class="cw13-meta"><a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer">Open official guideline update ↗</a></div></article>').join('')+'</div>'+(selected.length?'<div class="cw13-topicgrid">'+moduleCards+'</div>':'<p>No mapped topic matched that search. Try a chapter title, disease or procedure.</p>')+(list?'<h3>Chapter index ('+CHAPTERS.length+' entries)</h3><table class="cw13-table"><thead><tr><th>Ch.</th><th>Title</th><th>Printed page range</th><th>Volume</th></tr></thead><tbody>'+list+'</tbody></table>':'');
  }
 }
@@ -55,19 +55,6 @@ function activeModule(){
  let m=MODULES.find(x=>x.name.toLowerCase()===raw||x.aliases.some(a=>a.toLowerCase()===raw));
  if(m)return m;
  const compact=raw.replace(/[^a-z0-9]+/g,'');
- const aliases={
-  stones:['stonedisease','urolithiasis','renalstone','uretericstone','kidneystone','calculi'],
-  bladder:['cabl adder','bladdercancer','nmibc','mibc','urothelialbladder'],
-  kidney:['cakidney','rcc','renalcellcarcinoma','renalmass'],
-  prostate:['caprostate','prostatecancer','pc a','pc'],
-  bph:['bph','bphmaleluts','maleluts','benignprostatichyperplasia'],
-  stricture:['urethralstricture','urethralstricture disease','urethroplasty'],
-  utuc:['utuc','uppertracturothelialcarcinoma'],
-  testis:['catestis','testicularcancer','germcelltumour'],
-  penis:['capenis','penilecancer'],
-  infection:['uti','urosepsis','pyelonephritis','prostatitis','epididymitis'],
-  hematuria:['hematuria','haematuria','visiblehaematuria']
- };
  for(const item of MODULES){
   const norm=item.id.replace(/[^a-z0-9]+/g,'');
   if(norm===compact||item.aliases.some(a=>a.toLowerCase().replace(/[^a-z0-9]+/g,'')===compact))return item;
