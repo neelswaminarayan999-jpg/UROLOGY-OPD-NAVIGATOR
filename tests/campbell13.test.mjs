@@ -35,6 +35,9 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   const js = await moduleResponse.text();
   assert.match(js, /Campbell-Walsh-Wein Urology/);
   assert.match(js, /EAU NMIBC Guidelines 2026/);
+  assert.match(js, /function mountPlanContext/, '13e context is attached to the active treatment output');
+  assert.match(js, /cw13ActivePlanContext/, 'context panel target is present');
+  assert.match(js, /contentAvailability/, 'chapter access limitations are displayed');
   const chapterMatch = js.match(/const CHAPTERS=(\[[\s\S]*?\]);\nconst MODULES=/);
   assert.ok(chapterMatch, 'chapter array is embedded as valid JSON');
   const chapters = JSON.parse(chapterMatch[1]);
@@ -43,6 +46,8 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   const renalPelvis = chapters.find(c => c.chapter === 89);
   assert.equal(renalPelvis.electronicOnly, true);
   assert.equal(renalPelvis.printedPage, null);
+  const acuteStone = chapters.find(c => c.chapter === 96);
+  assert.ok(acuteStone.contentAvailability && acuteStone.contentAvailability.includes('Elsevier eBooks'), 'Chapter 96 partial-preview limitation is retained');
   for (const n of [8, 26, 79, 82, 86, 95, 96, 97, 98, 99, 100, 129, 130, 131, 137, 138, 139, 144, 149, 150, 151, 153, 157, 165, 166]) {
     assert.ok(chapters.find(c => c.chapter === n && c.title && c.printedPage), 'chapter ' + n + ' has title and print page');
   }
