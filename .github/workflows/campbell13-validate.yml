@@ -30,40 +30,55 @@ jobs:
           PORT=18765
           cat > frontend/cw13-smoke-test.html <<'HTML'
           <!doctype html>
-          <html><head><meta charset="utf-8"><title>Campbell 13e smoke test</title></head>
+          <html><head><meta charset="utf-8"><title>Campbell 13e integration smoke test</title></head>
           <body>
-            <select id="oracleDisease"><option value="Stone Disease">Stone Disease</option></select>
-            <div id="oracleOutput">Original management output</div>
-            <script src="/campbell13-content.js" defer></script>
+            <iframe id="oracleApp" src="/" title="Oracle application under test" style="width:1200px;height:800px;border:0"></iframe>
             <script>
-              document.addEventListener('DOMContentLoaded', () => setTimeout(() => {
-                const sel = document.getElementById('oracleDisease');
-                sel.value = 'Stone Disease';
-                sel.dispatchEvent(new Event('change', { bubbles: true }));
-                document.getElementById('oracleOutput').innerHTML = '<p>Rendered test treatment plan</p>';
-                setTimeout(() => {
-                  const panel = document.getElementById('cw13ActivePlanContext');
-                  document.body.setAttribute('data-cw13-plan',
-                    panel && panel.textContent.includes('Chapter 95') && panel.textContent.includes('Chapter 96') ? 'pass' : 'fail');
-                  const open = document.getElementById('cw13Open');
-                  if (open) open.click();
+              const app = document.getElementById('oracleApp');
+              const fail = name => document.body.setAttribute('data-cw13-' + name, 'fail');
+              const started = Date.now();
+              const run = () => {
+                try {
+                  const doc = app.contentDocument;
+                  const selector = doc && doc.getElementById('oracleDisease');
+                  const button = doc && doc.getElementById('cw13Open');
+                  if (!doc || !selector || !button) {
+                    if (Date.now() - started < 8000) return setTimeout(run, 100);
+                    fail('plan'); fail('modal'); fail('search'); return;
+                  }
+                  const opt = Array.from(selector.options).find(o => o.value === 'Stone Disease' || o.textContent.trim() === 'Stone Disease');
+                  if (!opt) { fail('plan'); fail('modal'); fail('search'); return; }
+                  selector.value = opt.value;
+                  selector.dispatchEvent(new Event('change', { bubbles: true }));
                   setTimeout(() => {
-                    const modal = document.getElementById('cw13Modal');
-                    document.body.setAttribute('data-cw13-modal',
-                      modal && modal.classList.contains('cw13-show') ? 'pass' : 'fail');
-                    const search = document.getElementById('cw13Search');
-                    if (search) {
-                      search.value = 'Chapter 96';
-                      search.dispatchEvent(new Event('input', { bubbles: true }));
-                      setTimeout(() => {
-                        const body = document.getElementById('cw13Body');
-                        document.body.setAttribute('data-cw13-search',
-                          body && body.textContent.includes('Acute Care of Urinary Lithiasis') && body.textContent.includes('full content') ? 'pass' : 'fail');
-                      }, 50);
-                    } else document.body.setAttribute('data-cw13-search', 'fail');
-                  }, 50);
-                }, 50);
-              }, 50));
+                    const panel = doc.getElementById('cw13ActivePlanContext');
+                    document.body.setAttribute('data-cw13-plan',
+                      panel && panel.textContent.includes('Chapter 95') && panel.textContent.includes('Chapter 96') ? 'pass' : 'fail');
+                    const openButton = doc.getElementById('cw13Open');
+                    if (openButton) openButton.click();
+                    setTimeout(() => {
+                      const modal = doc.getElementById('cw13Modal');
+                      document.body.setAttribute('data-cw13-modal',
+                        modal && modal.classList.contains('cw13-show') ? 'pass' : 'fail');
+                      const search = doc.getElementById('cw13Search');
+                      if (search) {
+                        search.value = 'Chapter 96';
+                        search.dispatchEvent(new Event('input', { bubbles: true }));
+                        setTimeout(() => {
+                          const body = doc.getElementById('cw13Body');
+                          document.body.setAttribute('data-cw13-search',
+                            body && body.textContent.includes('Acute Care of Urinary Lithiasis') && body.textContent.includes('full content') ? 'pass' : 'fail');
+                        }, 100);
+                      } else fail('search');
+                    }, 100);
+                  }, 250);
+                } catch (e) {
+                  document.body.setAttribute('data-cw13-error', String(e && e.message || e));
+                  fail('plan'); fail('modal'); fail('search');
+                }
+              };
+              app.addEventListener('load', () => setTimeout(run, 100));
+              setTimeout(run, 150);
             </script>
           </body></html>
           HTML
@@ -79,7 +94,7 @@ jobs:
             sleep 0.25
           done
           curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null
-          "$BROWSER" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --no-first-run --no-default-browser-check --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:$PORT/cw13-smoke-test.html" > /tmp/cw13-test-dom.html
+          "$BROWSER" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --no-first-run --no-default-browser-check --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:$PORT/cw13-smoke-test.html" > /tmp/cw13-test-dom.html
           grep -q 'data-cw13-plan="pass"' /tmp/cw13-test-dom.html
           grep -q 'data-cw13-modal="pass"' /tmp/cw13-test-dom.html
           grep -q 'data-cw13-search="pass"' /tmp/cw13-test-dom.html
