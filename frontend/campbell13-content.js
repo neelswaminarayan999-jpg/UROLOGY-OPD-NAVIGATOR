@@ -63,7 +63,6 @@
       id:"penis-cancer", category:"Male genital oncology", title:"Penile cancer and regional lymph-node management",
       chapters:[
         [82,"Tumors of the Penis",1715],
-        [83,"Tumors of the Urethra",1749],
         [84,"Inguinal Node Dissection",1764],
         [85,"Benign Disorders of the Penis and Urethra",1774]
       ],
@@ -73,6 +72,19 @@
         "Organ preservation, reconstructive consequences and regional control should be weighed against oncologic adequacy in a multidisciplinary pathway."
       ],
       appUse:"Cross-check the primary-lesion and groin-node branches separately. Confirm the current EAU/NCCN pathway for nodal staging, surgical indications and systemic therapy."
+    },
+    {
+      id:"urethral-cancer", category:"Uro-oncology", title:"Primary urethral carcinoma",
+      chapters:[
+        [83,"Tumors of the Urethra",1749],
+        [84,"Inguinal Node Dissection",1764]
+      ],
+      summary:[
+        "Primary urethral carcinoma is uncommon; the clinical pathway depends on anatomic site, histology, local extent, nodal status and metastatic stage.",
+        "Do not confuse urethral carcinoma with benign urethral disease or urethral stricture; diagnostic sampling and stage-appropriate imaging are separate steps.",
+        "Regional node management depends on the primary site and risk profile and should be planned in a specialist multidisciplinary setting."
+      ],
+      appUse:"Keep the primary urethral cancer pathway separate from penile SCC and benign stricture reconstruction. Confirm staging, node management and systemic therapy against current specialist guidance."
     },
     {
       id:"stricture", category:"Reconstruction & urethra", title:"Benign urethral disease and urethral stricture",
@@ -143,25 +155,36 @@
       appUse:"Use this chapter bundle to validate the separate NMIBC/MIBC branches, TURBT completeness/re-TURBT gates, systemic-treatment eligibility fields and urinary-diversion counselling. Current guideline versions and regulatory approvals—not textbook text alone—govern treatment choices."
     },
     {
-      id:"upper-tract", category:"Uro-oncology", title:"Renal masses, RCC and upper-tract urothelial carcinoma",
+      id:"renal-cancer", category:"Uro-oncology", title:"Renal masses and renal cell carcinoma",
       chapters:[
         [136,"Benign Renal Tumors",2860],
         [137,"Malignant Renal Tumors",2872],
-        [138,"Urothelial Tumors of the Upper Urinary Tract and Ureter",2924],
-        [139,"Surgical Management of Upper Urinary Tract Urothelial Tumors",2940],
-        [140,"Retroperitoneal Tumors",2968],
         [141,"Contemporary Open Surgery of the Kidney",2990],
         [142,"Laparoscopic and Robotic Surgery of the Kidney",3027],
         [143,"Focal Therapy for Renal Tumors",3059],
         [144,"Treatment of Advanced Renal Cell Carcinoma",3078]
       ],
       summary:[
-        "For renal masses, integrate multiphasic imaging, tumour size/location, nephrometry/anatomy, renal function, contralateral kidney, histology and patient comorbidity.",
+        "For renal masses, integrate multiphasic imaging, tumour size/location, anatomy/nephrometry, renal function, contralateral kidney, histology and patient comorbidity.",
         "Distinguish active surveillance, biopsy, ablation, partial nephrectomy and radical nephrectomy by oncologic risk and functional trade-offs rather than size alone.",
-        "UTUC requires a separate urothelial pathway: location, grade, cytology/biopsy reliability, invasive-risk features, renal function and suitability for kidney-sparing management inform decisions.",
-        "Surgical approach is not the same as oncologic indication; access choice should not obscure the need for appropriate margins, lymph-node strategy when indicated or renal preservation."
+        "Surgical approach is not the same as oncologic indication; access choice should not obscure appropriate margins, lymph-node strategy when indicated or renal preservation.",
+        "Advanced disease decisions require histology, risk stratification, disease burden, performance status, comorbidity and review of current systemic-treatment evidence."
       ],
-      appUse:"Connect renal-mass work-up and nephrometry to treatment selection; keep RCC systemic-risk tools separate from UTUC risk classification. Current EAU/NCCN pathways remain the treatment authority."
+      appUse:"Connect renal-mass work-up and nephrometry to treatment selection. Keep localised-mass decision tools separate from advanced RCC risk assessment and systemic treatment; current EAU/NCCN pathways remain the treatment authority."
+    },
+    {
+      id:"utuc", category:"Uro-oncology", title:"Upper-tract urothelial carcinoma (UTUC)",
+      chapters:[
+        [138,"Urothelial Tumors of the Upper Urinary Tract and Ureter",2924],
+        [139,"Surgical Management of Upper Urinary Tract Urothelial Tumors",2940]
+      ],
+      summary:[
+        "Keep UTUC separate from renal cell carcinoma: they have different histology, staging logic, risk assessment and treatment pathways.",
+        "Integrate tumour location, grade, cytology/biopsy limitations, invasive-risk features, multifocality, imaging, renal function and the status of the opposite kidney.",
+        "Kidney-sparing management and radical nephroureterectomy are selected according to oncologic risk, anatomy, renal reserve and patient factors; a single feature should not decide the pathway.",
+        "Coordinate diagnostic ureteroscopy, tissue sampling, lymph-node strategy and perioperative systemic-treatment discussion with the current guideline branch."
+      ],
+      appUse:"Use this chapter pairing for the UTUC pathway only. Verify current EAU/NCCN criteria, perioperative systemic therapy and kidney-sparing indications before any treatment recommendation."
     },
     {
       id:"bph", category:"Functional urology", title:"BPH / male LUTS: assessment, medication and procedures",
@@ -260,11 +283,11 @@
   var ROUTE_TOPIC = {
     "Ca Prostate":"prostate-cancer",
     "Ca Bladder":"bladder-cancer",
-    "UTUC":"upper-tract",
+    "UTUC":"utuc",
     "Ca Penis":"penis-cancer",
     "Ca Testis":"testis-cancer",
-    "Ca Kidney":"upper-tract",
-    "Urethral Cancer":"penis-cancer",
+    "Ca Kidney":"renal-cancer",
+    "Urethral Cancer":"urethral-cancer",
     "Adrenal / Neuroendocrine":"adrenal",
     "Urethral Stricture":"stricture",
     "BPH / Male LUTS":"bph",
@@ -370,7 +393,7 @@
     document.head.appendChild(style);
   }
   function showHomeSafe() {
-    if (typeof window.showHome === "function") { window.showHome(); return; }
+    if (typeof window.showHome === "function") window.showHome();
     document.querySelectorAll("section[id$='View']").forEach(function(el){el.classList.add("hidden");});
     var home = document.getElementById("homeView");
     if (home) home.classList.remove("hidden");
