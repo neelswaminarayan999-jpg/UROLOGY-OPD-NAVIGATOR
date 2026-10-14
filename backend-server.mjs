@@ -492,6 +492,7 @@ function hotfixHtml(html) {
     '<script src="/v15.6-operative-atlas-trauma.js" defer></script>',
     '<script src="/v15.7-operative-atlas-unified-launcher.js" defer></script>',
     '<script src="/v15.8-opd-workflow.js" defer></script>',
+    '<script src="/campbell13-content.js" defer></script>',
   ];
   let out = html;
   for (const tag of tags) {
