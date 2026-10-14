@@ -3,7 +3,8 @@
 ## Included in this branch
 - A source-index module with 166 table-of-contents entries. Chapter 89 is eBook-only in the supplied contents; Chapter 96 has a listed TOC page range, but the uploaded inspection PDF says full content is available through Elsevier eBooks or Chapter 95 and includes only an excerpt.
 - Page-range / volume metadata based on the uploaded 13th-edition table of contents.
-- Topic mapping for major Oracle modules: stone disease, bladder cancer, renal tumours, prostate cancer, BPH/male LUTS, urethral stricture, UTUC, testis, penis, infections and hematuria.
+- Topic mapping for 28 Oracle-related clinical areas, spanning diagnostic evaluation/imaging, surgical principles, stones, urinary infection, LUT dysfunction/urodynamics, female continence/pelvic floor, reconstruction, gender-affirming urology, transplant, trauma, and uro-oncology (bladder, renal, UTUC, prostate, urethral, testis and penile disease).
+- A visible chapter-coverage status: topic summary/checklist mapped, table-of-contents-only, partial excerpt (Chapter 96), or eBook-only (Chapter 89). The coverage state prevents chapter indexing from being mistaken for full content extraction.
 - Original concise clinical-context summaries and safety gates that link Oracle module topics to relevant 13e chapters.
 - A non-destructive server bootstrap that adds the layer to the rendered app without replacing the large existing frontend file.
 
