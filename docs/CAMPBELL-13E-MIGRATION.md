@@ -1,7 +1,7 @@
 # Campbell-Walsh-Wein Urology 13th Edition — Oracle Migration Layer
 
 ## Included in this branch
-- A source-index module with 166 table-of-contents entries, including Chapter 89 marked eBook-only because the uploaded inspection contents do not give it a printed page.
+- A source-index module with 166 table-of-contents entries. Chapter 89 is eBook-only in the supplied contents; Chapter 96 has a listed TOC page range, but the uploaded inspection PDF says full content is available through Elsevier eBooks or Chapter 95 and includes only an excerpt.
 - Page-range / volume metadata based on the uploaded 13th-edition table of contents.
 - Topic mapping for major Oracle modules: stone disease, bladder cancer, renal tumours, prostate cancer, BPH/male LUTS, urethral stricture, UTUC, testis, penis, infections and hematuria.
 - Original concise clinical-context summaries and safety gates that link Oracle module topics to relevant 13e chapters.
