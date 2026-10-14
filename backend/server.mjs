@@ -258,7 +258,7 @@ const server = http.createServer(async (req, res) => {
         let html = fs.readFileSync(file, 'utf8');
         const loader = '<script src="/campbell13-content.js" defer></script>';
         if (!html.includes(loader)) {
-          if (/<\\/body>/i.test(html)) html = html.replace(/<\\/body>/i, loader + '\\n</body>');
+          if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, loader + '\n</body>');
           else html += '\\n' + loader;
         }
         res.writeHead(200, {
