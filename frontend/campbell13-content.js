@@ -537,6 +537,7 @@
     var topics = filteredTopics();
     var content = '<div class="c13-header"><div><div class="c13-kicker">CAMPBELL-WALSH-WEIN · 13TH EDITION</div><h2>Clinical chapter reference</h2><p>Chapter-linked teaching summaries to support Oracle’s decision pathways. These are original clinical syntheses, not copied textbook passages.</p></div><div class="c13-head-actions"><button type="button" class="c13-button secondary" id="c13BackHome">Back to Oracle</button></div></div>' +
       '<div class="c13-safety"><b>Source hierarchy:</b> use Campbell 13e for clinical background and chapter context; use the current EAU/NCCN guidance, applicable drug labels, local protocols and MDT decision for treatment eligibility, dosing and sequencing. This module does not silently overwrite those pathways.</div>' +
+      '<div class="c13-audit"><b>13th-edition coverage audit — publisher-identified new chapters</b><p>Check whether the older Oracle build covers these areas explicitly: Ch 1 Personal and Professional Development; Ch 6 MRI; Ch 9 Occupational Health; Ch 12 Intraoperative Patient Safety; Ch 14 Sutures and Suturing; Ch 86 Urethral Stricture Disease; Ch 91 Renal Transplantation; Ch 98 Surgical Management of Upper Urinary Tract Calculi; Ch 99 Prevention of Urinary Stone Disease; Ch 127 Vaginoplasty; and Ch 128 Special Urologic Considerations in Transmasculine Individuals.</p><p class="c13-audit-note">Coverage flags are a checklist, not a claim that these subjects were entirely absent in 12e or in Oracle. <a href="https://www.inspectioncopy.elsevier.com/book/details/9780323884051" target="_blank" rel="noopener noreferrer">Elsevier 13e edition notes ↗</a></p></div>' +
       '<div class="c13-controls"><input id="c13Search" type="search" placeholder="Search disease, chapter title, number or concept…" value="' + esc(state.query) + '" aria-label="Search Campbell 13th edition chapters"><div class="c13-categories">' +
       CATEGORY_NAMES.map(function(cat){return '<button type="button" class="c13-chip '+(state.category===cat?'active':'')+'" data-category="'+esc(cat)+'">'+esc(cat)+'</button>';}).join("") +
       '</div></div><div class="c13-results"><div class="c13-result-count">Showing ' + topics.length + ' of ' + DATA.length + ' curated chapter groups</div>' +
@@ -609,6 +610,10 @@
       "#campbell13OracleContext p,#campbell13OracleContext li{font-size:11px;line-height:1.55;color:#334155;}",
       ".c13-context-chapters{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 9px;}",
       ".c13-context-chapters button{border:1px solid #99f6e4;background:white;color:#115e59;border-radius:8px;padding:5px 7px;font-size:10px;font-weight:800;cursor:pointer;}",
+      ".c13-audit{margin:12px 0;border:1px solid #fcd34d;background:#fffbeb;border-radius:12px;padding:12px 14px;font-size:11px;line-height:1.55;color:#78350f;}",
+      ".c13-audit p{margin:5px 0 0;}",
+      ".c13-audit a{font-weight:900;color:#92400e;text-decoration:underline;}",
+      ".c13-audit-note{font-size:10px;color:#92400e;}",
       ".c13-fullcontents{margin:18px 0;background:white;border:1px solid #cbd5e1;border-radius:14px;overflow:hidden;}",
       ".c13-fullcontents>summary{cursor:pointer;padding:15px;font-weight:900;font-size:13px;background:#f1f5f9;color:#0f172a;}",
       ".c13-full-intro{padding:12px 14px 0;font-size:11px;line-height:1.5;color:#64748b;}",
