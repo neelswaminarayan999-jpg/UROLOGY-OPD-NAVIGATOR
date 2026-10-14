@@ -33,6 +33,11 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   const moduleResponse = await fetch(base + '/campbell13-content.js');
   assert.equal(moduleResponse.status, 200);
   const js = await moduleResponse.text();
+  const swResponse = await fetch(base + '/sw.js');
+  assert.equal(swResponse.status, 200);
+  const sw = await swResponse.text();
+  assert.match(sw, /urology-oracle-campbell13-core/, 'service-worker cache is version-busted so installed clients do not remain pinned to stale HTML');
+  assert.match(sw, /\.\/campbell13-content\.js/, 'offline core cache includes the Campbell 13e layer');
   assert.match(js, /Campbell-Walsh-Wein Urology/);
   assert.match(js, /EAU NMIBC Guidelines 2026/);
   assert.match(js, /function mountPlanContext/, '13e context is attached to the active treatment output');
