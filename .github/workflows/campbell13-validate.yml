@@ -53,7 +53,7 @@ jobs:
                   setTimeout(() => {
                     const panel = doc.getElementById('cw13ActivePlanContext');
                     document.body.setAttribute('data-cw13-plan',
-                      panel && panel.textContent.includes('Chapter 95') && panel.textContent.includes('Chapter 96') ? 'pass' : 'fail');
+                      panel && panel.textContent.includes('Chapter 95') && panel.textContent.includes('Chapter 96') && panel.textContent.includes('Chapter-specific source syntheses') ? 'pass' : 'fail');
                     const openButton = doc.getElementById('cw13Open');
                     if (openButton) openButton.click();
                     setTimeout(() => {
@@ -67,7 +67,7 @@ jobs:
                         setTimeout(() => {
                           const body = doc.getElementById('cw13Body');
                           document.body.setAttribute('data-cw13-search',
-                            body && body.textContent.includes('Acute Care of Urinary Lithiasis') && body.textContent.includes('full content') ? 'pass' : 'fail');
+                            body && body.textContent.includes('Acute Care of Urinary Lithiasis') && body.textContent.includes('full content') && body.querySelector('[data-chapter-synthesis="96"]') ? 'pass' : 'fail');
                         }, 100);
                       } else fail('search');
                     }, 100);
