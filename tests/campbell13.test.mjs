@@ -38,6 +38,17 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   assert.match(js, /function mountPlanContext/, '13e context is attached to the active treatment output');
   assert.match(js, /cw13ActivePlanContext/, 'context panel target is present');
   assert.match(js, /contentAvailability/, 'chapter access limitations are displayed');
+  assert.match(js, /const CHAPTER_SYNTHESIS=\[/, 'chapter-specific original syntheses are present');
+  const synthesisMatch = js.match(/const CHAPTER_SYNTHESIS=(\[[\s\S]*?\]);\nCHAPTER_SYNTHESIS\.forEach/);
+  assert.ok(synthesisMatch, 'chapter synthesis registry has a closed boundary');
+  const synthesisCount = (synthesisMatch[1].match(/\{chapter:\d+,focus:/g) || []).length;
+  assert.ok(synthesisCount >= 30, 'priority chapters have chapter-specific syntheses');
+  for (const n of [86,95,96,97,98,99,100,129,130,131,132,133,134,137,138,139,149,150,151,153,154,155,156,157,158,159,160,161,162,164,165,166,79,80,82,83]) {
+    assert.match(synthesisMatch[1], new RegExp('\\\\{chapter:' + n + ',focus:'), 'chapter ' + n + ' has an original chapter-specific synthesis');
+  }
+  assert.match(js, /data-chapter-synthesis=/, 'chapter summaries render as searchable UI cards');
+  assert.match(js, /chapterNoteHtml/, 'chapter summaries are connected to the selected treatment context');
+  assert.match(js, /chapterSynthesisCount:CHAPTER_SYNTHESIS.length/, 'chapter synthesis coverage is exposed in metadata');
   const chapterMatch = js.match(/const CHAPTERS=(\[[\s\S]*?\]);\nconst MODULES=/);
   assert.ok(chapterMatch, 'chapter array is embedded as valid JSON');
   const chapters = JSON.parse(chapterMatch[1]);
