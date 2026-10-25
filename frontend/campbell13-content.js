@@ -47,7 +47,7 @@ const CHAPTER_SYNTHESIS=[
 {chapter:83,focus:'Urethral carcinoma',summary:'Primary urethral malignancy is uncommon and requires segment-specific diagnosis and staging. The pathway should establish histology, anatomical extent and regional involvement, and must remain separate from the benign urethral-stricture algorithm even when symptoms overlap.',checkpoints:['Specify urethral segment, lesion extent, histology and relevant previous bladder/penile cancer or reconstructive history.','Plan appropriate endoscopic, imaging and nodal assessment with a multidisciplinary team.','Keep the oncologic margin/extent decision distinct from reconstruction; reconstruction follows the disease-control plan.'],caution:'Evidence for rare histologies is limited; validate decisions with current specialist guidance and MDT review.'}
 ];
 CHAPTER_SYNTHESIS.forEach(s=>{const c=CHAPTERS.find(x=>x.chapter===s.chapter);if(c&&!c.electronicOnly&&c.chapter!==96)c.coverageStatus='Chapter-specific original synthesis added; this is not a full chapter reproduction or full pathway reconciliation';});
-META.chapterSynthesisCount=CHAPTER_SYNTHESIS.length;
+
 const GUIDELINE_AUDIT=[
  {title:'EAU Urolithiasis Guidelines 2026',update:'The 2026 guideline updates renal colic, medical expulsive therapy, SWL, ureteroscopy, PCNL, antithrombotic management, radiation protection and stone-prevention drug tables. Recheck every stone-procedure decision gate and prevention dose.',url:'https://uroweb.org/guidelines/urolithiasis/summary-of-changes/2026'},
  {title:'EAU NMIBC Guidelines 2026',update:'The 2026 update revises classification, TURBT and risk-stratification recommendations and adds treatment tables for BCG-unresponsive disease. It also adds recommendations concerning sasanlimab or durvalumab with BCG/maintenance in selected BCG-naive high/very-high-risk patients; exact eligibility, approval and local availability must be checked.',url:'https://uroweb.org/guidelines/non-muscle-invasive-bladder-cancer'},
@@ -56,7 +56,7 @@ const GUIDELINE_AUDIT=[
  {title:'EAU Renal Cell Carcinoma Guidelines 2026',update:'The 2026 update includes frailty/geriatric assessment, nephrological assessment, partial/radical nephrectomy techniques, alternatives to surgery, oligometastatic treatment and follow-up. Preserve renal function and comorbidity as explicit decision variables.',url:'https://uroweb.org/guidelines/renal-cell-carcinoma/summary-of-changes'},
  {title:'EAU UTUC Guidelines 2026',update:'The 2026 update incorporates the 9th TNM edition and discusses FGFR3 prognostic value, cytology/urinary biomarkers, kidney-sparing endoscopic evidence, bladder-cuff and nodal surgery, systemic-treatment evidence and follow-up after kidney-sparing management.',url:'https://uroweb.org/guidelines/upper-urinary-tract-urothelial-cell-carcinoma/summary-of-changes'}
 ];
-const META={edition:13,title:'Campbell-Walsh-Wein Urology',copyrightYear:2026,visiblePrintChapters:165,eBookOnlyChapter:89,contentLayer:'reference-map-and-original-clinical-context',migrationStatus:'staged'};
+const META={edition:13,title:'Campbell-Walsh-Wein Urology',copyrightYear:2026,visiblePrintChapters:165,eBookOnlyChapter:89,chapterSynthesisCount:CHAPTER_SYNTHESIS.length,contentLayer:'chapter-index-and-original-clinical-synthesis',migrationStatus:'staged'};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=id=>document.getElementById(id);
 function sourceUpdate(){
