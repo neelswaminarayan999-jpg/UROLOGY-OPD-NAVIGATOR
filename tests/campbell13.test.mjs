@@ -49,12 +49,13 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   assert.match(js, /data-chapter-synthesis=/, 'chapter summaries render as searchable UI cards');
   assert.match(js, /chapterNoteHtml/, 'chapter summaries are connected to the selected treatment context');
   assert.match(js, /chapterSynthesisCount:CHAPTER_SYNTHESIS.length/, 'chapter synthesis coverage is exposed in metadata');
-  const synthesisIds = [...synthesisMatch[1].matchAll(/\\{chapter:(\\d+),focus:/g)].map(m => Number(m[1]));
+  const synthesisIds = [...synthesisMatch[1].matchAll(/\{chapter:(\d+),focus:/g)].map(m => Number(m[1]));
   assert.equal(new Set(synthesisIds).size, synthesisIds.length, 'chapter synthesis ids are unique');
   assert.ok(synthesisIds.every(n => n >= 1 && n <= 166), 'synthesis chapters are in the contents index');
   const chapterMatch = js.match(/const CHAPTERS=(\[[\s\S]*?\]);\nconst MODULES=/);
   assert.ok(chapterMatch, 'chapter array is embedded as valid JSON');
   const chapters = JSON.parse(chapterMatch[1]);
+  assert.ok(synthesisIds.every(n => chapters.some(c => c.chapter === n)), 'every synthesis points to a real chapter entry');
   assert.equal(chapters.length, 166);
   assert.deepEqual(chapters.map(c => c.chapter), Array.from({ length: 166 }, (_, i) => i + 1));
   const renalPelvis = chapters.find(c => c.chapter === 89);
