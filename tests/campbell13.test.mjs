@@ -42,8 +42,8 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   const synthesisMatch = js.match(/const CHAPTER_SYNTHESIS=(\[[\s\S]*?\]);\nCHAPTER_SYNTHESIS\.forEach/);
   assert.ok(synthesisMatch, 'chapter synthesis registry has a closed boundary');
   const synthesisCount = (synthesisMatch[1].match(/\{chapter:\d+,focus:/g) || []).length;
-  assert.ok(synthesisCount >= 100, 'priority chapters have chapter-specific syntheses');
-  for (const n of [2,3,4,5,6,7,8,11,12,17,20,24,25,26,27,28,29,30,31,33,38,41,45,49,54,56,57,72,73,79,80,82,83,86,88,90,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,153,154,155,156,157,158,159,160,161,162,163,164,165,166]) {
+  assert.equal(synthesisCount, 165, 'every printed chapter has a chapter-specific synthesis; eBook-only Chapter 89 remains separately flagged');
+  for (const n of Array.from({ length: 166 }, (_, i) => i + 1).filter(n => n !== 89)) {
     assert.match(synthesisMatch[1], new RegExp('\\{chapter:' + n + ',focus:'), 'chapter ' + n + ' has an original chapter-specific synthesis');
   }
   assert.match(js, /data-chapter-synthesis=/, 'chapter summaries render as searchable UI cards');
