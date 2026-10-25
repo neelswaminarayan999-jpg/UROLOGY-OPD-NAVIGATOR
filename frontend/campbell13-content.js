@@ -192,5 +192,5 @@ function mount(){
  p.querySelector('#c13-search').addEventListener('input',()=>render(p));p.querySelector('#c13-filter').addEventListener('change',()=>render(p));render(p);
 }
 function init(){mount();window.CAMPBELL_WEIN_13E={source,chapters,modules:modules.map(({id,title,chapterIds,references})=>({id,title,chapterIds,references})),moduleCount:modules.length,chapterReferenceCount:chapters.length};}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+if(document.readyState==='complete')init();else document.addEventListener('DOMContentLoaded',init,{once:true});
 })();
