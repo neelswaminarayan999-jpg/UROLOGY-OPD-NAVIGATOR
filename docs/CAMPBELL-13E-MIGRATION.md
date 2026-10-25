@@ -4,12 +4,14 @@
 - A source-index module with 166 table-of-contents entries. Chapter 89 is eBook-only in the supplied contents; Chapter 96 has a listed TOC page range, but the uploaded inspection PDF says full content is available through Elsevier eBooks or Chapter 95 and includes only an excerpt.
 - Page-range / volume metadata based on the uploaded 13th-edition table of contents.
 - Topic mapping for 28 Oracle-related clinical areas, spanning diagnostic evaluation/imaging, surgical principles, stones, urinary infection, LUT dysfunction/urodynamics, female continence/pelvic floor, reconstruction, gender-affirming urology, transplant, trauma, and uro-oncology (bladder, renal, UTUC, prostate, urethral, testis and penile disease).
-- A visible chapter-coverage status: topic summary/checklist mapped, table-of-contents-only, partial excerpt (Chapter 96), or eBook-only (Chapter 89). The coverage state prevents chapter indexing from being mistaken for full content extraction.
+- A visible chapter-coverage status distinguishes chapter-specific synthesis, broader topic mapping/checklist, TOC-only entries, partial Chapter 96 excerpt, and Chapter 89 eBook-only. This prevents an index or cross-reference from being mistaken for full chapter extraction.
 - Original concise clinical-context summaries and safety gates that link Oracle module topics to relevant 13e chapters.
+- **36 chapter-specific original syntheses** for priority clinical chapters: urethral stricture; stone pathogenesis, acute colic, ureteral/renal/bladder stones and prevention; NMIBC/MIBC and cystectomy/diversion; RCC and UTUC; BPH; localized/advanced prostate cancer; testis, penile and urethral malignancy.
+- These chapter syntheses are visible in the searchable index and inside the collapsed chapter-level section under matching selected-disease output. They provide concise clinical reasoning and decision checks, not copied textbook passages.
 - A non-destructive server bootstrap that adds the layer to the rendered app without replacing the large existing frontend file.
 
 ## Important status distinction
-This is a **staged reference-layer migration**, not proof that every legacy treatment algorithm has been rewritten or validated against the 13th edition. The UI explicitly describes the layer this way. Existing pathways, scores, dose rules and guideline-specific recommendations must be audited individually before they are labelled fully reconciled. Textbook background must not silently supersede current guidelines or local protocols.
+This is a **staged content migration**, not proof that every legacy treatment algorithm has been rewritten or validated against the 13th edition. The UI explicitly distinguishes chapter-specific syntheses from mapped-only and TOC-only chapters. Existing pathways, scores, dose rules and guideline-specific recommendations must be audited individually before they are labelled fully reconciled. Textbook background must not silently supersede current guidelines or local protocols.
 
 ## Local/Render smoke test
 1. Deploy this branch to a preview service before merging.
