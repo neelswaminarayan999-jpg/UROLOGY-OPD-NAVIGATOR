@@ -252,7 +252,6 @@ const server = http.createServer(async (req, res) => {
       if (!file.startsWith(WEB_ROOT) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return json(res, 404, { error: 'Not found' }, origin);
       const ext = path.extname(file).toLowerCase();
       const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
-      res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
       // Serve the current frontend build unchanged apart from loading the separate, versioned
       // Campbell 13e source layer. This avoids replacing the large existing index.html.
       if (ext === '.html' && path.basename(file) === 'index.html') {
@@ -263,8 +262,10 @@ const server = http.createServer(async (req, res) => {
           : (/<\/body\s*>/i.test(html)
               ? html.replace(/<\/body\s*>/i, scriptTag + '</body>')
               : html + scriptTag);
+        res.writeHead(200, { 'Content-Type': types[ext], 'Cache-Control': 'no-store' });
         return res.end(output);
       }
+      res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
       return fs.createReadStream(file).pipe(res);
     }
     return json(res, 405, { error: 'Method not allowed' }, origin);
