@@ -171,6 +171,7 @@ function moduleCard(m){
  const refs=m.chapterIds.map(id=>chapters.find(c=>c.chapter===id)).filter(Boolean);
  const tags=refs.map(c=>'<span class="c13-tag">Ch '+c.chapter+' · p '+c.page+'</span>').join('');
  const pts=m.checkpoints.map(t=>'<li>'+esc(t)+'</li>').join('');
+ const chapterList=refs.map(c=>'<li>Chapter '+c.chapter+': '+esc(c.title)+' (printed p. '+c.page+')</li>').join('');
  const searchable=(m.title+' '+m.id+' '+m.summary+' '+m.references+' '+refs.map(c=>c.title).join(' ')).toLowerCase();
  return '<article class="c13-card" data-module="'+esc(m.id)+'" data-search="'+esc(searchable)+'"><h3>'+esc(m.title)+'</h3><p>'+esc(m.summary)+'</p><div class="c13-tags">'+tags+'</div><details><summary>Clinical synthesis and decision checkpoints</summary><ul>'+pts+'</ul><p><b>13e source:</b> '+esc(m.references)+'</p><div class="c13-caution"><b>Boundary:</b> '+esc(m.caution)+'</div></details></article>';
 }
