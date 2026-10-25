@@ -173,7 +173,7 @@ function moduleCard(m){
  const pts=m.checkpoints.map(t=>'<li>'+esc(t)+'</li>').join('');
  const chapterList=refs.map(c=>'<li>Chapter '+c.chapter+': '+esc(c.title)+' (printed p. '+c.page+')</li>').join('');
  const searchable=(m.title+' '+m.id+' '+m.summary+' '+m.references+' '+refs.map(c=>c.title).join(' ')).toLowerCase();
- return '<article class="c13-card" data-module="'+esc(m.id)+'" data-search="'+esc(searchable)+'"><h3>'+esc(m.title)+'</h3><p>'+esc(m.summary)+'</p><div class="c13-tags">'+tags+'</div><details><summary>Clinical synthesis and decision checkpoints</summary><ul>'+pts+'</ul><p><b>13e source:</b> '+esc(m.references)+'</p><div class="c13-caution"><b>Boundary:</b> '+esc(m.caution)+'</div></details></article>';
+ return '<article class="c13-card" data-module="'+esc(m.id)+'" data-search="'+esc(searchable)+'"><h3>'+esc(m.title)+'</h3><p>'+esc(m.summary)+'</p><div class="c13-tags">'+tags+'</div><details><summary>Clinical synthesis and decision checkpoints</summary><ul>'+pts+'</ul><p><b>Relevant 13e chapters</b></p><ul>'+chapterList+'</ul><p><b>13e source:</b> '+esc(m.references)+'</p><div class="c13-caution"><b>Boundary:</b> '+esc(m.caution)+'</div></details></article>';
 }
 function render(panel){
  const term=panel.querySelector('#c13-search').value.trim().toLowerCase(),filter=panel.querySelector('#c13-filter').value;let shown=0;
