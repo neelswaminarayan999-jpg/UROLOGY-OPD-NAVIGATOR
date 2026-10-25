@@ -11,7 +11,7 @@
 - A non-destructive server bootstrap that adds the layer to the rendered app without replacing the large existing frontend file.
 
 ## Important status distinction
-This is a **staged content migration**, not proof that every legacy treatment algorithm has been rewritten or validated against the 13th edition. The UI explicitly distinguishes chapter-specific syntheses from mapped-only and TOC-only chapters. Existing pathways, scores, dose rules and guideline-specific recommendations must be audited individually before they are labelled fully reconciled. Textbook background must not silently supersede current guidelines or local protocols.
+This is a **staged content migration**, not proof that every legacy treatment algorithm has been rewritten or validated against the 13th edition. The UI explicitly distinguishes chapter-specific syntheses from mapped-only and TOC-only chapters. This migration layer is based on the deployed `v13.2-final` tree and preserves its V14/V15 clinical engines and operative-atlas modules. Existing pathways, scores, dose rules and guideline-specific recommendations must be audited individually before they are labelled fully reconciled. Textbook background must not silently supersede current guidelines or local protocols.
 
 ## Local/Render smoke test
 1. Deploy this branch to a preview service before merging.

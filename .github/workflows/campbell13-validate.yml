@@ -3,7 +3,7 @@ on:
   push:
     branches: [campbell-13e-migration]
   pull_request:
-    branches: [main]
+    branches: [v13.2-final]
 jobs:
   validate:
     runs-on: ubuntu-latest

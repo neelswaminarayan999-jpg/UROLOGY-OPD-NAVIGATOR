@@ -1,37 +1,76 @@
-# Urology Oracle V12.1 — GitHub + Online AI deployment package
+# Urology Oracle V13.9 — strict AI fallback + expanded clinical protocols
 
-This repository package preserves the V12.1 offline Clinical Oracle and adds a clean Online AI route without exposing endpoint/model/API-key controls in the clinical UI.
+This release preserves the large clinical Oracle and the V13 offline/PWA architecture while replacing the single-provider AI dependency with ordered multi-provider failover. The clinical Oracle/UI are preserved and extended additively. V13.9 adds strict provider-response validation, automatic fallback for malformed/safety-classification outputs, an expanded protocol content pack, and visual pathway diagrams without replacing the existing clinical corpus.
 
-## Recommended live setup
-Use GitHub as the source repository and Render as the full-stack web host. Render serves `frontend/index.html` and the `/api/urology-ai` backend from the same origin, so the online AI requires no CORS or browser endpoint configuration.
+## Architecture
+- Clinical Oracle core: offline-capable PWA on every device after first successful online load.
+- Investigation AI: ONLINE ONLY through the server-side AI endpoint with ordered failover: Groq → Gemini → Cerebras → OpenRouter.
+- Offline AI / MedGemma: NOT INCLUDED.
+- API credentials: server-side only.
+- AI output: advisory; clinician confirmation is required before Oracle handoff.
 
-1. Create a GitHub repository and upload the contents of this folder.
-2. In Render, choose **New → Blueprint** and point it to the GitHub repository. Render will read `render.yaml`.
-3. In Render, set `GEMINI_API_KEY` as a secret environment variable.
-4. Deploy. Open the generated Render URL; the Oracle and `/api/urology-ai` are on the same origin.
-5. Test `https://YOUR-RENDER-URL/health` and confirm `{ "ok": true }`.
+## Gemini behaviour restored from V12.1
+- Primary model: `gemini-3.8-flash` (unless `GEMINI_MODEL` is explicitly changed server-side).
+- One Gemini API request per clinician submission.
+- `thinkingLevel: medium`.
+- `maxOutputTokens: 3500`.
+- No automatic model fallback.
+- No multi-attempt retry cascade.
+- A transient 503 is reported as temporary Gemini unavailability rather than consuming multiple free-tier requests.
+- A quota/rate-limit response is surfaced without repeated retry attempts.
 
-## Optional GitHub Pages frontend
-A GitHub Pages workflow is included at `.github/workflows/pages.yml`. Pages hosts only the static frontend. If you use it, edit `frontend/oracle-config.js` once after the Render backend exists:
+## Provider environment variables
+- `GROQ_API_KEY`, `GROQ_MODEL`, `GROQ_VISION_MODEL`
+- `GEMINI_API_KEY`, `GEMINI_MODEL`
+- `CEREBRAS_API_KEY`, `CEREBRAS_MODEL`
+- `OPENROUTER_API_KEY`, `OPENROUTER_MODEL` (default: `openrouter/free`)
 
-`window.UROLOGY_ORACLE_AI_BASE_URL = "https://YOUR-RENDER-SERVICE.onrender.com";`
+Keys remain server-side only; do not put them in frontend code.
 
-Then commit the change. The clinical UI still shows no endpoint/model/API-key controls; this file is deployment configuration, not a clinical setting.
+## Offline behaviour
+- `sw.js` caches the core Oracle assets and excludes `/api/` from caching.
+- Gemini remains unavailable offline by design.
+- Cache version is `urology-oracle-v13.9-core` and includes the additive V13.9 content pack.
 
-## Local test
-From the repository root:
+## Clinical safety architecture retained
+- TNM/classification validation gates.
+- Deterministic treatment-gate architecture.
+- Explicit cisplatin component collection / Galsky screen support.
+- Missing-data and contradiction states.
+- Decision trace and clinical provenance metadata.
+- Operative and reconstructive atlas preserved.
+- Investigation-specific online AI with clinician confirmation before Oracle handoff.
 
-`cd backend`
+## Test
+```bash
+node --check backend-server.mjs
+node --check frontend/v13-clinical-engine.js
+npm test
+```
 
-Copy `.env.example` to `.env`, set `GEMINI_API_KEY`, then run:
-
-`npm start`
-
-The server will serve the frontend at `http://127.0.0.1:8787/`.
-
-## Security / clinical use
-Never commit `.env` or an API key. Keep the Gemini credential only in the backend host's secret store. Online AI output is advisory and must be independently checked against the original investigation and clinical context. The deterministic Clinical Oracle is kept separate from AI output.
+## Clinical status
+This remains a clinical decision-support/teaching tool, not an autonomous prescribing system. Verify doses, contraindications, regimen schedules and institutional protocols against current authoritative sources before patient care.
 
 
-## Gemini API
-Create a Gemini API key in Google AI Studio and set it only as the Render environment variable `GEMINI_API_KEY`. Do not commit it to GitHub or put it in the browser. The backend uses Gemini multimodal image input and structured JSON output. Current default model: `gemini-3.8-flash`.
+### Provider notes
+- Groq text requests use `openai/gpt-oss-120b`; image requests automatically use `GROQ_VISION_MODEL` (default `qwen/qwen3.8-27b`).
+- OpenRouter defaults to `openrouter/free`, which dynamically selects an available free model.
+- Cerebras is retained in the fallback order but may return HTTP 402 when the account has no active inference credit; the router then continues to OpenRouter.
+
+
+## V13.9 changes
+- Provider responses are now schema-validated before being accepted. A safety-classification/refusal string such as `User Safety: unsafe` is treated as a provider failure and the next configured provider is attempted.
+- Required Oracle schema is enforced: `technical_adequacy`, `observations`, `interpretation`, `differential`, `urgent_flags`, `missing_data`, `uncertainty`, `suggested_disease`, `suggested_oracle_values`, `pathway_link`, `teaching`.
+- `pathway_link.requires_clinician_confirmation` must be `true`.
+- Added expanded treatment-protocol checkpoints for prostate, bladder, UTUC, RCC, testis, penis, urethral cancer, adrenal disease, urethral stricture, male LUTS and stone disease.
+- Added visual pathway diagrams for stone emergencies, urethral stricture phenotypes, bladder cancer decision layers and renal mass management.
+- Existing operative atlas, clinical engine, calculators, drug library and disease encyclopaedia are retained; the new material is additive.
+- Current EAU 2026 guidance should still be checked live before patient care; the 2026 EAU urethral-stricture and urolithiasis guidelines include substantive updates, and the RCC guideline also has 2026 updates.
+
+## V13.9 regression tests
+```bash
+node --check backend-server.mjs
+node --check frontend/v13-clinical-engine.js
+node --check frontend/v13.9-content-pack.js
+npm test
+```

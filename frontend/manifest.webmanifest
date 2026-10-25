@@ -1,0 +1,17 @@
+{
+  "name": "Urology Oracle",
+  "short_name": "Oracle",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "description": "Urology Oracle V14.0 — final clinical workstation for urology decision support, treatment pathways, surgical teaching and online investigation AI.",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
