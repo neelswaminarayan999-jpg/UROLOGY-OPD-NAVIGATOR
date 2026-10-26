@@ -218,14 +218,16 @@ function renderBladderPathway(){
     }
 
     if(bcg==='naive'&&(risk==='high'||risk==='veryhigh')){
-      if(ici==='eligible'&&access!=='unavailable'){
+      if(access==='unavailable'){
+        html+='<div class="v142-note"><b>Access:</b> BCG-plus-immunotherapy add-on options are marked unavailable locally. Use established risk-directed treatment or consider an appropriate clinical trial; do not prescribe on the basis of the evidence listing alone.</div>';
+      }else if(ici==='eligible'){
         html+='<div class="v142-note"><b>2026 EAU add-on discussion:</b> in selected, well-informed BCG-naïve high-/very-high-risk patients, discuss the benefits and harms of adding sasanlimab or durvalumab to BCG with maintenance. Confirm patient-specific immunotherapy suitability, country-specific authorization, actual supply, protocol and toxicity monitoring before selection.</div>';
+        if(access==='unverified') html+='<div class="v142-alert"><b>Availability not verified:</b> this is a guideline discussion point, not a treatment order. Confirm local approval, access and the current product label before use.</div>';
       }else if(ici==='contraindicated'){
         html+='<div class="v142-alert"><b>Checkpoint inhibitor unsuitable:</b> do not select the BCG + sasanlimab/durvalumab add-on pathway. Discuss standard BCG/cystectomy options according to risk and suitability.</div>';
       }else{
         html+='<div class="v142-alert"><b>Immunotherapy review required before add-on selection.</b> Assess contraindications first; the 2026 EAU update recommends shared discussion of BCG plus sasanlimab or durvalumab in selected high-/very-high-risk BCG-naïve patients, not automatic use in everyone.</div>';
       }
-      if(access==='unavailable') html+='<div class="v142-note"><b>Access:</b> newer BCG-plus-immunotherapy options are marked unavailable locally. Use established risk-directed treatment or consider an appropriate clinical trial; do not prescribe on the basis of the evidence listing alone.</div>';
     }
 
     if(bcg==='unresponsive'){
@@ -286,7 +288,7 @@ function renderBladderPathway(){
     }else{
       html='<b>Stage / node / metastasis discordance</b><div class="v142-alert">The entered data do not fit the localized cT2–T4a cN0–1 M0 branch. Reconcile clinical stage and imaging before selecting treatment.</div>';
     }
-  }else if(stage==='T4b'){
+  }else if(stage==='T4b'&&met!=='M1'){
     html='<b>Locally advanced / unresectable bladder cancer</b><div class="v142-alert">Confirm extent, cN/cM stage, resectability, symptoms, organ function, histology and immunotherapy/EV suitability. This case does not automatically enter the curative localized perioperative branch; discuss systemic/local options and goals of care in MDT.</div>';
   }else if(stage==='M1'||met==='M1'){
     if(ici==='unknown'||!ici||ev==='unknown'||!ev||!ecog||!hasGfr||!val('v142Hear')||!val('v142Neuro')||!val('v142Nyha')){
