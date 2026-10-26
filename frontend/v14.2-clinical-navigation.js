@@ -271,7 +271,7 @@ function renderBladderPathway(){
       }else if(periopCisplatinFit&&ici==='contraindicated'){
         html+='<div class="v142-note"><b>Cisplatin-eligible but immunotherapy unsuitable:</b> do not recommend perioperative durvalumab or EV + pembrolizumab. Discuss cisplatin-based neoadjuvant chemotherapy (e.g., GC or dd-MVAC per local protocol) followed by radical cystectomy/PLND, or selected trimodality treatment in MDT.</div>';
       }else if(evPFit){
-        html+='<div class="v142-alert"><b>Cisplatin-ineligible MIBC:</b> the 2026 EAU guideline recommends perioperative enfortumab vedotin + pembrolizumab for cisplatin-ineligible MIBC, subject to drug-specific eligibility, toxicity risk, local authorization/supply and MDT review. Do not substitute neoadjuvant carboplatin for cisplatin.</div>';
+        html+='<div class="v142-alert"><b>Cisplatin-ineligible MIBC:</b> the 2026 EAU guideline recommends perioperative enfortumab vedotin + pembrolizumab for cisplatin-ineligible MIBC, subject to drug-specific eligibility, toxicity risk, local authorization/supply and MDT review. This is not a carboplatin neoadjuvant pathway; do not substitute neoadjuvant carboplatin for cisplatin.</div>';
       }else if(!periopCisplatinFit&&ici==='eligible'&&ev==='eligible'&&access==='unavailable'){
         html+='<div class="v142-alert"><b>Guideline-supported perioperative EV + pembrolizumab is not locally available according to the entered setting.</b> Do not substitute neoadjuvant carboplatin. Discuss upfront radical cystectomy/PLND, selected trimodality therapy or clinical trial in MDT; verify local standards and access.';
       }else if(!periopCisplatinFit&&ici==='eligible'&&ev!=='eligible'){
