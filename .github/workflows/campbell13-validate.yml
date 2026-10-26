@@ -162,6 +162,8 @@ jobs:
           done
           curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null
           "$BROWSER" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --no-first-run --no-default-browser-check --virtual-time-budget=20000 --dump-dom "http://127.0.0.1:$PORT/cw13-smoke-test.html" > /tmp/cw13-test-dom.html
+          echo "Campbell/browser test results:"
+          grep -o 'data-cw13-[^=]*="[^"]*"' /tmp/cw13-test-dom.html || true
           grep -q 'data-cw13-plan="pass"' /tmp/cw13-test-dom.html
           grep -q 'data-cw13-modal="pass"' /tmp/cw13-test-dom.html
           grep -q 'data-cw13-search="pass"' /tmp/cw13-test-dom.html
