@@ -54,14 +54,16 @@ jobs:
                   await wait(40);
                   return resultText();
                 };
-                const launch = doc.getElementById('v142Bladder');
+                const launch = doc.getElementById('v142Bladder') || Array.from(doc.querySelectorAll('button')).find(b => (b.textContent || '').includes('Bladder cancer pathway'));
                 if (!launch) {
+                  document.body.setAttribute('data-cw13-bladder-error','launcher-missing');
                   ['bladder-nmibc','bladder-mibc-cisplatin','bladder-mibc-ineligible','bladder-node-gate','bladder-bcg-unresponsive'].forEach(fail);
                   return;
                 }
                 launch.click();
                 await wait(100);
                 if (!doc.getElementById('v142ClinicalModal')) {
+                  document.body.setAttribute('data-cw13-bladder-error','modal-not-open');
                   ['bladder-nmibc','bladder-mibc-cisplatin','bladder-mibc-ineligible','bladder-node-gate','bladder-bcg-unresponsive'].forEach(fail);
                   return;
                 }
