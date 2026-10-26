@@ -54,9 +54,13 @@ jobs:
                   await wait(40);
                   return resultText();
                 };
-                const launch = doc.getElementById('v142Bladder') || Array.from(doc.querySelectorAll('button')).find(b => (b.textContent || '').includes('Bladder cancer pathway'));
+                let launch = doc.getElementById('v142Bladder') || Array.from(doc.querySelectorAll('button')).find(b => (b.textContent || '').includes('Bladder cancer pathway'));
+                for (let attempt = 0; !launch && attempt < 30; attempt++) {
+                  await wait(100);
+                  launch = doc.getElementById('v142Bladder') || Array.from(doc.querySelectorAll('button')).find(b => (b.textContent || '').includes('Bladder cancer pathway'));
+                }
                 if (!launch) {
-                  document.body.setAttribute('data-cw13-bladder-error','launcher-missing');
+                  document.body.setAttribute('data-cw13-bladder-error','launcher-missing-after-wait');
                   ['bladder-nmibc','bladder-mibc-cisplatin','bladder-mibc-ineligible','bladder-node-gate','bladder-bcg-unresponsive'].forEach(fail);
                   return;
                 }
