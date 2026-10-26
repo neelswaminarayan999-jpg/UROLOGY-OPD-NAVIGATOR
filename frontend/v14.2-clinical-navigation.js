@@ -80,8 +80,11 @@ function removeInternalHomeCards(){
 function addClinicalNavigation(){
   if(document.getElementById('v142ClinicalNav')) return;
   var home=document.getElementById('homeView');
-  if(!home) return;
-  removeInternalHomeCards();
+  var view=document.getElementById('oracleView');
+  var selector=document.getElementById('oracleDisease');
+  // Keep this high-use navigation available even if a deployment's homeView
+  // shell is absent or mounted later than the first DOM-ready callback.
+  if(home) removeInternalHomeCards();
 
   var box=document.createElement('div');
   box.id='v142ClinicalNav';
@@ -108,18 +111,29 @@ function addClinicalNavigation(){
       '<button class="v142-btn" id="v142Urgent"><b>Urgent urology</b><span>Torsion · priapism · Fournier red flags</span></button>'+
     '</div></div>';
 
-  var first=home.querySelector('.card');
-  (first&&first.parentElement?first.parentElement:home).insertBefore(box,first||null);
+  if(home){
+    var first=home.querySelector('.card');
+    (first&&first.parentElement?first.parentElement:home).insertBefore(box,first||null);
+  }else if(view&&view.parentElement){
+    view.parentElement.insertBefore(box,view);
+  }else if(selector&&selector.parentElement){
+    selector.parentElement.insertBefore(box,selector);
+  }else{
+    document.body.insertBefore(box,document.body.firstChild);
+  }
 
   Array.from(box.querySelectorAll('[data-disease]')).forEach(function(b){
     b.onclick=function(){openDisease(b.getAttribute('data-disease'));};
   });
-  document.getElementById('v142Bladder').onclick=openBladderPathway;
-  document.getElementById('v142Scores').onclick=function(){
+  var bladder=document.getElementById('v142Bladder');
+  if(bladder) bladder.onclick=openBladderPathway;
+  var scores=document.getElementById('v142Scores');
+  if(scores) scores.onclick=function(){
     var b=Array.from(document.querySelectorAll('button')).find(function(x){return /Scores & risk calculators/i.test(x.innerText||'');});
     if(b) b.click();
   };
-  document.getElementById('v142Urgent').onclick=function(){
+  var urgent=document.getElementById('v142Urgent');
+  if(urgent) urgent.onclick=function(){
     var b=Array.from(document.querySelectorAll('button')).find(function(x){return /^Urgent urology/i.test((x.innerText||'').trim());});
     if(b) b.click();
   };
