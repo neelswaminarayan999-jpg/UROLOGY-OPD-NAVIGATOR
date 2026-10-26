@@ -80,9 +80,10 @@ jobs:
                   text.includes('sasanlimab or durvalumab') && text.includes('full-dose BCG') ? 'pass' : 'fail');
 
                 // GFR 40–60 with other fitness checks satisfied: test NIAGARA renal-threshold handling.
-                [['v142Stage','T2'],['v142N','N0'],['v142M','M0'],['v142Ecog','0'],['v142Crcl','50'],
+                const mibcSetResults=[['v142Stage','T2'],['v142N','N0'],['v142M','M0'],['v142Ecog','0'],['v142Crcl','50'],
                  ['v142Hear','no'],['v142Neuro','no'],['v142Nyha','no'],['v142Ici','eligible'],
-                 ['v142Ev','eligible'],['v142Access','available']].forEach(([id,v])=>set(id,v));
+                 ['v142Ev','eligible'],['v142Access','available']].map(([id,v])=>({id,ok:set(id,v),value:(doc.getElementById(id)||{}).value}));
+                document.body.setAttribute('data-cw13-mibc-inputs',mibcSetResults.map(x=>x.id+':'+x.value+':'+x.ok).join('|'));
                 text = await generate();
                 document.body.setAttribute('data-cw13-bladder-mibc-cisplatin-output', text.slice(0,650));
                 document.body.setAttribute('data-cw13-bladder-mibc-cisplatin',
