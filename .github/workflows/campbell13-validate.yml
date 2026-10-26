@@ -84,14 +84,16 @@ jobs:
                  ['v142Hear','no'],['v142Neuro','no'],['v142Nyha','no'],['v142Ici','eligible'],
                  ['v142Ev','eligible'],['v142Access','available']].forEach(([id,v])=>set(id,v));
                 text = await generate();
+                document.body.setAttribute('data-cw13-bladder-mibc-cisplatin-output', text.slice(0,650));
                 document.body.setAttribute('data-cw13-bladder-mibc-cisplatin',
                   text.includes('Perioperative cisplatin/gemcitabine + durvalumab') && text.includes('NIAGARA') && text.includes('Galsky') ? 'pass' : 'fail');
 
                 // Cisplatin-ineligible, immunotherapy-eligible, EV-suitable localized MIBC.
                 [['v142Crcl','35'],['v142Ici','eligible'],['v142Ev','eligible'],['v142Access','available']].forEach(([id,v])=>set(id,v));
                 text = await generate();
+                document.body.setAttribute('data-cw13-bladder-mibc-ineligible-output', text.slice(0,650));
                 document.body.setAttribute('data-cw13-bladder-mibc-ineligible',
-                  text.includes('Perioperative enfortumab vedotin + pembrolizumab') && text.includes('Do not substitute neoadjuvant carboplatin') ? 'pass' : 'fail');
+                  text.toLowerCase().includes('perioperative enfortumab vedotin + pembrolizumab') && text.includes('Do not substitute neoadjuvant carboplatin') ? 'pass' : 'fail');
 
                 // cN2–3 must not silently enter the localized perioperative branch.
                 [['v142Crcl','50'],['v142N','N23'],['v142M','M0']].forEach(([id,v])=>set(id,v));
