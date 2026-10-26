@@ -49,8 +49,36 @@ function serveStatic(req,res,origin){
   const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
   if(ext==='.html'&&path.basename(file)==='index.html'){
     let html=fs.readFileSync(file,'utf8');
-    const scriptTag='<script src="/campbell13-content.js" defer></script>';
-    if(!html.includes('/campbell13-content.js'))html=/<\/body\s*>/i.test(html)?html.replace(/<\/body\s*>/i,scriptTag+'</body>'):html+scriptTag;
+    // Keep this production-compatible entry point in parity with backend-server.mjs:
+    // both must load the V14/V15 clinical modules as well as the Campbell 13e layer.
+    const tags=[
+      '<script src="/v14-release-hotfix.js" defer></script>',
+      '<script src="/v14.1-opd-suite.js" defer></script>',
+      '<script src="/v14.1-core-hardening.js" defer></script>',
+      '<script src="/v14.2-clinical-navigation.js" defer></script>',
+      '<script src="/v14.3-prostate-pathway.js" defer></script>',
+      '<script src="/v14.4-oncology-pathways.js" defer></script>',
+      '<script src="/v14.5-urgent-urology.js" defer></script>',
+      '<script src="/v14.6-stone-engine.js" defer></script>',
+      '<script src="/v14.7-stricture-engine.js" defer></script>',
+      '<script src="/v14.8-bph-engine.js" defer></script>',
+      '<script src="/v14.9-scores-engine.js" defer></script>',
+      '<script src="/v15.0-operative-atlas.js" defer></script>',
+      '<script src="/v15.1-operative-atlas-bph-recon.js" defer></script>',
+      '<script src="/v15.2-operative-atlas-oncology-recon.js" defer></script>',
+      '<script src="/v15.3-operative-atlas-rplnd-ureter-ecirs.js" defer></script>',
+      '<script src="/v15.4-operative-atlas-advanced-stone.js" defer></script>',
+      '<script src="/v15.5-operative-atlas-bph-testis-penile.js" defer></script>',
+      '<script src="/v15.6-operative-atlas-trauma.js" defer></script>',
+      '<script src="/v15.7-operative-atlas-unified-launcher.js" defer></script>',
+      '<script src="/v15.8-opd-workflow.js" defer></script>',
+      '<script src="/campbell13-content.js" defer></script>'
+    ];
+    for(const tag of tags){
+      const src=tag.match(/src="([^"]+)"/)?.[1];
+      if(src&&!html.includes(src)&&html.includes('</head>'))html=html.replace('</head>',tag+'</head>');
+      else if(src&&!html.includes(src))html+=tag;
+    }
     res.writeHead(200,{'Content-Type':types[ext],'Cache-Control':'no-store'});
     return res.end(html);
   }
