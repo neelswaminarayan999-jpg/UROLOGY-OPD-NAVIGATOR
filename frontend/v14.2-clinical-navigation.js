@@ -198,7 +198,7 @@ function renderBladderPathway(){
       html+='<div class="v142-alert"><b>Pathway incomplete.</b> Complete the missing TURBT/pathology, CIS, formal EAU risk-group and BCG-status fields. A blank field is not evidence that repeat TURBT or additional therapy is unnecessary.</div>';
     }
     if(reTUR){
-      html+='<div class="v142-alert"><b>Repeat TURBT indicated by entered data.</b> Incomplete/doubtful resection; any T1 tumour; or absent detrusor muscle except in appropriate low-grade Ta/primary CIS situations. Plan re-resection in the guideline window (commonly within 2–6 weeks) and include the original tumour site, with the final decision based on pathology and local guideline.</div>';
+      html+='<div class="v142-alert"><b>Second TURBT indicated:</b> Incomplete/doubtful resection; any T1 tumour; or absent detrusor muscle except in appropriate low-grade Ta/primary CIS situations. Plan re-resection in the guideline window (commonly within 2–6 weeks) and include the original tumour site, with the final decision based on pathology and local guideline.</div>';
     }else if(considerReTUR){
       html+='<div class="v142-note"><b>High-grade Ta:</b> consider repeat TURBT according to tumour size/multifocality, resection completeness, muscle sampling and the applicable current guideline; do not dismiss it solely because muscle is reported.</div>';
     }else if(complete&&muscle){
