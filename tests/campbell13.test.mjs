@@ -29,6 +29,15 @@ test('Campbell 13e reference layer serves and validates its chapter map', async 
   assert.equal(home.status, 200);
   const html = await home.text();
   assert.match(html, /<script src="\/campbell13-content\.js" defer><\/script>/, 'server injects the 13e layer without rewriting the large HTML file');
+  assert.match(html, /\/v14\.2-clinical-navigation\.js/, 'Render backend loads the V14.2 clinical navigation module');
+  assert.match(html, /\/v14\.3-prostate-pathway\.js/, 'Render backend loads the V14.3 prostate pathway');
+  assert.match(html, /\/v15\.8-opd-workflow\.js/, 'Render backend loads the V15.8 OPD workflow');
+
+  const navResponse = await fetch(base + '/v14.2-clinical-navigation.js');
+  assert.equal(navResponse.status, 200, 'V14.2 clinical navigation is served');
+  const navJs = await navResponse.text();
+  assert.match(navJs, /v142Bladder/, 'clinical navigation exposes the bladder pathway control');
+  assert.match(navJs, /function renderBladderPathway/, 'bladder pathway handler is included');
 
   const moduleResponse = await fetch(base + '/campbell13-content.js');
   assert.equal(moduleResponse.status, 200);
