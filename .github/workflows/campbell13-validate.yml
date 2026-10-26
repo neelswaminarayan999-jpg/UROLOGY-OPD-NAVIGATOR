@@ -1,0 +1,188 @@
+name: Campbell 13e migration validation
+on:
+  push:
+    branches: [campbell-13e-migration]
+  pull_request:
+    branches: [v13.2-final]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax-check backend and content layer
+        run: |
+          node --check backend/server.mjs
+          node --check frontend/campbell13-content.js
+      - name: Smoke-test server injection and content coverage
+        run: node --test tests/campbell13.test.mjs
+      - name: Browser-test active plan integration and chapter search
+        shell: bash
+        run: |
+          set -euo pipefail
+          BROWSER="$(command -v chromium || command -v chromium-browser || command -v google-chrome || command -v google-chrome-stable || true)"
+          if [ -z "$BROWSER" ]; then
+            echo "A Chromium-compatible browser is required for the UI smoke test."
+            exit 1
+          fi
+          PORT=18765
+          cat > frontend/cw13-smoke-test.html <<'HTML'
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>Campbell 13e integration smoke test</title></head>
+          <body>
+            <iframe id="oracleApp" src="/" title="Oracle application under test" style="width:1200px;height:800px;border:0"></iframe>
+            <script>
+              const app = document.getElementById('oracleApp');
+              const fail = name => document.body.setAttribute('data-cw13-' + name, 'fail');
+              const started = Date.now();
+              const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+              async function testBladder(doc) {
+                const set = (id, value) => {
+                  const el = doc.getElementById(id);
+                  if (!el) return false;
+                  el.value = value;
+                  el.dispatchEvent(new doc.defaultView.Event('change', { bubbles: true }));
+                  return true;
+                };
+                const resultText = () => (doc.getElementById('v142Result') || {}).textContent || '';
+                const generate = async () => {
+                  const b = doc.getElementById('v142Generate');
+                  if (!b) return '';
+                  b.click();
+                  await wait(40);
+                  return resultText();
+                };
+                let launch = doc.getElementById('v142Bladder') || Array.from(doc.querySelectorAll('button')).find(b => (b.textContent || '').includes('Bladder cancer pathway'));
+                for (let attempt = 0; !launch && attempt < 30; attempt++) {
+                  await wait(100);
+                  launch = doc.getElementById('v142Bladder') || Array.from(doc.querySelectorAll('button')).find(b => (b.textContent || '').includes('Bladder cancer pathway'));
+                }
+                if (!launch) {
+                  document.body.setAttribute('data-cw13-bladder-error','launcher-missing-after-wait');
+                  ['bladder-nmibc','bladder-mibc-cisplatin','bladder-mibc-ineligible','bladder-node-gate','bladder-bcg-unresponsive'].forEach(fail);
+                  return;
+                }
+                launch.click();
+                await wait(100);
+                if (!doc.getElementById('v142ClinicalModal')) {
+                  document.body.setAttribute('data-cw13-bladder-error','modal-not-open');
+                  ['bladder-nmibc','bladder-mibc-cisplatin','bladder-mibc-ineligible','bladder-node-gate','bladder-bcg-unresponsive'].forEach(fail);
+                  return;
+                }
+                // High-risk, BCG-naive NMIBC: risk-directed BCG plus a 2026 EAU shared-decision checkpoint.
+                [['v142Stage','T1'],['v142Grade','high'],['v142Complete','yes'],['v142Muscle','yes'],['v142Cis','no'],
+                 ['v142Risk','high'],['v142Bcg','naive'],['v142BcgPhenotype','unknown'],['v142Cystectomy','unknown'],
+                 ['v142Ici','eligible'],['v142Ev','eligible'],['v142Access','available']].forEach(([id,v])=>set(id,v));
+                let text = await generate();
+                document.body.setAttribute('data-cw13-bladder-nmibc',
+                  text.includes('sasanlimab or durvalumab') && text.includes('full-dose BCG') ? 'pass' : 'fail');
+
+                // GFR 40–60 with other fitness checks satisfied: test NIAGARA renal-threshold handling.
+                const mibcSetResults=[['v142Stage','T2'],['v142N','N0'],['v142M','M0'],['v142Ecog','0'],['v142Crcl','50'],
+                 ['v142Hear','no'],['v142Neuro','no'],['v142Nyha','no'],['v142Ici','eligible'],
+                 ['v142Ev','eligible'],['v142Access','available']].map(([id,v])=>({id,ok:set(id,v),value:(doc.getElementById(id)||{}).value}));
+                document.body.setAttribute('data-cw13-mibc-inputs',mibcSetResults.map(x=>x.id+':'+x.value+':'+x.ok).join('|'));
+                text = await generate();
+                document.body.setAttribute('data-cw13-bladder-mibc-cisplatin-output', text.slice(0,650));
+                document.body.setAttribute('data-cw13-bladder-mibc-cisplatin',
+                  text.includes('Perioperative cisplatin/gemcitabine + durvalumab') && text.includes('NIAGARA') && text.includes('Galsky') ? 'pass' : 'fail');
+
+                // Cisplatin-ineligible, immunotherapy-eligible, EV-suitable localized MIBC.
+                [['v142Crcl','35'],['v142Ici','eligible'],['v142Ev','eligible'],['v142Access','available']].forEach(([id,v])=>set(id,v));
+                text = await generate();
+                document.body.setAttribute('data-cw13-bladder-mibc-ineligible-output', text.slice(0,650));
+                document.body.setAttribute('data-cw13-bladder-mibc-ineligible',
+                  text.toLowerCase().includes('perioperative enfortumab vedotin + pembrolizumab') && text.includes('Do not substitute neoadjuvant carboplatin') ? 'pass' : 'fail');
+
+                // cN2–3 must not silently enter the localized perioperative branch.
+                [['v142Crcl','50'],['v142N','N23'],['v142M','M0']].forEach(([id,v])=>set(id,v));
+                text = await generate();
+                document.body.setAttribute('data-cw13-bladder-node-gate',
+                  text.includes('Clinically node-advanced MIBC') && !text.includes('Perioperative cisplatin/gemcitabine + durvalumab') ? 'pass' : 'fail');
+
+                // BCG-unresponsive CIS with cystectomy refusal/unfitness gets phenotype-specific, explicitly qualified options.
+                [['v142Stage','T1'],['v142Grade','high'],['v142Complete','yes'],['v142Muscle','yes'],['v142Cis','yes'],
+                 ['v142Risk','high'],['v142Bcg','unresponsive'],['v142BcgPhenotype','cis'],['v142Cystectomy','unfit']].forEach(([id,v])=>set(id,v));
+                text = await generate();
+                document.body.setAttribute('data-cw13-bladder-bcg-unresponsive',
+                  text.includes('nadofaragene firadenovec') && text.includes('nogapendekin alfa inbakicept + BCG') && text.includes('strict definition') ? 'pass' : 'fail');
+              }
+              const run = () => {
+                try {
+                  const doc = app.contentDocument;
+                  const selector = doc && doc.getElementById('oracleDisease');
+                  const button = doc && doc.getElementById('cw13Open');
+                  if (!doc || !selector || !button) {
+                    if (Date.now() - started < 8000) return setTimeout(run, 100);
+                    fail('plan'); fail('modal'); fail('search'); return;
+                  }
+                  const opt = Array.from(selector.options).find(o => o.value === 'Stone Disease' || o.textContent.trim() === 'Stone Disease');
+                  if (!opt) { fail('plan'); fail('modal'); fail('search'); return; }
+                  selector.value = opt.value;
+                  selector.dispatchEvent(new Event('change', { bubbles: true }));
+                  setTimeout(() => {
+                    const panel = doc.getElementById('cw13ActivePlanContext');
+                    document.body.setAttribute('data-cw13-plan',
+                      panel && panel.textContent.includes('Chapter 95') && panel.textContent.includes('Chapter 96') && panel.textContent.includes('Chapter-specific source syntheses') ? 'pass' : 'fail');
+                    const openButton = doc.getElementById('cw13Open');
+                    if (openButton) openButton.click();
+                    setTimeout(() => {
+                      const modal = doc.getElementById('cw13Modal');
+                      document.body.setAttribute('data-cw13-modal',
+                        modal && modal.classList.contains('cw13-show') ? 'pass' : 'fail');
+                      const search = doc.getElementById('cw13Search');
+                      if (search) {
+                        search.value = 'Chapter 96';
+                        search.dispatchEvent(new Event('input', { bubbles: true }));
+                        setTimeout(() => {
+                          const body = doc.getElementById('cw13Body');
+                          document.body.setAttribute('data-cw13-search',
+                            body && body.textContent.includes('Acute Care of Urinary Lithiasis') && body.textContent.includes('full content') && body.querySelector('[data-chapter-synthesis="96"]') ? 'pass' : 'fail');
+                          testBladder(doc).catch(e => {
+                            document.body.setAttribute('data-cw13-bladder-error', String(e && e.message || e));
+                            ['bladder-nmibc','bladder-mibc-cisplatin','bladder-mibc-ineligible','bladder-node-gate','bladder-bcg-unresponsive'].forEach(fail);
+                          });
+                        }, 100);
+                      } else fail('search');
+                    }, 100);
+                  }, 250);
+                } catch (e) {
+                  document.body.setAttribute('data-cw13-error', String(e && e.message || e));
+                  fail('plan'); fail('modal'); fail('search');
+                }
+              };
+              app.addEventListener('load', () => setTimeout(run, 100));
+              setTimeout(run, 150);
+            </script>
+          </body></html>
+          HTML
+          WEB_ROOT="$PWD/frontend" PORT="$PORT" HOST=127.0.0.1 node backend/server.mjs >/tmp/cw13-server.log 2>&1 &
+          SERVER_PID=$!
+          cleanup() {
+            kill "$SERVER_PID" 2>/dev/null || true
+            rm -f frontend/cw13-smoke-test.html
+          }
+          trap cleanup EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null; then break; fi
+            sleep 0.25
+          done
+          curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null
+          "$BROWSER" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --no-first-run --no-default-browser-check --virtual-time-budget=20000 --dump-dom "http://127.0.0.1:$PORT/cw13-smoke-test.html" > /tmp/cw13-test-dom.html
+          echo "Campbell/browser test results:"
+          echo "Dump size: $(wc -c < /tmp/cw13-test-dom.html) bytes"
+          grep -o '<title>[^<]*</title>' /tmp/cw13-test-dom.html | head -3 || true
+          grep -o 'data-cw13-[^=]*="[^"]*"' /tmp/cw13-test-dom.html || true
+          echo "DOM tail for diagnostics:"
+          tail -c 2500 /tmp/cw13-test-dom.html || true
+          grep -q 'data-cw13-plan="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-modal="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-search="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-bladder-nmibc="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-bladder-mibc-cisplatin="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-bladder-mibc-ineligible="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-bladder-node-gate="pass"' /tmp/cw13-test-dom.html
+          grep -q 'data-cw13-bladder-bcg-unresponsive="pass"' /tmp/cw13-test-dom.html
+          echo "Browser smoke test passed: Campbell layer, plus NMIBC/MIBC and cisplatin/ICI eligibility branches."

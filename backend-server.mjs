@@ -529,7 +529,14 @@ const server = http.createServer(async (req, res) => {
       const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8', '.svg': 'image/svg+xml' };
       res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
       if (ext === '.html') {
-        const html = hotfixHtml(fs.readFileSync(file, 'utf8'));
+        let html = hotfixHtml(fs.readFileSync(file, 'utf8'));
+        // Load the Campbell 13e source layer without replacing the existing V14/V15 application.
+        if (path.basename(file) === 'index.html' && !html.includes('/campbell13-content.js')) {
+          const scriptTag = '<script src="/campbell13-content.js" defer></script>';
+          html = /<\/body\s*>/i.test(html)
+            ? html.replace(/<\/body\s*>/i, scriptTag + '</body>')
+            : html + scriptTag;
+        }
         res.end(html);
         return;
       }
