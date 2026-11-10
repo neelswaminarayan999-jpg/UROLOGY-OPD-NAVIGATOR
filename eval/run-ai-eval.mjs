@@ -32,9 +32,15 @@ for (const c of cases.filter(c => !only.length || only.includes(c.id))) {
   const t0 = Date.now();
   let text = '', provider = '', err = '', note = '';
   try {
-    const r = await fetch(base + '/api/urology-ai', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ study: c.study, instruction: instr(c.study), context: { report: c.report, structured: {} }, images: [], reference: reference(c.disease), reference_disease: c.disease }) });
-    const j = await r.json();
+    const payload = JSON.stringify({ study: c.study, instruction: instr(c.study), context: { report: c.report, structured: {} }, images: [], reference: reference(c.disease), reference_disease: c.disease });
+    // A free Render instance that is waking or restarting answers with an HTML page; wait and retry twice.
+    let r, raw, j;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      r = await fetch(base + '/api/urology-ai', { method: 'POST', headers: { 'content-type': 'application/json' }, body: payload });
+      raw = await r.text();
+      try { j = JSON.parse(raw); break; } catch { j = null; if (attempt < 3) { console.log(`  ${c.id}: server sent a non-JSON page (HTTP ${r.status}); retrying in 20 s`); await new Promise(res => setTimeout(res, 20000)); } }
+    }
+    if (!j) throw new Error(`server returned a web page instead of an AI answer (HTTP ${r.status}) three times`);
     if (!r.ok) err = `HTTP ${r.status} ${(j.error || '').slice(0, 120)}`;
     provider = `${j.provider || '?'}/${j.model || '?'}`;
     note = (j.fallback_attempts || []).map(a => `${a.model}: ${a.status || a.code || 'error'}`).join(', ');
