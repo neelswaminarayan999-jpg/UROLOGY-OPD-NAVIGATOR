@@ -1,0 +1,18 @@
+
+/* ===== FINAL UI V7 — hidden-state correctness + scroll containment ===== */
+#oracleView.hidden{display:none!important}
+#oracleView{display:flex!important}
+#oracleView .oracle-grid{height:calc(100vh - 205px)!important;min-height:600px!important;overflow:hidden!important}
+#oracleView .oracle-grid>div,#oracleView .oracle-grid>aside{min-height:0!important}
+#oracleView #oracleForm,#oracleView #oracleRiskPanel,#oracleView #oracleOutput{height:100%!important;max-height:none!important;min-height:0!important;overflow-y:scroll!important;overflow-x:hidden!important;overscroll-behavior:contain!important;scrollbar-gutter:stable both-edges!important}
+#oracleView #oracleRiskPanel{position:relative!important;top:auto!important}
+#oracleView #oracleForm::-webkit-scrollbar,#oracleView #oracleRiskPanel::-webkit-scrollbar,#oracleView #oracleOutput::-webkit-scrollbar{width:11px}
+#oracleView #oracleForm::-webkit-scrollbar-track,#oracleView #oracleRiskPanel::-webkit-scrollbar-track,#oracleView #oracleOutput::-webkit-scrollbar-track{background:#e8eef3!important;border-radius:12px}
+#oracleView #oracleForm::-webkit-scrollbar-thumb,#oracleView #oracleRiskPanel::-webkit-scrollbar-thumb,#oracleView #oracleOutput::-webkit-scrollbar-thumb{background:#7c93a3!important;border-radius:12px;border:2px solid #e8eef3!important}
+#oracleView .v4-kicker,#oracleView .v4-muted,#oracleView .text-slate-500,#oracleView .text-slate-600{color:#4d6679!important}
+#oracleView .v4-panel,#oracleView .step{color:#2b465a!important}
+#homeView .text-white{color:#fff!important}
+#homeView .home-title{color:#102b42!important}
+#homeView .home-muted{color:#536b7f!important}
+@media(max-width:1280px){#oracleView .oracle-grid{height:auto!important;min-height:0!important;overflow:visible!important}#oracleView #oracleForm,#oracleView #oracleRiskPanel{height:680px!important;max-height:none!important}#oracleView #oracleOutput{height:620px!important}}
+@media(max-width:900px){#oracleView .oracle-grid{height:auto!important;min-height:0!important}#oracleView #oracleForm,#oracleView #oracleRiskPanel,#oracleView #oracleOutput{height:auto!important;overflow:visible!important}}

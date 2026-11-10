@@ -1,0 +1,76 @@
+
+/* ===== UI V6 — professional contrast + reliable column scrolling ===== */
+:root{color-scheme:light;--ui-navy:#0b1f33;--ui-ink:#162b3d;--ui-muted:#536b7f;--ui-line:#cbd8e2;--ui-bg:#eef3f7;--ui-panel:#ffffff;--ui-accent:#0f6b86;--ui-accent-soft:#edf7fb}
+html,body{background:var(--ui-bg)!important;color:var(--ui-ink)!important}
+body{min-height:100vh;font-size:15px;line-height:1.55}
+body *{text-wrap:pretty}
+button,input,select,textarea{font-family:inherit}
+button{color:var(--ui-ink)}
+body>div.max-w-7xl{max-width:1680px!important;background:linear-gradient(180deg,#f8fbfc 0%,#edf3f7 100%)!important}
+header.sticky-top{min-height:72px;background:#081b2d!important;border-color:#19364d!important;box-shadow:0 4px 18px rgba(2,12,24,.18)}
+header.sticky-top .text-lg{color:#fff!important;font-weight:900}
+header.sticky-top .text-slate-300{color:#d7e4ee!important}
+header.sticky-top input{background:#fff!important;color:#163044!important;border:1px solid #9db0bf!important}
+header.sticky-top input::placeholder{color:#6c8192!important;opacity:1}
+header.sticky-top button{background:#173650!important;color:#fff!important;border:1px solid #587186!important}
+#homeView{color:var(--ui-ink)!important}
+#homeView>.card{background:#fff!important;border-color:#cad7e1!important;box-shadow:0 10px 30px rgba(15,23,42,.06)!important}
+#homeView h1,#homeView h2,#homeView h3,#homeView .section-title,#homeView b{color:#102b42!important}
+#homeView p,#homeView .text-sm,#homeView .text-xs,#homeView .home-muted{color:#4c6579!important}
+#homeView .warn{background:#fff8ed!important;color:#5a3a16!important;border-color:#e7b86d!important}
+#homeView .warn b{color:#814b0a!important}
+#diseaseGrid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important}
+#diseaseGrid>button.card{display:flex!important;flex-direction:column!important;justify-content:flex-start!important;align-items:flex-start!important;min-height:158px!important;padding:20px!important;background:#fff!important;color:#132b40!important;border:1px solid #cbd8e2!important;border-radius:18px!important;box-shadow:0 8px 24px rgba(15,23,42,.055)!important}
+#diseaseGrid>button.card .font-black{color:#102b42!important}
+#diseaseGrid>button.card .text-xs{color:#566f82!important;line-height:1.55}
+#diseaseGrid>button.card:hover{transform:translateY(-2px);border-color:#83a9bf!important;box-shadow:0 16px 34px rgba(15,23,42,.12)!important}
+#diseaseGrid>button.card.bg-slate-950{background:linear-gradient(135deg,#0a253a,#0d6077)!important;color:#fff!important;border-color:#1c6d83!important}
+#diseaseGrid>button.card.bg-slate-950 .font-black,#diseaseGrid>button.card.bg-slate-950 .text-slate-300{color:#fff!important}
+#homeView .bg-slate-50{background:#f5f8fa!important;color:#27455a!important;border-color:#d9e4eb!important}
+#homeView footer,#homeView+.card{color:#4e6679!important}
+
+#oracleView{height:calc(100vh - 72px)!important;min-height:720px!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+#oracleView>.oracle-grid{flex:1 1 auto!important;min-height:0!important;width:100%!important;display:grid!important;grid-template-columns:minmax(360px,1fr) minmax(360px,.95fr) minmax(440px,1.15fr)!important;gap:18px!important;overflow:hidden!important;align-items:stretch!important}
+#oracleView .oracle-grid>*{min-width:0!important;min-height:0!important}
+#oracleView #oracleForm,#oracleView #oracleRiskPanel,#oracleView #oracleOutput{height:100%!important;max-height:none!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;scrollbar-gutter:stable!important;scroll-behavior:smooth}
+#oracleView #oracleRiskPanel{position:relative!important;top:auto!important;align-self:stretch!important}
+#oracleView #oracleForm::-webkit-scrollbar,#oracleView #oracleRiskPanel::-webkit-scrollbar,#oracleView #oracleOutput::-webkit-scrollbar{width:12px}
+#oracleView #oracleForm::-webkit-scrollbar-track,#oracleView #oracleRiskPanel::-webkit-scrollbar-track,#oracleView #oracleOutput::-webkit-scrollbar-track{background:#e6edf2;border-radius:10px}
+#oracleView #oracleForm::-webkit-scrollbar-thumb,#oracleView #oracleRiskPanel::-webkit-scrollbar-thumb,#oracleView #oracleOutput::-webkit-scrollbar-thumb{background:#8298a8;border-radius:10px;border:3px solid #e6edf2}
+#oracleView #oracleForm,#oracleView #oracleRiskPanel,#oracleView #oracleOutput{scrollbar-width:auto;scrollbar-color:#8298a8 #e6edf2}
+#oracleView .card{background:#fff!important;color:#1b3448!important;border-color:#cbd8e2!important;box-shadow:0 10px 28px rgba(15,23,42,.065)!important}
+#oracleView label{color:#3f5b70!important;font-weight:800}
+#oracleView select,#oracleView input,#oracleView textarea{background:#fff!important;color:#172f42!important;border-color:#bfcfda!important}
+#oracleView select:focus,#oracleView input:focus,#oracleView textarea:focus{border-color:#2d7692!important;box-shadow:0 0 0 3px rgba(15,107,134,.13)!important}
+#oracleView .v4-kicker{color:#4a6478!important}
+#oracleView .v4-muted{color:#5b7385!important}
+#oracleView .context-note{background:#eef8fb!important;color:#1e5369!important;border:1px solid #bddde8!important}
+#oracleView .decision{background:#eef8fb!important;color:#1c4659!important;border-color:#b4d8e5!important}
+#oracleView .warn{background:#fff4f1!important;color:#5b2925!important;border-color:#e9a79d!important}
+#oracleView .ok{background:#effaf4!important;color:#20533b!important;border-color:#add5bd!important}
+#oracleView .alt{background:#fff8eb!important;color:#65450c!important;border-color:#e4c271!important}
+#oracleView .step{background:#f6f9fb!important;color:#355267!important;border-color:#76a8bf!important}
+#oracleView .v4-btn{background:#fff!important;color:#17364b!important;border-color:#c4d4de!important}
+#oracleView .v4-btn:hover{background:#f1f7fa!important}
+#oracleView .v4-btn.blue{background:#edf7ff!important;color:#075985!important;border-color:#acd4ea!important}
+#oracleView .v4-btn.amber{background:#fff7e8!important;color:#80500d!important;border-color:#ecd08d!important}
+#oracleView .v4-btn.dark{background:#0b2438!important;color:#fff!important;border-color:#0b2438!important}
+#oracleView .badge,#oracleView .chip{color:#234459!important}
+#oracleView .badge-blue{background:#e3f4fb!important;color:#075985!important;border-color:#b9deef!important}
+#oracleView .badge-green{background:#e8f7ed!important;color:#16633a!important}
+#oracleView .badge-red{background:#fdecec!important;color:#962b2b!important}
+#oracleView .badge-amber{background:#fff5dc!important;color:#7b4705!important}
+#oracleView #riskPanelContent{padding-bottom:24px}
+
+@media(max-width:1280px){
+  #diseaseGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #oracleView{height:auto!important;min-height:0!important;overflow:visible!important}
+  #oracleView .oracle-grid{grid-template-columns:minmax(320px,1fr) minmax(320px,1fr)!important;overflow:visible!important}
+  #oracleView #oracleOutput{grid-column:1/-1;height:620px!important}
+  #oracleView #oracleForm,#oracleView #oracleRiskPanel{height:680px!important}
+}
+@media(max-width:900px){
+  #diseaseGrid{grid-template-columns:1fr!important}
+  #oracleView .oracle-grid{grid-template-columns:1fr!important}
+  #oracleView #oracleForm,#oracleView #oracleRiskPanel,#oracleView #oracleOutput{height:auto!important;max-height:none!important;overflow:visible!important}
+}
