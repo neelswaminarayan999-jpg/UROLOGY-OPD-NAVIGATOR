@@ -70,6 +70,9 @@ assert.ok(lastBody.includes('3. TNM staging & risk'));
 assert.ok((lastBody.match(/x/g) || []).length < 12500, 'reference must be capped');
 await post();
 assert.ok(!lastBody.includes('VERIFIED REFERENCE CONTENT'));
+// V16.3: study-specific rule reaches the model
+await post({ study: 'uroflow', context: {} });
+assert.ok(lastBody.includes('STUDY-SPECIFIC RULE (uroflow)') && lastBody.includes('retrograde urethrogram'));
 
 // 5. Health reports the order and which keys are present (never the keys themselves).
 const health = await new Promise(resolve => http.get('http://127.0.0.1:8811/health', r => { let d = ''; r.on('data', c => d += c); r.on('end', () => resolve(JSON.parse(d))); }));

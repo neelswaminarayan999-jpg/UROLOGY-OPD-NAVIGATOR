@@ -135,6 +135,18 @@ UROFLOWMETRY-SPECIFIC ACCURACY RULES:
 - If a urethral stricture is suggested, require direct supporting evidence such as visible narrowing on urethroscopy/RUG/VCUG rather than low flow alone.
 - Keep interpretation proportional to the data: do not invent prostate size, PVR, symptoms, obstruction grade, stricture length or detrusor contractility.
 ` : '';
+  // V16.3: study-specific reasoning rules, so the model names the right confirmatory step.
+  const STUDY_HINTS = {
+    uroflow: 'For a plateau or obstructive curve, weigh urethral stricture (younger age, instrumentation/trauma/catheter history, flat plateau) against benign prostatic obstruction, and name the next confirmatory test: retrograde urethrogram and/or urethroscopy when stricture is suspected, pressure-flow study when BPO vs detrusor underactivity is the question.',
+    pfs: 'Report the bladder outlet obstruction index and bladder contractility index when the pressures allow, and classify obstruction and contractility.',
+    rgu: 'State stricture site, length and calibre, and whether the posterior urethra was assessed (a VCUG/MCUG is needed for near-obliterative disease).',
+    ctstone: 'First check for infection or obstruction that needs urgent drainage before any definitive stone treatment.',
+    scrotal: 'Absent or reduced testicular flow with acute pain is a surgical emergency needing exploration. For an intratesticular mass, state inguinal orchidectomy with AFP, beta-hCG and LDH, and that trans-scrotal biopsy must be avoided.',
+    renalmass: 'Assign the Bosniak v2019 class for cystic lesions; macroscopic fat indicates angiomyolipoma.',
+    adrenal: 'Apply ESE/ENSAT 2023: a homogeneous lesion of 10 HU or less is benign; always recommend hormonal work-up (1 mg dexamethasone suppression test; metanephrines unless 10 HU or less).',
+    cystoscopy: 'For a bladder tumour, state TURBT with detrusor muscle in the specimen, and biopsy of suspicious flat red areas for CIS.'
+  };
+  const studyHint = STUDY_HINTS[study] ? `\nSTUDY-SPECIFIC RULE (${study}): ${STUDY_HINTS[study]}\nIn the interpretation, always name the next confirmatory investigation or step.\n` : `\nIn the interpretation, always name the next confirmatory investigation or step.\n`;
   const reference = String(body.reference || '').slice(0, 12000);
   const referenceDisease = String(body.reference_disease || '').slice(0, 60);
   const grounding = reference ? `
@@ -152,7 +164,7 @@ GROUNDING RULES:
 Patient/context data:
 ${JSON.stringify(ctx)}
 
-Analyze only the supplied image(s), written report and structured data. This is clinician-facing support, not autonomous medical care. Do NOT identify a person, make a definitive patient diagnosis, prescribe treatment, or issue a treatment order. Describe visible radiologic/clinical features, extract measurements only when clearly readable, identify important abnormalities and limitations, and suggest which existing Oracle module should be opened for clinician review. Do not invent measurements or facts. Distinguish direct observations from interpretation. ${specialtyGuardrail}${grounding}Return valid JSON matching the requested schema. Canonical Oracle modules: ${canonical.join(', ')}. The clinician must confirm all findings and treatment decisions.`;
+Analyze only the supplied image(s), written report and structured data. This is clinician-facing support, not autonomous medical care. Do NOT identify a person, make a definitive patient diagnosis, prescribe treatment, or issue a treatment order. Describe visible radiologic/clinical features, extract measurements only when clearly readable, identify important abnormalities and limitations, and suggest which existing Oracle module should be opened for clinician review. Do not invent measurements or facts. Distinguish direct observations from interpretation. ${specialtyGuardrail}${studyHint}${grounding}Return valid JSON matching the requested schema. Canonical Oracle modules: ${canonical.join(', ')}. The clinician must confirm all findings and treatment decisions.`;
 }
 function outputSchema() {
   const diseases = [
