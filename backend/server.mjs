@@ -5,7 +5,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const WEB_ROOT = path.resolve(process.env.WEB_ROOT || path.join(__dirname, 'frontend'));
+const WEB_ROOT = path.resolve(process.env.WEB_ROOT || path.join(__dirname, '../frontend'));
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
@@ -40,6 +40,50 @@ async function callGemini(body,model){
   return {output_text:extractText(data),model,provider:'Gemini'};
 }
 async function runAI(body){if(!API_KEY)throw new Error('Server is not configured with GEMINI_API_KEY.');const models=[MODEL,...FALLBACKS.filter(x=>x!==MODEL)];let last;for(const model of models){try{return await callGemini(body,model);}catch(e){last=e;if(![429,503].includes(e.status))break;}}throw last||new Error('Gemini request failed.');}
-function serveStatic(req,res,origin){let p=(req.url||'/').split('?')[0];if(p==='/')p='/index.html';if(!p.startsWith('/')||p.includes('..'))return json(res,400,{error:'Invalid path'},origin);const file=path.resolve(WEB_ROOT,'.'+p);if(!file.startsWith(WEB_ROOT)||!fs.existsSync(file)||!fs.statSync(file).isFile())return json(res,404,{error:'Not found'},origin);const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};res.writeHead(200,{'Content-Type':types[path.extname(file).toLowerCase()]||'application/octet-stream','Cache-Control':'no-store'});fs.createReadStream(file).pipe(res);}
+function serveStatic(req,res,origin){
+  let p=(req.url||'/').split('?')[0];if(p==='/')p='/index.html';
+  if(!p.startsWith('/')||p.includes('..'))return json(res,400,{error:'Invalid path'},origin);
+  const file=path.resolve(WEB_ROOT,'.'+p);
+  if(!file.startsWith(WEB_ROOT)||!fs.existsSync(file)||!fs.statSync(file).isFile())return json(res,404,{error:'Not found'},origin);
+  const ext=path.extname(file).toLowerCase();
+  const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
+  if(ext==='.html'&&path.basename(file)==='index.html'){
+    let html=fs.readFileSync(file,'utf8');
+    // Keep this production-compatible entry point in parity with backend-server.mjs:
+    // both must load the V14/V15 clinical modules as well as the Campbell 13e layer.
+    const tags=[
+      '<script src="/v14-release-hotfix.js" defer></script>',
+      '<script src="/v14.1-opd-suite.js" defer></script>',
+      '<script src="/v14.1-core-hardening.js" defer></script>',
+      '<script src="/v14.2-clinical-navigation.js" defer></script>',
+      '<script src="/v14.3-prostate-pathway.js" defer></script>',
+      '<script src="/v14.4-oncology-pathways.js" defer></script>',
+      '<script src="/v14.5-urgent-urology.js" defer></script>',
+      '<script src="/v14.6-stone-engine.js" defer></script>',
+      '<script src="/v14.7-stricture-engine.js" defer></script>',
+      '<script src="/v14.8-bph-engine.js" defer></script>',
+      '<script src="/v14.9-scores-engine.js" defer></script>',
+      '<script src="/v15.0-operative-atlas.js" defer></script>',
+      '<script src="/v15.1-operative-atlas-bph-recon.js" defer></script>',
+      '<script src="/v15.2-operative-atlas-oncology-recon.js" defer></script>',
+      '<script src="/v15.3-operative-atlas-rplnd-ureter-ecirs.js" defer></script>',
+      '<script src="/v15.4-operative-atlas-advanced-stone.js" defer></script>',
+      '<script src="/v15.5-operative-atlas-bph-testis-penile.js" defer></script>',
+      '<script src="/v15.6-operative-atlas-trauma.js" defer></script>',
+      '<script src="/v15.7-operative-atlas-unified-launcher.js" defer></script>',
+      '<script src="/v15.8-opd-workflow.js" defer></script>',
+      '<script src="/campbell13-content.js" defer></script>'
+    ];
+    for(const tag of tags){
+      const src=tag.match(/src="([^"]+)"/)?.[1];
+      if(src&&!html.includes(src)&&html.includes('</head>'))html=html.replace('</head>',tag+'</head>');
+      else if(src&&!html.includes(src))html+=tag;
+    }
+    res.writeHead(200,{'Content-Type':types[ext],'Cache-Control':'no-store'});
+    return res.end(html);
+  }
+  res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream','Cache-Control':'no-store'});
+  return fs.createReadStream(file).pipe(res);
+}
 const server=http.createServer(async(req,res)=>{const origin=String(req.headers.origin||'');try{if(req.method==='OPTIONS'){res.writeHead(204,corsHeaders(origin));return res.end();}if(origin&&ALLOWED_ORIGIN!=='*'&&origin!==ALLOWED_ORIGIN)return json(res,403,{error:'Origin is not allowed.'},origin);if(req.method==='GET'&&req.url==='/health')return json(res,200,{ok:true,service:'urology-oracle-online-ai',model:MODEL,fallbacks:FALLBACKS,provider:'Gemini',configured:Boolean(API_KEY)},origin);if(req.method==='POST'&&req.url==='/api/urology-ai'){if(!rateAllowed(req))return json(res,429,{error:'Rate limit reached. Please try again later.'},origin);let body={};try{body=JSON.parse(await readBody(req));}catch{return json(res,400,{error:'Invalid JSON payload.'},origin);}return json(res,200,await runAI(body),origin);}if(req.method==='GET')return serveStatic(req,res,origin);return json(res,405,{error:'Method not allowed'},origin);}catch(e){return json(res,e.status===429?429:500,{error:e?.message||String(e)},origin);}});
 server.listen(PORT,HOST,()=>console.log(`Urology Oracle backend listening on ${HOST}:${PORT}; Gemini model=${MODEL}`));
