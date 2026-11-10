@@ -35,6 +35,10 @@ const facts = [
   [/EV-302/, 'EV-302 (enfortumab vedotin + pembrolizumab) first-line mUC'],
   [/KEYNOTE-564/, 'KEYNOTE-564 adjuvant pembrolizumab RCC'],
   [/lastVerified:\s*"20\d\d-\d\d-\d\d"/, 'META.lastVerified date present'],
+  [/Prasugrel<\/td><td>7 days/, 'anticoagulation table: prasugrel 7-day stop (CHEST 2022)'],
+  [/Dabigatran, CrCl &lt;50 mL\/min<\/td><td>Omit 2 days before<\/td><td>Omit 4 days before/, 'anticoagulation table: dabigatran renal adjustment (CHEST 2022)'],
+  [/Do not use DVIU for penile|do not use DVIU \(EAU 2026, strong/, 'stricture engine: no DVIU for penile strictures (EAU 2026, strong)'],
+  [/do not use DVIU or dilatation as the only treatment \(EAU 2026, strong\)/, 'stricture engine: no solitary DVIU for >2 cm (EAU 2026, strong)'],
 ];
 for (const [re, why] of facts) assert.ok(re.test(html), `missing: ${why}`);
 
@@ -42,6 +46,8 @@ for (const [re, why] of facts) assert.ok(re.test(html), `missing: ${why}`);
 const banned = [
   [/epididymal invasion (?:is|=|→) ?pT1\b/i, 'epididymal invasion must not be stated as pT1'],
   [/race-adjusted STONE/i, 'unvalidated race-free STONE bands were removed'],
+  [/data-del="'\+i\+'"/, 'stent registry must delete by id, not by position in a sorted list'],
+  [/stDate'\); d\.value=new Date\(\)\.toISOString/, 'stent dates must use local dates, not UTC'],
 ];
 for (const [re, why] of banned) assert.ok(!re.test(html), `regression: ${why}`);
 
