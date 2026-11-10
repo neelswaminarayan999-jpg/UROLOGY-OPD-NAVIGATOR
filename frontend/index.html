@@ -444,7 +444,7 @@ header.sticky-top button{background:#173650!important;color:#fff!important;borde
 
 <script>
 const META = {
-  lastVerified: "2026-09-22",
+  lastVerified: "2026-11-10",
   guidelineBaseline: {
     EAU: {
       prostate:"2026", bladderNMIBC:"2026", bladderMIBC:"2026", UTUC:"2026", RCC:"2026", penis:"2026", testis:"2026"
@@ -496,7 +496,7 @@ const DISEASES = {
     ["Pathologic prognostic factors","Cribriform/IDC, percentage pattern 4, EPE, SVI, positive margins, nodal burden, genomic alterations and treatment context can change management even when the headline GG is unchanged."]
    ]},
    {title:"4. Localized / locally advanced treatment",items:[
-    ["Very-low / low risk","Use shared decision-making with life expectancy. Active surveillance is a curative-intent strategy for appropriately selected low-risk and selected favorable-intermediate disease; watchful waiting is palliative/conservative management for limited life expectancy."],
+    ["Low risk (NCCN 2026 merged very-low into low)","Use shared decision-making with life expectancy. Active surveillance is a curative-intent strategy for appropriately selected low-risk and selected favorable-intermediate disease; watchful waiting is palliative/conservative management for limited life expectancy."],
     ["Favorable intermediate","Options can include AS in selected men, radical prostatectomy, external-beam RT, or brachytherapy-based approaches depending on burden, anatomy and life expectancy. Avoid making focal therapy the default standard."],
     ["Unfavorable intermediate","Definitive local therapy with RP ± ePLND or RT plus short-course ADT is typical. RT approaches may combine EBRT and/or brachytherapy in selected men."],
     ["High / very-high risk","Multimodality treatment: RP with appropriate nodal staging in selected fit men, or definitive RT with long-course ADT. Intensification with an AR-pathway agent is increasingly incorporated in selected high-risk/locally advanced pathways; use the current guideline criteria, not a generic 'ADT for everyone' rule."],
@@ -513,21 +513,21 @@ const DISEASES = {
     ["ARPI doublets","Abiraterone + ADT (LATITUDE/STAMPEDE), enzalutamide + ADT (ENZAMET/ARCHES), apalutamide + ADT (TITAN), darolutamide + ADT and other approved ARPI strategies are guideline-based options selected according to patient/disease factors."],
     ["Docetaxel","Docetaxel 75 mg/m² IV every 3 weeks for 6 cycles can be combined with ADT, with current guidelines generally preferring ARPI + docetaxel triplet regimens for patients fit for chemotherapy where criteria are met."],
     ["Triplet therapy","ARASENS = ADT + docetaxel + darolutamide. PEACE-1 = ADT + docetaxel + abiraterone/prednisone, with prostate RT studied in defined low-volume disease. The decision is not simply 'high-volume = triplet': disease volume, timing, fitness and prior therapy matter."],
-    ["BRCA/HRR","The 2026 EAU update adds HRR-directed strategies including ADT + ARPI + PARP inhibition in selected molecularly defined disease (AMPLITUDE). CAPItello-281 evaluated AKT-pathway inhibition in a molecularly selected population; treat only according to current regulatory/guideline status."],
+    ["Biomarker-directed mHSPC (2025–26)","Test HRR genes (germline + somatic), PTEN and PSMA PET where they change treatment. FDA-approved: talazoparib + enzalutamide for HRR-mutated disease (TALAPRO-3, Oct 2026); niraparib + abiraterone for BRCA2-mutated disease (AMPLITUDE, Dec 2025; also in EAU 2026); capivasertib + abiraterone for PTEN-deficient disease (CAPItello-281, Jun 2026); Lu-177 PSMA-617 + ARPI for PSMA-positive disease (PSMAddition, Jul 2026). Check EAU recommendation strength and local approval before use."],
     ["Prostate RT in M1","For men presenting with low-volume metastatic disease, prostate-directed RT remains a guideline-supported option in combination with systemic therapy."]
    ]},
    {title:"7. nmCRPC • mCRPC",items:[
     ["nmCRPC","Continue ADT. For M0 CRPC at high risk of metastasis (classically PSA-DT <10 months), ARPI options include darolutamide, apalutamide or enzalutamide."],
     ["mCRPC principle","Maintain castrate testosterone and select therapy according to prior ARPI/taxane exposure, visceral disease, symptoms, PSMA expression and molecular profile."],
-    ["PARP inhibitors","For eligible HRR-altered disease, PARP inhibitor choices are biomarker- and prior-treatment-dependent. PROfound supports olaparib in selected HRR-mutated mCRPC. Other PARP strategies require exact gene/line-of-therapy eligibility."],
-    ["Radioligand","VISION established Lu-177 PSMA-617 in PSMA-positive mCRPC after ARPI and taxane exposure. Common reference regimen is 7.4 GBq IV every 6 weeks for up to 6 doses, subject to label and eligibility."],
+    ["PARP inhibitors","Biomarker- and prior-treatment-dependent. Olaparib after ARPI in HRR-mutated mCRPC (PROfound); first-line mCRPC combinations: olaparib + abiraterone (PROpel, BRCA-mutated per FDA), niraparib + abiraterone (MAGNITUDE, BRCA), talazoparib + enzalutamide (TALAPRO-2, HRR-mutated). Avoid repeating a PARP inhibitor already given in mHSPC."],
+    ["Radioligand","Lu-177 PSMA-617 7.4 GBq IV every 6 weeks × 6 for PSMA-positive mCRPC after ARPI and taxane (VISION) or after one ARPI when delaying taxane is appropriate (PSMAfore, FDA Mar 2025); now also with an ARPI in mHSPC (PSMAddition)."],
     ["Taxane sequencing","CARD supports cabazitaxel after docetaxel + an ARPI when the clinical scenario fits. Docetaxel/cabazitaxel dosing must follow current label and prior-toxicity criteria."],
     ["Neuroendocrine transformation","If progression is discordant with PSA, rapid visceral progression or lineage shift is suspected, obtain biopsy of a progressing lesion when feasible and treat the emerging phenotype rather than continuing an ineffective AR pathway strategy."]
    ]},
    {title:"8. Trials you should recognize",items:[
     ["Diagnostics / AS","PRECISION, PRECISION-PC, FUTURE, MRI-FIRST, MR PROPER, ProtecT, PROTECT/AS literature."],
     ["Localized intensification","ProtecT; modern RT/RP comparative datasets; focal-therapy studies remain distinct from guideline-standard whole-gland definitive therapy."],
-    ["mHSPC","CHAARTED, STAMPEDE, LATITUDE, TITAN, ENZAMET, ARCHES, ARASENS, PEACE-1, AMPLITUDE, PEACE-1 prostate RT component."],
+    ["mHSPC","CHAARTED, STAMPEDE, LATITUDE, TITAN, ENZAMET, ARCHES, ARASENS, ARANOTE, PEACE-1 (incl. prostate RT), AMPLITUDE, CAPItello-281, TALAPRO-3, PSMAddition."],
     ["BCR / high-risk","EMBARK and contemporary salvage-RT trials/series."],
     ["mCRPC","PROfound, MAGNITUDE, TALAPRO-2, VISION, TheraP, CARD, PREVAIL, AFFIRM, COU-AA studies." ]
    ]},
@@ -558,8 +558,8 @@ const DISEASES = {
    ["EAU 2026 risk groups","Four-group EAU risk stratification: low, intermediate, high, very high. Very-high-risk features include selected high-grade/T1/CIS combinations, plus LVI, CIS in the prostatic urethra and selected aggressive variant histologies."],
    ["Low risk","Complete TURBT followed by a single immediate intravesical chemotherapy instillation when safe/indicated."],
    ["Intermediate risk","Repeat TURBT when indicated, then adjuvant chemotherapy and/or BCG according to recurrence/progression risk and patient factors."],
-   ["High risk","BCG induction with maintenance is a key bladder-preserving strategy; early radical cystectomy should be discussed in very-high-risk disease, selected variant histology and other poor-risk settings."],
-   ["BCG schedule","Induction = weekly instillation ×6. Standard maintenance uses 3-week mini-courses at defined intervals; use a BCG availability-adapted institutional schedule and exact EAU/NCCN pathway."],
+   ["High risk","Full-dose BCG induction + maintenance for 1–3 years is the standard bladder-preserving strategy. In BCG-naïve high-risk disease, adding durvalumab (POTOMAC; FDA May 2026: 1500 mg q4w × 13 with BCG induction + maintenance) or sasanlimab (CREST) can be discussed: both improved DFS, with more immune toxicity. Discuss early radical cystectomy in very-high-risk disease and selected variant histology."],
+   ["BCG schedule","Induction = weekly × 6. Maintenance (SWOG) = weekly × 3 at months 3, 6, 12, 18, 24, 30 and 36: 1 year for intermediate risk, 1–3 years for high risk. During BCG shortage, prioritise high-risk patients and use the local reduced-dose/frequency protocol."],
    ["BCG-unresponsive","Further BCG is generally not appropriate. Radical cystectomy is the standard/preferred oncologic option; bladder-preserving options are selected according to guideline/approval/trial status and include intravesical gene therapy, N-803 + BCG, TAR-200 and systemic pembrolizumab in defined settings."]
   ]},
   {title:"4. NMIBC risk calculators",items:[
@@ -570,8 +570,8 @@ const DISEASES = {
   {title:"5. MIBC staging & local therapy",items:[
    ["TNM","Ta non-invasive papillary; Tis CIS; T1 lamina propria; T2a/b inner/outer muscle; T3a microscopic perivesical tissue and T3b macroscopic; T4a invades prostatic stroma, seminal vesicles, uterus or vagina; T4b pelvic or abdominal wall. N1 single node in the true pelvis (hypogastric, obturator, external iliac or presacral); N2 multiple true-pelvic nodes; N3 common iliac node(s). M1a non-regional lymph nodes; M1b other distant metastases. UICC TNM 9 made no changes to bladder T, N, M or stage."],
    ["Standard curative route","Fit cT2–T4a N0M0 patients: radical cystectomy + pelvic lymph-node dissection with perioperative systemic therapy according to eligibility."],
-   ["Neoadjuvant / perioperative systemic therapy","Cisplatin-based chemotherapy remains a major standard backbone. EAU 2026 also incorporates perioperative gemcitabine/cisplatin + durvalumab for appropriate cisplatin-eligible MIBC, and EV + pembrolizumab for cisplatin-ineligible MIBC based on KEYNOTE-905/EV-303 data and approvals."],
-   ["Adjuvant","Adjuvant nivolumab is established for selected high-risk patients who cannot receive/decline cisplatin-based chemotherapy. ctDNA-guided strategies are emerging; use only when the guideline/approved trial pathway supports them."],
+   ["Neoadjuvant / perioperative systemic therapy","Cisplatin-based chemotherapy remains a major standard backbone. EAU 2026 incorporates perioperative gemcitabine/cisplatin + durvalumab for cisplatin-eligible MIBC (NIAGARA), and EV + pembrolizumab for cisplatin-ineligible MIBC (KEYNOTE-905/EV-303). In July 2026 the FDA extended perioperative EV + pembrolizumab to cisplatin-eligible patients after KEYNOTE-B15/EV-304 showed better EFS (HR 0.53) and OS than neoadjuvant gemcitabine/cisplatin."],
+   ["Adjuvant","Adjuvant nivolumab (CheckMate 274) for high-risk pathology (ypT2–4 or ypN+ after NAC; pT3–4 or pN+ without NAC) when no perioperative immunotherapy was given. ctDNA-guided adjuvant atezolizumab (IMvigor011; FDA May 2026) for patients with molecular residual disease on serial ctDNA testing, 1680 mg q4w up to 1 year."],
    ["Bladder preservation","Selected patients with favourable tumour factors and the ability to undergo maximal TURBT can receive trimodality therapy (maximal TURBT + radiosensitizing systemic therapy + definitive RT) in an MDT."]
   ]},
   {title:"6. Metastatic urothelial carcinoma",items:[
@@ -582,8 +582,8 @@ const DISEASES = {
    ["What changed","Sacituzumab govitecan is not a routine recommendation after the negative TROPiCS-04 result and regulatory withdrawal of the accelerated indication."]
   ]},
   {title:"7. Trials",items:[
-   ["NMIBC","SWOG 8507 (BCG maintenance), CUETO, KEYNOTE-057, QUILT-3032, SunRISe-1, THOR-2, Nadofaragene phase III."],
-   ["MIBC perioperative","SWOG 8710, VESPER, CheckMate 274, AMBASSADOR, NIAGARA, KEYNOTE-905/EV-303, IMvigor011."],
+   ["NMIBC","SWOG 8507 (BCG maintenance), CUETO, POTOMAC, CREST, KEYNOTE-057, QUILT-3032, SunRISe-1, THOR-2, Nadofaragene phase III."],
+   ["MIBC perioperative","SWOG 8710, VESPER, CheckMate 274, AMBASSADOR, NIAGARA, KEYNOTE-905/EV-303, KEYNOTE-B15/EV-304, IMvigor011."],
    ["Metastatic","EV-302/KEYNOTE-A39, JAVELIN Bladder 100, DANUBE, KEYNOTE-361, IMvigor130, THOR and HER2-directed studies."]
   ]},
   {title:"8. Follow-up",items:[
@@ -613,7 +613,7 @@ const DISEASES = {
    ["Perioperative chemotherapy","Adjuvant platinum-based chemotherapy after RNU is supported by the POUT trial in appropriate high-risk patients; timing relative to surgery matters because renal function may fall after nephroureterectomy."]
   ]},
   {title:"4. Metastatic / systemic",items:[
-   ["First line","For platinum-eligible disease, platinum combination chemotherapy and increasingly EV + pembrolizumab depending on jurisdiction/approval and current guideline pathway. For cisplatin-eligible patients, gemcitabine/cisplatin or HD-MVAC are standard options; gemcitabine/carboplatin is used when cisplatin-ineligible."],
+   ["First line","EV + pembrolizumab is the preferred first-line regimen for advanced urothelial carcinoma including upper-tract primaries (EV-302; benefit regardless of cisplatin eligibility). If EV + pembrolizumab is unsuitable: cisplatin-eligible → gemcitabine/cisplatin + nivolumab (CheckMate 901) or GC/ddMVAC followed by avelumab maintenance; cisplatin-ineligible → gemcitabine/carboplatin then avelumab maintenance."],
    ["Maintenance","Avelumab maintenance after non-progressive platinum-treated metastatic disease is established."],
    ["Later line","Erdafitinib for susceptible FGFR alterations and checkpoint inhibitors according to prior therapy/biomarker status. Clinical trial participation is important."]
   ]},
@@ -701,7 +701,7 @@ const DISEASES = {
    ["Good risk","Seminoma: any site without non-pulmonary visceral metastasis. NSGCT: AFP <1,000 ng/mL, β-hCG <5,000 IU/L and LDH <1.5× ULN, with no mediastinal primary and no non-pulmonary visceral metastases."],
    ["Intermediate","Seminoma with non-pulmonary visceral metastasis; NSGCT with AFP 1,000–10,000, β-hCG 5,000–50,000 or LDH 1.5–10× ULN, absent poor-risk features."],
    ["Poor","NSGCT only: primary mediastinal germ-cell tumour, non-pulmonary visceral metastasis, AFP >10,000, β-hCG >50,000 or LDH >10× ULN."],
-   ["Use case","IGCCCG drives chemotherapy intensity, cycle number and prognosis after orchiectomy in metastatic disease."]
+   ["Use case","IGCCCG drives chemotherapy intensity, cycle number and prognosis after orchiectomy in metastatic disease. IGCCCG 2021 update: within these groups, LDH >2.5× ULN (seminoma) and lung metastases, LDH and older age (NSGCT) identify worse outcomes; use the online IGCCCG calculator for refined prognosis."]
   ]},
   {title:"5. Stage I seminoma",items:[
    ["Surveillance","Preferred for many compliant stage I patients; relapse risk is roughly 12–20% depending on risk features and surveillance strategy."],
@@ -714,7 +714,7 @@ const DISEASES = {
    ["Fertility","Discuss sperm banking before chemotherapy/RPLND. Avoid unnecessary retroperitoneal surgery that compromises ejaculation."]
   ]},
   {title:"7. Stage II / metastatic treatment",items:[
-   ["Seminoma IIA/B","Marker-negative low-volume disease may be managed with RT or cisplatin-based chemotherapy in selected patients. Stage IIC+ generally receives systemic chemotherapy according to IGCCCG."],
+   ["Seminoma IIA/B","Options: RT (IIA 30 Gy, IIB 36 Gy), BEP × 3 / EP × 4, or, in expert centres, primary nerve-sparing RPLND for marker-negative IIA/small IIB disease (SEMS, PRIMETEST). Stage IIC+ receives chemotherapy according to IGCCCG."],
    ["Good-risk metastatic","BEP ×3 or EP ×4 are standard first-line patterns when bleomycin is contraindicated."],
    ["Intermediate/poor-risk","BEP ×4 is the standard backbone. VIP ×4 is a bleomycin-free alternative in patients at pulmonary risk."],
    ["Poor-risk marker decline","Re-check markers after cycle 1; an unfavourable decline prompts consideration of expert-center intensification strategies."]
@@ -773,13 +773,14 @@ const DISEASES = {
   {title:"6. Adjuvant therapy",items:[
    ["KEYNOTE-564","Adjuvant pembrolizumab improves DFS and OS in selected high-risk operable clear-cell RCC. EAU 2026 recommends it for trial-defined intermediate-high/high-risk groups and M1 NED after resection of oligometastatic disease within 1 year."],
    ["Dose reference","Pembrolizumab 200 mg IV q3w or 400 mg q6w for approximately 1 year according to the approved regimen/order set."],
+   ["Belzutifan add-on","Adding belzutifan 120 mg daily (up to 54 weeks) to adjuvant pembrolizumab improved DFS (LITESPARK-022, HR 0.72; FDA Jun 2026) at the cost of more grade ≥3 toxicity (anaemia, hypoxia)."],
    ["Do not extrapolate","Do not give adjuvant pembrolizumab to every T1 RCC or every non-clear-cell tumour; the evidence and approval are histology/risk-specific."]
   ]},
   {title:"7. IMDC & metastatic treatment",items:[
    ["IMDC factors","KPS <80%, diagnosis-to-treatment interval <1 year, low haemoglobin, high corrected calcium, neutrophilia and thrombocytosis. Favorable = 0; intermediate = 1–2; poor = 3–6."],
    ["First-line ccRCC","EAU 2026: nivolumab/ipilimumab, pembrolizumab/axitinib, lenvatinib/pembrolizumab or nivolumab/cabozantinib are standards, especially for IMDC intermediate/poor risk. VEGFR-TKI monotherapy remains an option when ICI is unsuitable."],
    ["Cytoreductive nephrectomy","CARMENA and SURTIME shifted practice toward deferred/selected CN. Upfront CN is for carefully selected patients, not an automatic step for metastatic RCC."],
-   ["After ICI combinations","Cabozantinib or another unused VEGFR-TKI is a common evidence-based next line. Belzutifan is an emerging later-line option in appropriately pretreated ccRCC."],
+   ["After ICI combinations","Belzutifan 120 mg + lenvatinib 20 mg daily improved PFS vs cabozantinib after PD-(L)1 therapy (LITESPARK-011; FDA Sep 2026). Cabozantinib or another unused VEGFR-TKI remains standard. Belzutifan alone after PD-(L)1 and VEGFR-TKI (LITESPARK-005). Do not re-challenge with an ICI (CONTACT-03 negative)."],
    ["Sarcomatoid","ICI-containing combinations are particularly relevant."]
   ]},
   {title:"8. Non-clear-cell pathways",items:[
@@ -788,8 +789,8 @@ const DISEASES = {
    ["Hereditary RCC","Use syndrome-specific pathways (VHL, FH/HLRCC, BHD, TSC and others) and genetics referral."]
   ]},
   {title:"9. Trials",items:[
-   ["Adjuvant","KEYNOTE-564; IMmotion010 and CheckMate 914 were negative for routine adjuvant ICI; use the evidence hierarchy."],
-   ["Metastatic","KEYNOTE-426, CheckMate-214, CLEAR, CheckMate 9ER, CARMENA, SURTIME, CONTACT-03."],
+   ["Adjuvant","KEYNOTE-564 (DFS + OS), LITESPARK-022 (belzutifan + pembrolizumab); IMmotion010, CheckMate 914 and PROSPER were negative."],
+   ["Metastatic","KEYNOTE-426, CheckMate-214, CLEAR, CheckMate 9ER, CARMENA, SURTIME, CONTACT-03, LITESPARK-005, LITESPARK-011."],
    ["Papillary","SWOG 1500 (PAPMET) informed cabozantinib in papillary RCC."]
   ]},
   {title:"10. Follow-up",items:[
@@ -823,8 +824,8 @@ const DISEASES = {
  emoji:"🧪",color:"purple",tagline:"Adrenal incidentaloma • pheochromocytoma • ACC • neuroendocrine",
  sections:[
   {title:"1. Incidentaloma evaluation",items:[
-   ["Hormone screen","Before biopsy or surgery, exclude pheochromocytoma with plasma free or urinary fractionated metanephrines when indicated. Perform 1-mg overnight dexamethasone suppression testing; assess aldosterone/renin ratio in patients with hypertension/hypokalaemia."],
-   ["Imaging","Non-contrast CT attenuation, homogeneity, washout and MRI chemical-shift features help differentiate benign adenoma from malignant/suspicious lesions. Washout thresholds must be interpreted only with an appropriate adrenal CT protocol."],
+   ["Hormone screen (ESE/ENSAT 2023)","1-mg overnight dexamethasone suppression test in every patient: cortisol ≤50 nmol/L (≤1.8 µg/dL) excludes autonomous secretion; >50 nmol/L without overt Cushing = mild autonomous cortisol secretion (MACS), so screen for hypertension, diabetes and bone disease. Plasma free or urinary fractionated metanephrines unless the mass is ≤10 HU on unenhanced CT (pheochromocytoma very unlikely). Aldosterone/renin ratio if hypertensive or hypokalaemic."],
+   ["Imaging (ESE/ENSAT 2023)","Unenhanced CT first. Homogeneous and ≤10 HU = benign, no further imaging regardless of size (about 70% of incidentalomas). Homogeneous 11–20 HU and <4 cm: immediate further imaging (washout CT, chemical-shift MRI or FDG-PET) or repeat unenhanced CT in 12 months. ≥4 cm and heterogeneous, or >20 HU: MDT discussion, usually surgery. Washout data are weak; do not rely on them alone."],
    ["Biopsy","Never biopsy a potentially functional adrenal mass before pheochromocytoma is excluded." ]
   ]},
   {title:"2. Adrenocortical carcinoma / pheochromocytoma",items:[
@@ -1689,7 +1690,7 @@ const GUIDELINE_ADDENDA = {
  {title:"11. MIBC — every cisplatin branch",items:[
   ["Cisplatin eligible","Typical criteria include PS 0–1, GFR generally >50–60 mL/min, no grade ≥2 hearing loss, no grade ≥2 neuropathy and no NYHA III heart failure; apply the complete institutional/EAU/NCCN definition."],
   ["Cisplatin-ineligible but fit for perioperative therapy","Do not stop at 'no cisplatin'. 2026 guidance/evidence includes perioperative enfortumab vedotin + pembrolizumab for cisplatin-ineligible MIBC in appropriate candidates (KEYNOTE-905/EV-303), as well as other guideline/approval-defined options."],
-  ["Cisplatin-eligible perioperative immunotherapy","NIAGARA supports perioperative durvalumab + gemcitabine/cisplatin followed by radical cystectomy + pelvic LND and adjuvant durvalumab in eligible patients; use the current label/trial schedule."],
+  ["Cisplatin-eligible perioperative immunotherapy","Two evidence-based options: (1) NIAGARA: durvalumab 1500 mg + gemcitabine/cisplatin q3w × 4, cystectomy + pelvic LND, then durvalumab q4w × 8; (2) KEYNOTE-B15/EV-304: EV + pembrolizumab × 4 cycles before and EV × 5 + pembrolizumab × 13 cycles after cystectomy (FDA Jul 2026; EFS HR 0.53 and OS benefit vs neoadjuvant GC). No head-to-head comparison exists; choose at MDT by neuropathy, diabetes, renal function and access."],
   ["Cisplatin-ineligible but carboplatin-eligible","Carboplatin is not an equivalent neoadjuvant substitute for cisplatin in MIBC. Discuss definitive local therapy, perioperative EV+pembro where indicated, clinical trial or bladder-preservation pathways rather than reflexively substituting GemCarbo as NAC."],
   ["Platinum-unfit","Use definitive local therapy when feasible, trimodality bladder preservation in selected candidates, or systemic therapy/clinical trial according to the current guideline and patient fitness."],
   ["CheckMate 901 branch","For advanced/metastatic cisplatin-fit urothelial carcinoma, GC + nivolumab is an evidence-based alternative when EV is unsuitable/unavailable, with nivolumab maintenance."],
