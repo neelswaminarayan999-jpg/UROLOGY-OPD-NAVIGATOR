@@ -1,0 +1,29 @@
+name: AI accuracy check
+# Run on demand from the Actions tab: tests the live AI Lab on 12 synthetic, de-identified cases.
+# Uses real (free-tier) model quota, so it never runs automatically.
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Site to test'
+        default: 'https://urology-opd-navigator.onrender.com'
+        required: true
+      min_pass:
+        description: 'Minimum cases that must pass (of 12)'
+        default: '10'
+        required: true
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wake the site (free Render services sleep)
+        run: for i in 1 2 3 4 5 6; do curl -fsS "${{ inputs.site }}/health" && break; sleep 20; done
+      - name: Run 12 AI cases
+        env:
+          MIN_PASS: ${{ inputs.min_pass }}
+        run: node eval/run-ai-eval.mjs "${{ inputs.site }}"
