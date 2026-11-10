@@ -358,6 +358,18 @@
       html[data-oracle-theme="light"] body>div.max-w-7xl [class*="bg-gray-"]{
         color:#172033!important;border-color:#cbd5e1!important;
       }
+      /* V15.10 light-mode contrast fixes (found by an automated contrast scan of every view).
+         1. Text that was white on cards/panels that light mode turns white becomes dark. */
+      html[data-oracle-theme="light"] body>div.max-w-7xl .card :is(.text-white,.text-slate-100,.text-slate-200,.text-slate-300):not([class*="bg-"]),
+      html[data-oracle-theme="light"] body>div.max-w-7xl .panel :is(.text-white,.text-slate-100,.text-slate-200,.text-slate-300):not([class*="bg-"]),
+      html[data-oracle-theme="light"] body>div.max-w-7xl :is(.bg-slate-900,.bg-gray-900) :is(.text-white,.text-slate-100,.text-slate-200,.text-slate-300):not([class*="bg-"]){color:#172033!important}
+      /* 2. Buttons/chips that keep a dark background keep white text (the [class*="bg-slate-"] rule made it dark). */
+      html[data-oracle-theme="light"] body>div.max-w-7xl :is(.bg-slate-600,.bg-slate-700,.bg-slate-800,.bg-slate-950,.bg-gray-700,.bg-gray-800,.bg-gray-950,.bg-black),
+      html[data-oracle-theme="light"] body>div.max-w-7xl .card :is(.bg-slate-600,.bg-slate-700,.bg-slate-800,.bg-slate-950,.bg-gray-700,.bg-gray-800,.bg-gray-950,.bg-black),
+      html[data-oracle-theme="light"] body>div.max-w-7xl .panel :is(.bg-slate-600,.bg-slate-700,.bg-slate-800,.bg-slate-950,.bg-gray-700,.bg-gray-800,.bg-gray-950,.bg-black),
+      html[data-oracle-theme="light"] body>div.max-w-7xl :is(.bg-slate-600,.bg-slate-700,.bg-slate-800,.bg-slate-950,.bg-gray-700,.bg-gray-800,.bg-gray-950,.bg-black) *{color:#ffffff!important}
+      /* 3. Small grey section labels: slate-400 is 2.6:1 on white; slate-500 meets 4.5:1. */
+      html[data-oracle-theme="light"] body>div.max-w-7xl .text-slate-400{color:#64748b!important}
       html[data-oracle-theme="dark"] body,
       html[data-oracle-theme="dark"] body>div.max-w-7xl{
         background:#0b1220!important;color:#e5edf7!important;
@@ -366,6 +378,27 @@
       html[data-oracle-theme="dark"] body>div.max-w-7xl .panel{
         background:#111827!important;color:#e5edf7!important;border-color:#334155!important;
       }
+      /* V15.10 contrast fixes, both themes (automated scan of every view; target ≥4.5:1). */
+      html[data-oracle-theme="light"] body>div.max-w-7xl .text-slate-500{color:#526075!important}
+      html[data-oracle-theme="light"] body>div.max-w-7xl :is(.v14-stat span,.v14-mini),html[data-oracle-theme="dark"] body>div.max-w-7xl :is(.v14-stat span,.v14-mini){color:#4b5f6d!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl .section-title{color:#e5edf7!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl :is(.text-slate-500,.text-slate-400){color:#9fb0c3!important}
+      html[data-oracle-theme="light"] body>div.max-w-7xl #sectionNav button{background:#ffffff!important;color:#172033!important;border:1px solid #cbd5e1!important}
+      html[data-oracle-theme="light"] body>div.max-w-7xl #sectionNav button:hover{background:#f0f7fb!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl #sectionNav button{background:#1e293b!important;color:#e5edf7!important;border:1px solid #334155}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl #sectionNav button:hover{background:#334155!important}
+      html[data-oracle-theme="dark"] #cw13Open{background:#1e3a5f!important;color:#ffffff!important}
+      /* Panels that stay light in dark mode get dark text. */
+      html[data-oracle-theme="dark"] body>div.max-w-7xl :is(.v12-panel,.v10-result,.v14-stat,.v14-card,.warn,.step,.ok,.risk-panel){color:#172033!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl :is(.v12-panel,.v10-result,.v14-stat,.v14-card,.warn,.step,.ok,.risk-panel) :is(b,strong,h3,h4,p,li,div:not([class*="bg-"]),.text-sm){color:#172033!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl :is(.v12-panel,.v10-result,.v14-stat,.v14-card,.warn,.step,.ok,.risk-panel) small{color:#475569!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl .risk-panel .section-title{color:#172033!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl #v141QuickTools .card,html[data-oracle-theme="dark"] body>div.max-w-7xl #v141QuickTools .card .section-title{color:#e5edf7!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl #oracleView>.flex .text-slate-500{color:#9fb0c3!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl .v10-lab small,html[data-oracle-theme="dark"] body>div.max-w-7xl .v10-plate-head small{color:#475569!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl #oracleView>.card :is(.text-slate-500,.text-slate-400,label,span.block){color:#475569!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl #oracleView>.card .text-red-600{color:#dc2626!important}
+      html[data-oracle-theme="dark"] body>div.max-w-7xl .v14-card .v14-head,html[data-oracle-theme="dark"] body>div.max-w-7xl .v14-card .v14-head *{color:#ffffff!important}
       @media(max-width:700px){
         #oracle158Toolbar{max-width:100vw}
         #oracle158Toolbar button{min-height:38px}
