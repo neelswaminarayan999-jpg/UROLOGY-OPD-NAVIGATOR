@@ -24,9 +24,13 @@ const lab = fs.readFileSync(new URL('../frontend/app/05-ai-lab.js', import.meta.
 const instr = vm.runInNewContext(lab.match(/function aiInstruction12\(study\)\{[\s\S]*?`;\}/)[0] + ';aiInstruction12');
 
 const NEG = /\b(no|not|avoid|avoided|without|never|unnecessary|contraindicated|rather than|instead of|do not|don't|should not)\b[^.]{0,40}$/;
-const hit = (text, term) => { let i = -1; while ((i = text.indexOf(term, i + 1)) >= 0) { if (!NEG.test(text.slice(Math.max(0, i - 60), i))) return true; } return false; };
+// Negation can come after the phrase too: "trans-scrotal biopsy must be avoided / is contraindicated".
+const NEG_AFTER = /^[^.;]{0,30}\b(must be avoided|should be avoided|be avoided|is avoided|is contraindicated|contraindicated|is not recommended|not recommended|should not|must not|is not indicated|not indicated|is unnecessary|unnecessary)\b/;
+const hit = (text, term) => { let i = -1; while ((i = text.indexOf(term, i + 1)) >= 0) { if (NEG.test(text.slice(Math.max(0, i - 60), i))) continue; if (NEG_AFTER.test(text.slice(i + term.length, i + term.length + 80))) continue; return true; } return false; };
+// Quota/outage replies are not accuracy failures: they are reported separately.
+const isQuota = msg => /\b429\b|quota|rate limit/i.test(msg || '');
 
-let pass = 0, run = 0; const lines = [];
+let pass = 0, run = 0, skipped = 0; const lines = [];
 for (const c of cases.filter(c => !only.length || only.includes(c.id))) {
   run++;
   const t0 = Date.now();
@@ -48,16 +52,20 @@ for (const c of cases.filter(c => !only.length || only.includes(c.id))) {
   } catch (e) { err = e.message; }
   const missing = c.must.filter(group => !group.some(t => text.includes(t.toLowerCase()))).map(g => g[0]);
   const wrong = c.must_not.filter(t => hit(text, t.toLowerCase()));
+  const quota = err && isQuota(err);
   const ok = !err && !missing.length && !wrong.length;
   if (ok) pass++;
+  if (quota) { skipped++; }
   const problem = err || [missing.length ? 'missing: ' + missing.join('; ') : '', wrong.length ? 'unsafe: ' + wrong.join('; ') : ''].filter(Boolean).join(' · ') || '—';
-  lines.push(`| ${ok ? '✅' : '❌'} | ${c.id} | ${problem} | ${provider}${note ? ' (fell back after ' + note + ')' : ''} |`);
+  lines.push(`| ${ok ? '✅' : quota ? '⏸️' : '❌'} | ${c.id} | ${problem} | ${provider}${note ? ' (fell back after ' + note + ')' : ''} |`);
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${c.id.padEnd(24)} ${provider.padEnd(34)} ${((Date.now() - t0) / 1000).toFixed(1)}s  ${problem}${note ? '  [fallback: ' + note + ']' : ''}`);
   await new Promise(r => setTimeout(r, 6000)); // stay inside free-tier rate limits
 }
-const score = `AI accuracy: ${pass}/${run} (${Math.round(100 * pass / Math.max(run, 1))}%)`;
+const answered = run - skipped;
+const score = `AI accuracy: ${pass}/${answered} answered cases (${Math.round(100 * pass / Math.max(answered, 1))}%)` + (skipped ? ` · ${skipped} not answered: free AI quota used up (⏸️), rerun tomorrow` : '');
 console.log('\n' + score);
 // In GitHub Actions, write a phone-readable table to the run summary page (problem column before model).
 if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## ${score}\n\nSite: ${base}\n\n| | Case | Problem | Model |\n|---|---|---|---|\n${lines.join('\n')}\n`);
 const minPass = Number(process.env.MIN_PASS || run);
-process.exit(pass >= minPass ? 0 : 1);
+// Wrong answers allowed = cases − pass mark (12 − 10 = 2). Quota-skipped cases don't count as wrong.
+process.exit(answered - pass <= run - minPass ? 0 : 1);
