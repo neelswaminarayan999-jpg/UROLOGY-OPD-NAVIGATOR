@@ -21,8 +21,8 @@ loadEnv(path.join(__dirname, '.env'));
 
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
-const GEMINI_FALLBACK_MODELS = String(process.env.GEMINI_FALLBACK_MODELS || 'gemini-3.8-flash').split(',').map(x => x.trim()).filter(Boolean);
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const GEMINI_FALLBACK_MODELS = String(process.env.GEMINI_FALLBACK_MODELS || 'gemini-3.5-flash-lite').split(',').map(x => x.trim()).filter(Boolean);
 const API_KEY = process.env.GEMINI_API_KEY || '';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
@@ -35,6 +35,10 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'thinkingmachines/inkling:free';
 const OPENROUTER_FALLBACK_MODELS = String(process.env.OPENROUTER_FALLBACK_MODELS || 'google/gemma-4-31b-it:free,thinkingmachines/inkling-small:free,nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free,openrouter/free').split(',').map(x => x.trim()).filter(Boolean);
 const OPENROUTER_API_BASE_URL = (process.env.OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
+// Image + reasoning calls routinely take 15-40 s; the old 12 s limit aborted good requests.
+const AI_TIMEOUT_MS = Math.max(5000, Number(process.env.AI_TIMEOUT_MS || 60000));
+// Most dependable free providers first. OpenRouter's shared free pool is the last resort.
+const PROVIDER_ORDER = String(process.env.AI_PROVIDER_ORDER || 'gemini,groq,cerebras,openrouter').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
 const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 const MAX_BODY = 32 * 1024 * 1024;
 const RATE_LIMIT = Number(process.env.RATE_LIMIT_PER_10MIN || 30);
@@ -310,11 +314,14 @@ function buildCompatMessages(body) {
   return [{ role: 'user', content }];
 }
 
-async function fetchJsonWithTimeout(url, options, timeoutMs=12000) {
+async function fetchJsonWithTimeout(url, options, timeoutMs=AI_TIMEOUT_MS) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     return await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (e?.name === 'AbortError') { const err = new Error(`Request timed out after ${Math.round(timeoutMs/1000)} s`); err.status = 408; throw err; }
+    throw e;
   } finally { clearTimeout(timer); }
 }
 
@@ -437,14 +444,15 @@ function configuredProviderChain(body) {
     const models = [MODEL, ...GEMINI_FALLBACK_MODELS].filter((x,i,a)=>x && a.indexOf(x)===i);
     chain.push({ name:'Gemini', models, run:model=>callGemini(body,model) });
   }
-  return chain;
+  const rank = p => { const i = PROVIDER_ORDER.indexOf(p.name.toLowerCase()); return i === -1 ? PROVIDER_ORDER.length : i; };
+  return chain.sort((a,b) => rank(a) - rank(b));
 }
 
 async function callWithFallback(body) {
   const attempts = [];
   const chain = configuredProviderChain(body);
   if (!chain.length) {
-    const err = new Error('No AI provider is configured. Set at least one server-side provider key (OpenRouter, Groq, Gemini; Cerebras supports text-only requests).');
+    const err = new Error('No AI provider is configured. Set at least one server-side provider key (Gemini, Groq, OpenRouter; Cerebras supports text-only requests).');
     err.status = 503; err.attempts = []; throw err;
   }
   for (const provider of chain) {
@@ -511,7 +519,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && req.url === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '15.8.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'Multi-provider fallback', model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { OpenRouter: Boolean(OPENROUTER_API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), Gemini: Boolean(API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '15.8.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);

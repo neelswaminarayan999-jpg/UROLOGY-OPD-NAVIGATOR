@@ -74,3 +74,10 @@ node --check frontend/v13-clinical-engine.js
 node --check frontend/v13.9-content-pack.js
 npm test
 ```
+
+## V15.9 — dependable free-tier AI routing
+- **Provider order** (override with `AI_PROVIDER_ORDER`): `gemini,groq,cerebras,openrouter`. Gemini's free tier goes first; OpenRouter's shared free pool is the last resort.
+- **Gemini**: `gemini-3.8-flash` first, then `gemini-3.5-flash-lite` when quota runs out (`GEMINI_MODEL`, `GEMINI_FALLBACK_MODELS`).
+- **Timeout**: raised from 12 s to 60 s per call (`AI_TIMEOUT_MS`). A timed-out provider is reported as 408 and the next one is tried.
+- `/health` now reports the provider order, timeout and which keys are present (never the keys themselves).
+- **Privacy**: free tiers (e.g. Gemini free) may use submitted data to improve their models. Upload de-identified images and reports only.
