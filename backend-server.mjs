@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
+import crypto from 'node:crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(process.env.WEB_ROOT || path.join(__dirname, 'frontend'));
@@ -64,8 +66,12 @@ function json(res, status, body, origin='') {
   res.end(payload);
 }
 function clientIp(req) {
-  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-  return forwarded || req.socket.remoteAddress || 'unknown';
+  // Render sits behind Cloudflare, which sets True-Client-IP; clients cannot forge it.
+  // X-Forwarded-For is only appended to by Render's proxy, so its first entry can be faked.
+  const trueClient = String(req.headers['true-client-ip'] || req.headers['cf-connecting-ip'] || '').trim();
+  if (trueClient) return trueClient;
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',').map(x => x.trim()).filter(Boolean);
+  return forwarded[forwarded.length - 1] || req.socket.remoteAddress || 'unknown';
 }
 function allowedOrigin(req) {
   const origin = String(req.headers.origin || '');
@@ -88,7 +94,12 @@ function readBody(req) {
     let total = 0, chunks = [];
     req.on('data', c => {
       total += c.length;
-      if (total > MAX_BODY) { req.destroy(); reject(new Error('Request too large')); return; }
+      if (total > MAX_BODY) {
+        // Answer with a clear 413 instead of dropping the connection (the browser only saw "Failed to fetch").
+        req.removeAllListeners('data'); req.resume();
+        const err = new Error(`Upload too large (over ${Math.round(MAX_BODY / 1048576)} MB). Use fewer or smaller images.`);
+        err.status = 413; reject(err); return;
+      }
       chunks.push(c);
     });
     req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
@@ -478,6 +489,25 @@ async function callWithFallback(body) {
   throw err;
 }
 
+// Static files: built once per file version, gzip-compressed and revalidated with an ETag,
+// so phones do not re-download the 4 MB page on every visit.
+const staticCache = new Map();
+function sendStatic(req, res, headers, file, build, gzipOk) {
+  const st = fs.statSync(file);
+  const key = file;
+  let entry = staticCache.get(key);
+  if (!entry || entry.mtimeMs !== st.mtimeMs || entry.size !== st.size) {
+    const raw = Buffer.from(build());
+    entry = { mtimeMs: st.mtimeMs, size: st.size, raw, gz: zlib.gzipSync(raw, { level: 6 }),
+      etag: '"' + crypto.createHash('sha1').update(raw).digest('base64url').slice(0, 20) + '"' };
+    staticCache.set(key, entry);
+  }
+  const out = { ...headers, ETag: entry.etag };
+  if (String(req.headers['if-none-match'] || '') === entry.etag) { res.writeHead(304, out); return res.end(); }
+  if (gzipOk) { res.writeHead(200, { ...out, 'Content-Encoding': 'gzip', 'Content-Length': entry.gz.length }); return res.end(entry.gz); }
+  res.writeHead(200, { ...out, 'Content-Length': entry.raw.length }); return res.end(entry.raw);
+}
+
 function hotfixHtml(html) {
   const tags = [
     '<script src="/v14-release-hotfix.js" defer></script>',
@@ -518,7 +548,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(204, corsHeaders(origin));
       return res.end();
     }
-    if (req.method === 'GET' && req.url === '/health') {
+    if (req.method === 'GET' && (req.url || '').split('?')[0] === '/health') {
       return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '15.8.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
@@ -530,12 +560,14 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET') {
       let urlPath = (req.url || '/').split('?')[0];
       if (urlPath === '/') urlPath = '/index.html';
+      if (urlPath === '/favicon.ico') urlPath = '/icon.svg';
       if (!urlPath.startsWith('/') || urlPath.includes('..')) return json(res, 400, { error: 'Invalid path' }, origin);
       const file = path.resolve(WEB_ROOT, `.${urlPath}`);
       if (!file.startsWith(WEB_ROOT) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return json(res, 404, { error: 'Not found' }, origin);
       const ext = path.extname(file).toLowerCase();
       const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8', '.svg': 'image/svg+xml' };
-      res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+      const headers = { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-cache', 'Vary': 'Accept-Encoding' };
+      const gzipOk = /\bgzip\b/.test(String(req.headers['accept-encoding'] || ''));
       if (ext === '.html') {
         let html = hotfixHtml(fs.readFileSync(file, 'utf8'));
         // Load the Campbell 13e source layer without replacing the existing V14/V15 application.
@@ -545,10 +577,9 @@ const server = http.createServer(async (req, res) => {
             ? html.replace(/<\/body\s*>/i, scriptTag + '</body>')
             : html + scriptTag;
         }
-        res.end(html);
-        return;
+        return sendStatic(req, res, headers, file, () => html, gzipOk);
       }
-      return fs.createReadStream(file).pipe(res);
+      return sendStatic(req, res, headers, file, () => fs.readFileSync(file), gzipOk);
     }
     return json(res, 405, { error: 'Method not allowed' }, origin);
   } catch (e) {
