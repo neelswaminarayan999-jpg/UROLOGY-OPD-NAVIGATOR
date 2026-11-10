@@ -489,10 +489,10 @@ const DISEASES = {
     ["Rare aggressive histology","Neuroendocrine transformation may be small-cell, large-cell or amphicrine and is often seen in CRPC. These subtypes have limited sensitivity to conventional ADT and should prompt expert pathology review and lineage-appropriate therapy." ]
    ]},
    {title:"3. TNM staging & risk",items:[
-    ["T category","T1: clinically inapparent/biopsy-detected or incidental categories; T2: organ-confined; T3a: extraprostatic extension; T3b: seminal-vesicle invasion; T4: fixation/invasion of adjacent structures. Record imaging-based EPE/SVI separately from formal cT based on DRE where required by the staging system."],
-    ["N / M","N1 = regional pelvic nodes. M1a = non-regional nodes; M1b = bone; M1c = visceral metastasis."],
+    ["T category (UICC TNM 9 = AJCC 8)","cT1a incidental in ≤5% of resected tissue; cT1b incidental in >5%; cT1c found on needle biopsy (e.g. raised PSA); cT2a ≤ half of one lobe; cT2b > half of one lobe; cT2c both lobes; cT3a extraprostatic extension (uni/bilateral) incl. microscopic bladder-neck invasion; cT3b seminal-vesicle invasion; cT4 fixed or invading adjacent structures other than seminal vesicles (external sphincter, rectum, bladder, levator muscles, pelvic wall). Pathological pT2 is not sub-divided. Clinical T is based on DRE; record MRI-derived EPE/SVI separately. TNM 9 notes stage migration when MRI or PSMA PET replaces palpation/conventional imaging, so record miTNM (PSMA-based) separately."],
+    ["N / M","N1 = regional (true pelvic) node metastasis. M1a = non-regional lymph nodes; M1b = bone(s); M1c = other sites ± bone (e.g. visceral)."],
     ["NCCN localized risk","2026 NCCN moved away from a separate very-low-risk group. Risk assessment uses PSA, Grade Group, T category and tumor burden/cores; clinically meaningful categories include low, favorable-intermediate, unfavorable-intermediate, high and very-high risk. Use the current NCCN table rather than a legacy 3-tier shortcut."],
-    ["EAU risk","EAU uses PSA, ISUP Grade Group and clinical T stage; the 2026 guideline further refined risk grouping and incorporates emerging tools such as Cambridge Prognostic Groups and selected risk calculators."],
+    ["EAU 2026 risk groups","Low: ISUP GG1 + PSA <10 + cT1–2. Favourable intermediate: GG2 + PSA <10, or GG1 + PSA 10–20 (cT1–2). Unfavourable intermediate: GG2 + PSA 10–20, or GG3 (cT1–2). High: GG4–5 or PSA >20. Locally advanced: cT3–4 and/or cN+, any GG, any PSA. The 2026 table no longer separates cT2b/cT2c; the EAU treatment algorithm still lists cT2c under high-risk localised disease, so review cT2c at MDT."],
     ["Pathologic prognostic factors","Cribriform/IDC, percentage pattern 4, EPE, SVI, positive margins, nodal burden, genomic alterations and treatment context can change management even when the headline GG is unchanged."]
    ]},
    {title:"4. Localized / locally advanced treatment",items:[
@@ -568,7 +568,7 @@ const DISEASES = {
    ["EAU 2021 model","Uses age >70, primary/recurrent status, multiplicity, size ≥3 cm, Ta/T1, CIS and WHO 2004/2016 or 1973 grading. EAU online calculator remains the preferred implementation reference."]
   ]},
   {title:"5. MIBC staging & local therapy",items:[
-   ["TNM","Ta non-invasive papillary; Tis CIS; T1 lamina propria; T2a/b inner/outer muscle; T3a microscopic perivesical tissue and T3b macroscopic; T4a invades adjacent pelvic structures such as prostate/stroma/uterus/vagina; T4b pelvic/abdominal wall. N1 single pelvic node, N2 multiple pelvic nodes, N3 common iliac nodes."],
+   ["TNM","Ta non-invasive papillary; Tis CIS; T1 lamina propria; T2a/b inner/outer muscle; T3a microscopic perivesical tissue and T3b macroscopic; T4a invades prostatic stroma, seminal vesicles, uterus or vagina; T4b pelvic or abdominal wall. N1 single node in the true pelvis (hypogastric, obturator, external iliac or presacral); N2 multiple true-pelvic nodes; N3 common iliac node(s). M1a non-regional lymph nodes; M1b other distant metastases. UICC TNM 9 made no changes to bladder T, N, M or stage."],
    ["Standard curative route","Fit cT2–T4a N0M0 patients: radical cystectomy + pelvic lymph-node dissection with perioperative systemic therapy according to eligibility."],
    ["Neoadjuvant / perioperative systemic therapy","Cisplatin-based chemotherapy remains a major standard backbone. EAU 2026 also incorporates perioperative gemcitabine/cisplatin + durvalumab for appropriate cisplatin-eligible MIBC, and EV + pembrolizumab for cisplatin-ineligible MIBC based on KEYNOTE-905/EV-303 data and approvals."],
    ["Adjuvant","Adjuvant nivolumab is established for selected high-risk patients who cannot receive/decline cisplatin-based chemotherapy. ctDNA-guided strategies are emerging; use only when the guideline/approved trial pathway supports them."],
@@ -598,7 +598,7 @@ const DISEASES = {
   {title:"1. Diagnosis & staging",items:[
    ["Imaging","CT urography is the principal staging/diagnostic imaging test when renal function permits. MR urography is an alternative in selected patients."],
    ["Endoscopy","Ureteroscopy with biopsy and selective upper-tract cytology helps define tumour grade and eligibility for kidney-sparing treatment."],
-   ["TNM","Tis/CIS; Ta non-invasive papillary; T1 lamina propria; T2 muscularis; T3 peripelvic/periureteric fat or renal parenchyma; T4 adjacent organs/through kidney into surrounding structures. Use current UICC TNM 9th edition incorporated in EAU 2026."],
+   ["TNM","Tis/CIS; Ta non-invasive papillary; T1 lamina propria; T2 muscularis; T3 peripelvic/periureteric fat or renal parenchyma; T4 adjacent organs, or through the kidney into perinephric fat. N1 single node ≤2 cm; N2 single node >2 cm or multiple nodes. M1 distant metastasis. Unchanged in UICC TNM 9 (used in EAU 2026)."],
    ["Molecular","FGFR3 alterations are relevant to risk biology and systemic therapy selection in advanced disease; molecular testing should be integrated with the disease line."]
   ]},
   {title:"2. Histology / risk stratification",items:[
@@ -634,10 +634,10 @@ const DISEASES = {
    ["Prognostic pathology","Worst pattern of invasion, LVI/PNI, ENE, nodal burden and subtype can be more clinically useful than grade alone."]
   ]},
   {title:"2. TNM & stage groups",items:[
-   ["T","Tis/PeIN; Ta non-invasive; T1 invades subepithelial connective tissue; T2 corpus spongiosum; T3 corpus cavernosum/urethra; T4 adjacent structures. T1a = low-grade/LVI-negative; T1b = high-grade and/or LVI-positive."],
-   ["cN","cN0 = non-palpable; cN1 = palpable mobile unilateral inguinal node; cN2 = multiple mobile unilateral/bilateral inguinal nodes; cN3 = fixed inguinal mass or pelvic lymphadenopathy."],
-   ["pN","pN1 = 1–2 inguinal nodes; pN2 = >2 unilateral or bilateral inguinal nodes; pN3 = pelvic nodal metastasis or ENE."],
-   ["Stage groups","Stage 0 = Tis/Ta N0; I = T1a N0; IIA = T1b–T2 N0; IIB = T3 N0; IIIA = N1; IIIB = N2; IV = T4, N3 or M1."]
+   ["T (UICC/AJCC 9 = 8)","Tis carcinoma in situ (PeIN); Ta non-invasive verrucous carcinoma; T1 invades subepithelial connective tissue: T1a without lymphovascular or perineural invasion and not poorly differentiated; T1b with lymphovascular or perineural invasion, or poorly differentiated; T2 corpus spongiosum ± urethra; T3 corpus cavernosum ± urethra; T4 other adjacent structures (prepubic fat, scrotum, spermatic cord, pubic bone, prostate). Urethral invasion alone no longer upstages to T3."],
+   ["cN","cN0 = no palpable or visibly enlarged inguinal nodes; cN1 = single palpable, mobile, unilateral inguinal node; cN2 = multiple or bilateral palpable, mobile inguinal nodes; cN3 = fixed inguinal nodal mass or pelvic lymphadenopathy (uni- or bilateral)."],
+   ["pN","pN1 = metastasis in 1–2 inguinal nodes; pN2 = >2 unilateral inguinal nodes or bilateral inguinal nodes; pN3 = pelvic node(s) (uni/bilateral) or extranodal extension."],
+   ["Stage groups","Stage 0 = Tis/Ta N0 M0; I = T1a N0; IIA = T1b or T2 N0; IIB = T3 N0; IIIA = T1–3 N1; IIIB = T1–3 N2; IV = T4 any N, any T N3, or M1."]
   ]},
   {title:"3. Primary tumour treatment",items:[
    ["PeIN / Ta","Topical or organ-sparing therapy can be used in selected superficial lesions. NCCN 2.2026 lists imiquimod 5% 3 nights/week for 4–16 weeks and 5-FU cream 5% twice daily for 2–6 weeks; ensure histologic diagnosis and follow-up."],
@@ -692,9 +692,10 @@ const DISEASES = {
    ["Somatic pathology","Lymphovascular invasion, rete testis invasion, tumour size and histologic composition drive stage I relapse risk and treatment choice."]
   ]},
   {title:"3. TNM / stage",items:[
-   ["Primary","pTis intratubular germ-cell neoplasia; pT1 confined to testis/epididymis without LVI; pT2 with LVI or hilar/soft tissue involvement; pT3 spermatic cord invasion; pT4 scrotal invasion."],
-   ["Nodes","N1–N3 reflect escalating retroperitoneal nodal burden by size/number; use current AJCC/UICC table for exact measurement cut-offs."],
-   ["M / markers","M1a non-regional nodes/lung; M1b non-pulmonary visceral metastasis. Serum marker categories S0–S3 are integrated into stage grouping."]
+   ["Primary (UICC TNM 9 / AJCC 8)","pTis germ cell neoplasia in situ (GCNIS); pT1 limited to testis incl. rete testis, without lymphovascular invasion or epididymal invasion (may invade tunica albuginea, not vaginalis); AJCC sub-divides pure seminoma into pT1a <3 cm and pT1b ≥3 cm; pT2 lymphovascular invasion, OR invasion of hilar soft tissue, epididymis or tunica vaginalis; pT3 direct spermatic-cord invasion; pT4 scrotal invasion. Discontinuous spermatic-cord involvement is pM1 (AJCC). Epididymal invasion was pT1 in older editions and is now pT2."],
+   ["Nodes","cN1 node mass ≤2 cm; cN2 >2 cm but ≤5 cm; cN3 >5 cm. pN1 ≤2 cm and ≤5 positive nodes; pN2 >2–5 cm, or >5 positive nodes, or extranodal extension; pN3 >5 cm."],
+   ["M / markers","M1a non-regional nodes or lung; M1b other sites. Post-orchiectomy markers: S1 LDH <1.5× ULN and hCG <5,000 IU/L and AFP <1,000 ng/mL; S2 LDH 1.5–10× ULN or hCG 5,000–50,000 or AFP 1,000–10,000; S3 LDH >10× ULN or hCG >50,000 or AFP >10,000."],
+    ["Stage groups","0 pTis S0; IA pT1 N0 M0 S0; IB pT2–4 N0 M0 S0; IS any pT N0 M0 S1–3; IIA N1 S0–1; IIB N2 S0–1; IIC N3 S0–1; IIIA M1a S0–1; IIIB N1–3 or M1a with S2; IIIC N1–3 or M1a with S3, or any M1b."]
   ]},
   {title:"4. IGCCCG metastatic risk",items:[
    ["Good risk","Seminoma: any site without non-pulmonary visceral metastasis. NSGCT: AFP <1,000 ng/mL, β-hCG <5,000 IU/L and LDH <1.5× ULN, with no mediastinal primary and no non-pulmonary visceral metastases."],
@@ -758,9 +759,9 @@ const DISEASES = {
    ["Bosniak IV","Enhancing nodular soft-tissue component; high likelihood of malignancy and usually treated as malignant when clinically appropriate."]
   ]},
   {title:"4. TNM & surgical treatment",items:[
-   ["T1","Tumour ≤7 cm limited to kidney. Partial nephrectomy is preferred when technically feasible and oncologically appropriate."],
-   ["T2","Tumour >7 cm limited to kidney. Radical nephrectomy is common when partial nephrectomy is not reasonable."],
-   ["T3/T4","Extension into major veins/perinephric tissues or adjacent structures; surgery remains possible in selected patients, often in expert centres."],
+   ["T1","T1a ≤4 cm, T1b >4–7 cm, limited to the kidney. Partial nephrectomy is preferred when technically feasible and oncologically appropriate."],
+   ["T2","T2a >7–10 cm, T2b >10 cm, limited to the kidney. Radical nephrectomy is common when partial nephrectomy is not reasonable."],
+   ["T3/T4","T3a renal vein or segmental branches, pelvicalyceal system, or perirenal/renal-sinus fat (not beyond Gerota fascia); T3b IVC below the diaphragm; T3c IVC above the diaphragm or invading the IVC wall; T4 beyond Gerota fascia, incl. contiguous ipsilateral adrenal. N1 regional node metastasis. Unchanged in UICC TNM 9. Surgery remains possible in selected T3/T4 patients, often in expert centres."],
    ["PN details","RENAL/PADUA complexity guides operative planning but is not itself a treatment indication. Do not use score alone to deny nephron-sparing surgery."],
    ["Adrenal / LN","Routine adrenalectomy is not required unless involved/suspicious. Routine lymph-node dissection is not mandatory in clinically node-negative disease solely for staging."]
   ]},
@@ -804,8 +805,8 @@ const DISEASES = {
    ["Pathology essentials","Site, grade, depth, LVI, margins, nodal status and histologic subtype should be explicit."]
   ]},
   {title:"2. Staging",items:[
-   ["T","Tis limited mucosa/CIS; Ta non-invasive; T1 subepithelial connective tissue; T2 spongiosum/prostate/periurethral muscle; T3 corpora/other adjacent tissues; T4 adjacent organs/structures."],
-   ["Nodes","Use current AJCC/UICC N definitions with attention to inguinal versus pelvic drainage and tumour location."]
+   ["T (male penile and female urethra)","Ta non-invasive papillary; Tis carcinoma in situ; T1 subepithelial connective tissue; T2 corpus spongiosum, prostate or periurethral muscle; T3 corpus cavernosum, beyond the prostatic capsule, anterior vagina or bladder neck; T4 other adjacent organs (e.g. bladder). Prostatic urethra is staged separately: Tis pu/pd (CIS of urethra/ducts), T1 subepithelial tissue, T2 prostatic stroma, T3 periprostatic tissue, T4 adjacent organs."],
+   ["Nodes","N1 single regional node (inguinal or true pelvic: perivesical, obturator, internal/external iliac, presacral); N2 multiple regional nodes. Distal urethra drains to inguinal nodes, proximal to pelvic nodes."]
   ]},
   {title:"3. Local / nodal treatment",items:[
    ["Distal superficial disease","Selected lesions can undergo urethra-preserving excision with careful negative margins."],
@@ -2277,13 +2278,13 @@ window.buildOnlineAI=buildOnlineAI12;window.openOnlineAI=function(focus){buildOn
 
 /* ---------- 2. REAL TNM / CLASSIFICATION MODAL ---------- */
 const TNM12={
- 'Ca Prostate':{title:'Prostate cancer — TNM record',rows:[['T','T1|T2a|T2b|T2c|T3a|T3b|T4'],['N','N0|N1'],['M','M0|M1a|M1b|M1c']],note:'Record clinical T separately from MRI-derived EPE/SVI descriptors where required by the staging system.'},
- 'Ca Bladder':{title:'Bladder cancer — TNM record',rows:[['T','Ta|Tis|T1|T2|T3|T4a|T4b'],['N','N0|N1|N2|N3'],['M','M0|M1']],note:'Use TNM plus the NMIBC/MIBC layer. T4b is locally advanced/unresectable rather than the routine T2–T4a perioperative pathway.'},
+ 'Ca Prostate':{title:'Prostate cancer — TNM record',rows:[['T','T1a|T1b|T1c|T2a|T2b|T2c|T3a|T3b|T4'],['N','N0|N1'],['M','M0|M1a|M1b|M1c']],note:'Record clinical T separately from MRI-derived EPE/SVI descriptors where required by the staging system.'},
+ 'Ca Bladder':{title:'Bladder cancer — TNM record',rows:[['T','Ta|Tis|T1|T2a|T2b|T3a|T3b|T4a|T4b'],['N','N0|N1|N2|N3'],['M','M0|M1a|M1b']],note:'Use TNM plus the NMIBC/MIBC layer. T4b is locally advanced/unresectable rather than the routine T2–T4a perioperative pathway.'},
  'UTUC':{title:'UTUC — TNM record',rows:[['T','Ta|Tis|T1|T2|T3|T4'],['N','N0|N1|N2'],['M','M0|M1']],note:'Risk stratification remains important alongside TNM, particularly for kidney-sparing versus radical management.'},
- 'Ca Kidney':{title:'RCC — TNM record',rows:[['T','T1a|T1b|T2|T3a|T3b|T3c|T4'],['N','N0|N1'],['M','M0|M1']],note:'For renal mass planning, retain RENAL/PADUA anatomy separately from TNM.'},
+ 'Ca Kidney':{title:'RCC — TNM record',rows:[['T','T1a|T1b|T2a|T2b|T3a|T3b|T3c|T4'],['N','N0|N1'],['M','M0|M1']],note:'For renal mass planning, retain RENAL/PADUA anatomy separately from TNM.'},
  'Ca Penis':{title:'Penile cancer — TNM record',rows:[['T','Tis|Ta|T1a|T1b|T2|T3|T4'],['N','cN0|cN1|cN2|cN3'],['M','M0|M1']],note:'Regional nodal phenotype drives the groin/pelvic pathway and should not be collapsed into the primary T category.'},
  'Urethral Cancer':{title:'Primary urethral carcinoma — TNM record',rows:[['T','Tis|Ta|T1|T2|T3|T4'],['N','N0|N1|N2'],['M','M0|M1']],note:'Site and histology remain essential; stage alone does not specify the surgical approach.'},
- 'Ca Testis':{title:'Testicular cancer — stage / marker record',rows:[['Stage','I|IIA|IIB|IIC|III'],['Markers','S0|S1|S2|S3']],note:'Testicular staging incorporates serum tumor markers (S category) and stage group; retain histology and metastatic sites separately.'},
+ 'Ca Testis':{title:'Testicular cancer — stage / marker record',rows:[['Stage','0|IA|IB|IS|IIA|IIB|IIC|IIIA|IIIB|IIIC'],['Markers','SX|S0|S1|S2|S3']],note:'Testicular staging incorporates serum tumor markers (S category) and stage group; retain histology and metastatic sites separately.'},
  'Adrenal / Neuroendocrine':{title:'Adrenal lesion — classification record',rows:[['Function','Non-functional|Cortisol excess|Catecholamine excess|Aldosterone excess|Sex-steroid excess'],['Imaging','Benign-appearing|Indeterminate|Suspicious|Locally invasive|Metastatic']],note:'Adrenal lesions do not use the same organ TNM workflow as prostate/bladder/kidney cancer. Biochemical classification and imaging phenotype come first.'},
  'Urethral Stricture':{title:'Urethral stricture — classification record',rows:[['Site','Meatus/fossa|Penile|Bulbar|Panurethral|Posterior|VUAS/BNC'],['Length','<1 cm|1–2 cm|2–5 cm|>5 cm|Panurethral'],['Degree','Non-obliterative|Near-obliterative|Obliterative']],note:'No TNM system: treatment depends on site, length, degree, etiology, prior treatment and tissue quality.'},
  'BPH / Male LUTS':{title:'BPH / male LUTS — classification record',rows:[['Bother','Mild|Moderate|Severe'],['Complication','None|Retention|Recurrent UTI|Bladder stones|Hematuria|Upper tract impact'],['Size','<30 mL|30–80 mL|>80 mL']],note:'No TNM system: symptoms, complications, obstruction and prostate anatomy drive the treatment pathway.'},
