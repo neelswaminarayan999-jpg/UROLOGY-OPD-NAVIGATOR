@@ -166,18 +166,36 @@ function openUrgent(){
 }
 
 function openAnticoag(){
+  /* V16.1: checked against CHEST 2022 perioperative antithrombotic guideline (Douketis et al., Chest 2022;162:e207)
+     and EAU urology guidance. Bleeding-risk examples are typical classifications, not fixed rules. */
   openToolkit('Perioperative anticoagulation & antiplatelet planning',`
-  <div class="v141-note">This is a planning aid only. Procedure bleeding risk, renal function, neuraxial anaesthesia, thrombotic indication, recent coronary intervention and the operating/anesthesia team's protocol override this generic table.</div>
-  <div class="row"><div class="label">DOACs — general elective planning</div><div class="body">
-    <table class="xs-table" style="margin-top:8px"><thead><tr><th>Drug class</th><th>Low/moderate bleeding risk</th><th>High bleeding risk</th><th>Restart</th></tr></thead>
+  <div class="v141-note">Planning aid only. Procedure bleeding risk, renal function, neuraxial anaesthesia, the thrombotic indication, recent coronary stenting and your anaesthesia/cardiology team's protocol override this table.</div>
+  <div class="row"><div class="label">Step 1 — classify the procedure's bleeding risk</div><div class="body">
+    <table class="xs-table" style="margin-top:8px"><thead><tr><th>Bleeding risk</th><th>Typical urology examples</th></tr></thead><tbody>
+      <tr><td>Minimal — antithrombotics can often continue</td><td>Flexible cystoscopy, catheter/stent change without dilatation, urodynamics</td></tr>
+      <tr><td>Low / moderate</td><td>Ureteroscopy (often feasible on antiplatelet therapy; individualise with anticoagulants), small TURBT, transperineal prostate biopsy, laser prostate surgery (HoLEP/PVP/ThuLEP are the preferred outlet procedures on antithrombotics)</td></tr>
+      <tr><td>High</td><td>TURP (non-laser), large TURBT, PCNL, partial/radical nephrectomy, radical prostatectomy/cystectomy, any procedure under neuraxial (spinal/epidural) anaesthesia</td></tr>
+    </tbody></table></div></div>
+  <div class="row"><div class="label">DOACs (CHEST 2022)</div><div class="body">
+    <table class="xs-table" style="margin-top:8px"><thead><tr><th>Drug</th><th>Low/moderate bleeding risk</th><th>High bleeding risk</th><th>Restart</th></tr></thead>
     <tbody>
-      <tr><td>Apixaban / rivaroxaban / edoxaban</td><td>Usually omit 1 day before</td><td>Usually omit 2 days before</td><td>Usually ≥24 h; often 48–72 h after high-risk surgery when haemostasis secure</td></tr>
-      <tr><td>Dabigatran</td><td>Hold duration depends on renal function</td><td>Commonly 2–4+ days depending on renal function</td><td>Usually ≥24 h; delay longer after high-risk surgery</td></tr>
+      <tr><td>Apixaban / rivaroxaban / edoxaban</td><td>Omit 1 day before (last dose day −2)</td><td>Omit 2 days before (last dose day −3)</td><td>~24 h after low/moderate-risk; 48–72 h after high-risk surgery, once haemostasis is secure</td></tr>
+      <tr><td>Dabigatran, CrCl ≥50 mL/min</td><td>Omit 1 day before</td><td>Omit 2 days before</td><td>As above</td></tr>
+      <tr><td>Dabigatran, CrCl &lt;50 mL/min</td><td>Omit 2 days before</td><td>Omit 4 days before</td><td>As above</td></tr>
     </tbody></table>
-    <div class="v141-note" style="margin-top:8px">Neuraxial/deep plexus procedures require a separate, stricter anaesthesia schedule. Routine heparin bridging is not recommended for most DOAC interruptions.</div>
+    <div class="v141-note" style="margin-top:8px">No heparin bridging for DOAC interruption, and no routine pre-operative DOAC level testing (CHEST 2022). Neuraxial anaesthesia counts as high bleeding risk; follow the anaesthesia team's neuraxial schedule. Use prophylactic-dose LMWH after surgery until the DOAC restarts if VTE prophylaxis is indicated.</div>
   </div></div>
-  <div class="row"><div class="label">Warfarin</div><div class="body">Typical elective interruption is about 5 days with a pre-procedure INR target set by the procedure/team (often ≤1.5). Do not auto-bridge: bridging decisions depend on the individual thrombotic risk and should be specialist-led, especially with mechanical valves.</div></div>
-  <div class="row"><div class="label">P2Y12 inhibitors</div><div class="body">Common elective washout planning is clopidogrel 5 days and ticagrelor 3–5 days, but recent coronary intervention/high ischemic risk can make cessation unsafe. Coordinate with cardiology/anesthesia rather than using an automatic stop rule. Aspirin continuation is indication- and procedure-dependent.</div></div>`);
+  <div class="row"><div class="label">Warfarin (VKA)</div><div class="body">Stop 5 days before; check INR the day before (aim ≤1.5, or as the team sets). Restart 12–24 h after surgery when haemostasis is secure. <b>Bridging:</b> not for atrial fibrillation (CHEST 2022, strong recommendation against) and generally not for VTE; consider only for selected very-high thrombotic risk (e.g., mechanical mitral valve, recent stroke or VTE) and decide with cardiology/haematology. Large or high-risk procedures may need a longer gap before therapeutic LMWH restarts.</div></div>
+  <div class="row"><div class="label">Antiplatelets</div><div class="body">
+    <table class="xs-table" style="margin-top:8px"><thead><tr><th>Drug</th><th>Usual pre-operative stop</th></tr></thead><tbody>
+      <tr><td>Clopidogrel</td><td>5 days</td></tr>
+      <tr><td>Ticagrelor</td><td>3–5 days</td></tr>
+      <tr><td>Prasugrel</td><td>7 days</td></tr>
+      <tr><td>Aspirin</td><td>Continue in most patients, especially for secondary prevention (CHEST 2022). If stopping is essential (e.g., TURP or another high-bleeding-risk procedure in primary prevention), stop ≤7 days before.</td></tr>
+    </tbody></table>
+    <div class="v141-note" style="margin-top:8px"><b>Coronary stent:</b> postpone elective surgery during the mandatory dual antiplatelet period (typically 6 months after elective DES, 12 months after acute coronary syndrome). If surgery cannot wait, keep aspirin and decide P2Y12 interruption with cardiology. Never stop both antiplatelets without cardiology input.</div>
+  </div></div>
+  <div class="v141-note">Sources: Douketis JD et al. Perioperative management of antithrombotic therapy, CHEST guideline, Chest 2022;162(5):e207–e243 · EAU Thromboprophylaxis in Urological Surgery · EAU Non-neurogenic Male LUTS 2026 (laser procedures on antithrombotics). Reviewed 10 Nov 2026.</div>`);
 }
 
 function openAndrology(){
@@ -211,30 +229,44 @@ function openPaeds(){
   <div class="row"><div class="label">VUR</div><div class="body">VCUG remains the reference diagnostic test when reflux needs to be demonstrated/graded, but modern paediatric pathways use risk-adapted imaging rather than exposing every child to routine VCUG. Breakthrough febrile UTI on prophylaxis is a reason to reassess the pathway.</div></div>`);
 }
 
+/* V16.1 stent registry fixes:
+   - deleting a row removed the wrong patient (list shown sorted by due date, deletion used the unsorted index);
+   - due dates were a day early in IST (dates converted through UTC);
+   - storage errors could break the tool; the list now exports to CSV because it lives only in this browser. */
+function stLocalISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function stParse(iso){const m=String(iso||'').match(/^(\d{4})-(\d\d)-(\d\d)$/);return m?new Date(+m[1],+m[2]-1,+m[3]):null;}
+function stLoad(){try{const a=JSON.parse(localStorage.getItem('uroV141Stents')||'[]');return Array.isArray(a)?a.map((x,i)=>x.id?x:{...x,id:'s'+Date.now().toString(36)+i}):[];}catch(e){return [];}}
+function stSave(a){try{localStorage.setItem('uroV141Stents',JSON.stringify(a));return true;}catch(e){return false;}}
 function openStentRegistry(){
-  const rows=JSON.parse(localStorage.getItem('uroV141Stents')||'[]');
-  const today=new Date(); today.setHours(0,0,0,0);
   openToolkit('DJ stent registry',`
-    <div class="v141-note">Store only a local patient reference rather than unnecessary identifiers. The removal interval must follow the actual stent type, operative plan and local protocol; the preset intervals below are reminders, not universal dwell-time recommendations.</div>
-    <div class="inputs" style="margin-top:10px"><input id="stRef" placeholder="Local patient reference / initials"><input id="stDate" type="date"><select id="stPreset"><option value="42">Example reminder: 6 weeks</option><option value="90">Example reminder: 3 months</option><option value="0">Custom interval</option></select><input id="stDays" type="number" min="1" placeholder="Custom days"></div>
-    <button class="v141-primary" id="stAdd" style="margin-top:8px">Add reminder</button>
+    <div class="v141-note">Store only a local patient reference rather than identifiers. Set the removal date from the stent type, the manufacturer's maximum indwelling time and your operative plan; the presets are reminders only. <b>This list is saved only in this browser on this device</b> — export it regularly.</div>
+    <div class="inputs" style="margin-top:10px"><input id="stRef" placeholder="Local patient reference / initials"><input id="stDate" type="date"><select id="stPreset"><option value="14">Reminder: 2 weeks</option><option value="42" selected>Reminder: 6 weeks</option><option value="90">Reminder: 3 months</option><option value="180">Reminder: 6 months</option><option value="0">Custom interval</option></select><input id="stDays" type="number" min="1" placeholder="Custom days"></div>
+    <button class="v141-primary" id="stAdd" style="margin-top:8px">Add reminder</button> <button class="v141-secondary" id="stExport" style="margin-top:8px">Export CSV</button>
     <div id="stList" class="v141-result"></div>`);
   const render=()=>{
     const now=new Date(); now.setHours(0,0,0,0);
-    const active=JSON.parse(localStorage.getItem('uroV141Stents')||'[]').sort((a,b)=>String(a.due).localeCompare(String(b.due)));
-    document.getElementById('stList').innerHTML=active.length?active.map((x,i)=>{
-      const due=new Date(x.due); const diff=Math.round((due-now)/86400000); const state=diff<0?'OVERDUE':diff===0?'DUE TODAY':diff<=14?'DUE SOON':'Scheduled';
-      return '<div class="row"><div class="label">'+escV14(x.ref||'Local reference')+' — '+x.due+' <span class="badge '+(state==='OVERDUE'?'badge-red':'badge-slate')+'">'+state+'</span></div><div class="body">Placed '+x.placed+' · '+diff+' day(s) from today <button class="v141-secondary" data-del="'+i+'" style="float:right">Remove</button></div></div>';
+    const active=stLoad().sort((a,b)=>String(a.due).localeCompare(String(b.due)));
+    document.getElementById('stList').innerHTML=active.length?active.map(x=>{
+      const due=stParse(x.due); const diff=due?Math.round((due-now)/86400000):NaN; const state=diff<0?'OVERDUE':diff===0?'DUE TODAY':diff<=14?'DUE SOON':'Scheduled';
+      return '<div class="row"><div class="label">'+escV14(x.ref||'Local reference')+' — remove by '+escV14(x.due)+' <span class="badge '+(state==='OVERDUE'?'badge-red':state==='Scheduled'?'badge-slate':'badge-amber')+'">'+state+'</span></div><div class="body">Placed '+escV14(x.placed)+' · '+(diff<0?Math.abs(diff)+' day(s) overdue':diff+' day(s) from today')+' <button class="v141-secondary" data-del="'+escV14(x.id)+'" style="float:right">Remove</button></div></div>';
     }).join(''):'No stents in the local registry.';
-    document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const a=JSON.parse(localStorage.getItem('uroV141Stents')||'[]').filter((_,j)=>j!==Number(b.dataset.del));localStorage.setItem('uroV141Stents',JSON.stringify(a));render();});
+    document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{stSave(stLoad().filter(x=>x.id!==b.dataset.del));render();});
   };
   setTimeout(()=>{
-    const d=document.getElementById('stDate'); d.value=new Date().toISOString().slice(0,10);
+    const d=document.getElementById('stDate'); d.value=stLocalISO(new Date());
     document.getElementById('stAdd').onclick=()=>{
       const ref=document.getElementById('stRef').value.trim(); const placed=d.value; const preset=Number(document.getElementById('stPreset').value); const days=preset||Number(document.getElementById('stDays').value);
-      if(!placed||!days){document.getElementById('stList').innerHTML='<span class="v141-alert">Enter a placement date and a reminder interval.</span>';return;}
-      const due=new Date(placed+'T00:00:00'); due.setDate(due.getDate()+days);
-      const a=JSON.parse(localStorage.getItem('uroV141Stents')||'[]'); a.push({ref,placed,due:due.toISOString().slice(0,10)}); localStorage.setItem('uroV141Stents',JSON.stringify(a)); render();
+      const start=stParse(placed);
+      if(!start||!(days>0)){document.getElementById('stList').innerHTML='<span class="v141-alert">Enter a placement date and a reminder interval.</span>';return;}
+      const due=new Date(start); due.setDate(due.getDate()+days);
+      const a=stLoad(); a.push({id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),ref,placed,due:stLocalISO(due)});
+      if(!stSave(a)){document.getElementById('stList').innerHTML='<span class="v141-alert">This browser blocked saving (private mode or storage full). The reminder was not stored.</span>';return;}
+      document.getElementById('stRef').value=''; render();
+    };
+    document.getElementById('stExport').onclick=()=>{
+      const rows=[['reference','placed','remove_by']].concat(stLoad().map(x=>[x.ref||'',x.placed,x.due]));
+      const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+      const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='stent-registry-'+stLocalISO(new Date())+'.csv'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
     };
     render();
   },0);
