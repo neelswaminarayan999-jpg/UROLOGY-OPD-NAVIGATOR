@@ -18,10 +18,11 @@ const compat = () => ok({ choices: [{ message: { content: JSON.stringify(valid) 
 
 let mode = 'gemini-ok';
 const calls = [];
+let lastBody = '';
 global.fetch = async (url, opts = {}) => {
   const u = String(url);
   const host = u.includes('googleapis') ? 'gemini' : u.includes('groq') ? 'groq' : 'openrouter';
-  calls.push(host);
+  calls.push(host); lastBody = String(opts.body || '');
   if (host === 'gemini') {
     if (mode === 'gemini-ok') return ok({ candidates: [{ content: { parts: [{ text: JSON.stringify(valid) }] } }] });
     if (mode === 'gemini-429') return new Response(JSON.stringify({ error: { message: 'quota' } }), { status: 429 });
@@ -32,11 +33,11 @@ global.fetch = async (url, opts = {}) => {
 
 await import('./backend-server.mjs?order-test=1');
 await new Promise(r => setTimeout(r, 80));
-const post = () => new Promise((resolve, reject) => {
+const post = (payload = { study: 'test', context: {} }) => new Promise((resolve, reject) => {
   const req = http.request('http://127.0.0.1:8811/api/urology-ai', { method: 'POST', headers: { 'content-type': 'application/json' } }, r => {
     let d = ''; r.on('data', c => d += c); r.on('end', () => resolve({ status: r.statusCode, json: JSON.parse(d) }));
   });
-  req.on('error', reject); req.end(JSON.stringify({ study: 'test', context: {} }));
+  req.on('error', reject); req.end(JSON.stringify(payload));
 });
 
 // 1. Gemini is tried first by default.
@@ -60,7 +61,17 @@ assert.equal(res.status, 200);
 assert.equal(res.json.provider, 'Groq');
 assert.equal(res.json.fallback_attempts[0].status, 408);
 
-// 4. Health reports the order and which keys are present (never the keys themselves).
+// 4. Grounding: the app's reference text reaches the model, capped at 12000 chars; absent when not sent.
+mode = 'gemini-ok';
+res = await post({ study: 'psma', context: {}, reference_disease: 'Ca Prostate', reference: '## 3. TNM staging & risk\n- EAU 2026: test line\n' + 'x'.repeat(20000) });
+assert.equal(res.status, 200);
+assert.ok(lastBody.includes('VERIFIED REFERENCE CONTENT'));
+assert.ok(lastBody.includes('3. TNM staging & risk'));
+assert.ok((lastBody.match(/x/g) || []).length < 12500, 'reference must be capped');
+await post();
+assert.ok(!lastBody.includes('VERIFIED REFERENCE CONTENT'));
+
+// 5. Health reports the order and which keys are present (never the keys themselves).
 const health = await new Promise(resolve => http.get('http://127.0.0.1:8811/health', r => { let d = ''; r.on('data', c => d += c); r.on('end', () => resolve(JSON.parse(d))); }));
 assert.deepEqual(health.providerOrder, ['gemini', 'groq', 'cerebras', 'openrouter']);
 assert.equal(health.configured.Groq, true);

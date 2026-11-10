@@ -135,12 +135,24 @@ UROFLOWMETRY-SPECIFIC ACCURACY RULES:
 - If a urethral stricture is suggested, require direct supporting evidence such as visible narrowing on urethroscopy/RUG/VCUG rather than low flow alone.
 - Keep interpretation proportional to the data: do not invent prostate size, PVR, symptoms, obstruction grade, stricture length or detrusor contractility.
 ` : '';
+  const reference = String(body.reference || '').slice(0, 12000);
+  const referenceDisease = String(body.reference_disease || '').slice(0, 60);
+  const grounding = reference ? `
+
+VERIFIED REFERENCE CONTENT (from this app, checked against EAU 2026 / current approvals) for ${referenceDisease}:
+${reference}
+
+GROUNDING RULES:
+- For staging, risk grouping and management statements, prefer this reference over general knowledge.
+- When a teaching point or interpretation relies on it, name the section title in brackets, e.g. [3. TNM staging & risk].
+- If the images/report conflict with the reference, or the reference does not cover the question, say so explicitly in "uncertainty" rather than guessing.
+` : '';
   return `You are the image/report interpretation assistant inside a urology clinical decision-support and teaching tool. Study: ${study}.
   
 Patient/context data:
 ${JSON.stringify(ctx)}
 
-Analyze only the supplied image(s), written report and structured data. This is clinician-facing support, not autonomous medical care. Do NOT identify a person, make a definitive patient diagnosis, prescribe treatment, or issue a treatment order. Describe visible radiologic/clinical features, extract measurements only when clearly readable, identify important abnormalities and limitations, and suggest which existing Oracle module should be opened for clinician review. Do not invent measurements or facts. Distinguish direct observations from interpretation. ${specialtyGuardrail}Return valid JSON matching the requested schema. Canonical Oracle modules: ${canonical.join(', ')}. The clinician must confirm all findings and treatment decisions.`;
+Analyze only the supplied image(s), written report and structured data. This is clinician-facing support, not autonomous medical care. Do NOT identify a person, make a definitive patient diagnosis, prescribe treatment, or issue a treatment order. Describe visible radiologic/clinical features, extract measurements only when clearly readable, identify important abnormalities and limitations, and suggest which existing Oracle module should be opened for clinician review. Do not invent measurements or facts. Distinguish direct observations from interpretation. ${specialtyGuardrail}${grounding}Return valid JSON matching the requested schema. Canonical Oracle modules: ${canonical.join(', ')}. The clinician must confirm all findings and treatment decisions.`;
 }
 function outputSchema() {
   const diseases = [
@@ -508,38 +520,6 @@ function sendStatic(req, res, headers, file, build, gzipOk) {
   res.writeHead(200, { ...out, 'Content-Length': entry.raw.length }); return res.end(entry.raw);
 }
 
-function hotfixHtml(html) {
-  const tags = [
-    '<script src="/v14-release-hotfix.js" defer></script>',
-    '<script src="/v14.1-opd-suite.js" defer></script>',
-    '<script src="/v14.1-core-hardening.js" defer></script>',
-    '<script src="/v14.2-clinical-navigation.js" defer></script>',
-    '<script src="/v14.3-prostate-pathway.js" defer></script>',
-    '<script src="/v14.4-oncology-pathways.js" defer></script>',
-    '<script src="/v14.5-urgent-urology.js" defer></script>',
-    '<script src="/v14.6-stone-engine.js" defer></script>',
-    '<script src="/v14.7-stricture-engine.js" defer></script>',
-    '<script src="/v14.8-bph-engine.js" defer></script>',
-    '<script src="/v14.9-scores-engine.js" defer></script>',
-    '<script src="/v15.0-operative-atlas.js" defer></script>',
-    '<script src="/v15.1-operative-atlas-bph-recon.js" defer></script>',
-    '<script src="/v15.2-operative-atlas-oncology-recon.js" defer></script>',
-    '<script src="/v15.3-operative-atlas-rplnd-ureter-ecirs.js" defer></script>',
-    '<script src="/v15.4-operative-atlas-advanced-stone.js" defer></script>',
-    '<script src="/v15.5-operative-atlas-bph-testis-penile.js" defer></script>',
-    '<script src="/v15.6-operative-atlas-trauma.js" defer></script>',
-    '<script src="/v15.7-operative-atlas-unified-launcher.js" defer></script>',
-    '<script src="/v15.8-opd-workflow.js" defer></script>',
-  ];
-  let out = html;
-  for (const tag of tags) {
-    const src = tag.match(/src="([^"]+)"/)?.[1];
-    if (src && !out.includes(src) && out.includes('</head>')) out = out.replace('</head>', tag + '</head>');
-    else if (src && !out.includes(src)) out += tag;
-  }
-  return out;
-}
-
 const server = http.createServer(async (req, res) => {
   const origin = String(req.headers.origin || '');
   try {
@@ -549,7 +529,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && (req.url || '').split('?')[0] === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '15.8.0', release: 'FINAL CLINICAL WORKSTATION', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.0.0', release: 'V16 rebuild', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
@@ -569,14 +549,8 @@ const server = http.createServer(async (req, res) => {
       const headers = { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-cache', 'Vary': 'Accept-Encoding' };
       const gzipOk = /\bgzip\b/.test(String(req.headers['accept-encoding'] || ''));
       if (ext === '.html') {
-        let html = hotfixHtml(fs.readFileSync(file, 'utf8'));
-        // Load the Campbell 13e source layer without replacing the existing V14/V15 application.
-        if (path.basename(file) === 'index.html' && !html.includes('/campbell13-content.js')) {
-          const scriptTag = '<script src="/campbell13-content.js" defer></script>';
-          html = /<\/body\s*>/i.test(html)
-            ? html.replace(/<\/body\s*>/i, scriptTag + '</body>')
-            : html + scriptTag;
-        }
+        // V16: index.html lists its own scripts; no server-side injection.
+        const html = fs.readFileSync(file, 'utf8');
         return sendStatic(req, res, headers, file, () => html, gzipOk);
       }
       return sendStatic(req, res, headers, file, () => fs.readFileSync(file), gzipOk);
