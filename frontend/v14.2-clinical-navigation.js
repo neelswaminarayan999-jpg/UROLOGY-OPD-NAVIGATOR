@@ -253,7 +253,7 @@ function renderBladderPathway(){
         if(phenotype==='cis'){
           html+='<div class="v142-note"><b>CIS ± papillary options to review:</b> phenotype- and jurisdiction-dependent bladder-sparing options listed in the 2026 EAU evidence table include nadofaragene firadenovec, nogapendekin alfa inbakicept + BCG, TAR-200, and systemic pembrolizumab; valrubicin and other intravesical strategies may be relevant in selected settings. Verify the current local label and eligibility for each option.</div>';
         }else if(phenotype==='papillary'){
-          html+='<div class="v142-note"><b>Papillary Ta/T1-only options to review:</b> use the current EAU Table 7.3 and local protocol for phenotype-specific intravesical/device-assisted options and clinical trials; do not automatically transfer CIS-only evidence or indications to papillary-only disease.</div>';
+          html+='<div class="v142-note"><b>Papillary Ta/T1-only options to review:</b> use the current EAU Table 7.3 and local protocol for phenotype-specific intravesical/device-assisted options and clinical trials; do not automatically transfer CIS-only evidence or indications to papillary-only disease. Regulatory note: in October 2026 the FDA extended nogapendekin alfa inbakicept + BCG (instillations for up to 37 months) to BCG-unresponsive high-grade papillary-only NMIBC, extrapolated from CIS efficacy data.</div>';
         }else{
           html+='<div class="v142-alert"><b>BCG-unresponsive phenotype missing.</b> Specify CIS ± papillary versus papillary Ta/T1-only disease before considering a bladder-sparing regimen.</div>';
         }
@@ -282,6 +282,7 @@ function renderBladderPathway(){
         }else{
           html+='<div class="v142-note"><b>Perioperative cisplatin/gemcitabine + durvalumab is a guideline-supported candidate:</b> renal function and entered screens meet the simplified pathway gate, but local approval/supply is not confirmed. Verify eligibility and access. If unavailable, discuss standard cisplatin-based neoadjuvant chemotherapy (e.g., GC or dd-MVAC per MDT) followed by definitive local treatment.</div>';
         }
+        if(ev==='eligible')html+='<div class="v142-note"><b>Alternative for cisplatin-eligible patients:</b> perioperative enfortumab vedotin + pembrolizumab (EV 1.25 mg/kg, max 125 mg, days 1 and 8 every 21 days × 4 neoadjuvant cycles, then 5 adjuvant EV cycles; pembrolizumab 200 mg every 3 weeks, 13 adjuvant cycles) improved event-free and overall survival versus neoadjuvant gemcitabine/cisplatin in KEYNOTE-B15/EV-304 (EFS HR 0.53). FDA approved it for all cystectomy candidates in July 2026; check whether your EAU edition and local approval include it, and compare with GC + durvalumab at MDT.</div>';
       }else if(periopCisplatinFit&&ici==='contraindicated'){
         html+='<div class="v142-note"><b>Cisplatin-eligible but immunotherapy unsuitable:</b> do not recommend perioperative durvalumab or EV + pembrolizumab. Discuss cisplatin-based neoadjuvant chemotherapy (e.g., GC or dd-MVAC per local protocol) followed by radical cystectomy/PLND, or selected trimodality treatment in MDT.</div>';
       }else if(evPFit){
@@ -293,6 +294,7 @@ function renderBladderPathway(){
       }else{
         html+='<div class="v142-alert"><b>No immune-containing standard perioperative regimen selected.</b> Either immunotherapy is unsuitable or key drug-specific eligibility is unresolved. Do not recommend GC + durvalumab or EV + pembrolizumab; discuss definitive local treatment, selected trimodality therapy and clinical trials in MDT. Do not substitute neoadjuvant carboplatin for cisplatin.</div>';
       }
+      html+='<div class="v142-note"><b>After radical cystectomy (high-risk pathology):</b> adjuvant nivolumab (CheckMate 274) remains an option when no perioperative immunotherapy was given. ctDNA-guided adjuvant atezolizumab (1680 mg every 4 weeks for up to 1 year) is FDA-approved (May 2026, IMvigor011) for patients with molecular residual disease on serial ctDNA testing with an FDA-authorized assay, starting at least 6 weeks after surgery.</div>';
       if(crcl>=40&&crcl<60&&periopCisplatinFit){
         html+='<div class="v142-note"><b>Renal threshold note:</b> the classic Galsky renal threshold (<60 mL/min) and the NIAGARA perioperative eligibility threshold (GFR ≥40 mL/min, with split-dose cisplatin in the 40–60 range) are not interchangeable. Confirm the actual renal measurement, local protocol and patient-specific fitness rather than automatically excluding or automatically clearing cisplatin.</div>';
       }

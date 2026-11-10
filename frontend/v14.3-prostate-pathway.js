@@ -117,27 +117,36 @@ function updateLive(){
   }
 }
 
-function risk(psa,gg,t){
-  var highFeature=(psa!==null&&psa>20)||gg>=4||['T3a','T3b','T4'].includes(t);
-  var lowFeature=(psa!==null&&psa<10)&&gg===1&&['T1c','T2a'].includes(t);
-  if(lowFeature)return 'Low risk';
-  if(highFeature)return 'High risk / locally advanced feature';
-  if((psa!==null&&psa>=10&&psa<=20)||gg===2||gg===3||['T2b','T2c'].includes(t))return 'Intermediate risk';
+/* EAU-EANM-ESTRO-ESUR-ISUP-SIOG 2026, Table 3 (risk of biochemical recurrence, systematic biopsy):
+   low = GG1 + PSA<10 + cT1-2; favourable intermediate = GG2 + PSA<10, or GG1 + PSA 10-20 (cT1-2);
+   unfavourable intermediate = GG2 + PSA 10-20, or GG3 (cT1-2); high = GG4/5 or PSA>20;
+   locally advanced = cT3-4 and/or cN+ (any GG, any PSA). The 2026 table no longer splits cT1-2 by sub-stage. */
+function risk(psa,gg,t,n){
+  if(['T3a','T3b','T4'].includes(t)||n==='N1')return 'Locally advanced';
+  if(psa===null||!gg||!t)return 'Risk group incomplete';
+  if(gg>=4||psa>20)return 'High risk';
+  if((gg===2&&psa>=10)||gg===3)return 'Unfavourable intermediate risk';
+  if((gg===2&&psa<10)||(gg===1&&psa>=10))return 'Favourable intermediate risk';
+  if(gg===1&&psa<10)return 'Low risk';
   return 'Risk group incomplete';
 }
 
 function renderRiskNote(r,psa,gg,t){
-  if(r==='Low risk')return '<div class="v143-ok"><b>Risk pattern:</b> low-risk phenotype by the entered PSA, Grade Group and cT fields.</div>';
-  if(r==='Intermediate risk')return '<div class="v143-note"><b>Risk pattern:</b> intermediate-risk phenotype. Further subclassification requires tumour burden (including biopsy core involvement) and the complete pathology/staging record before choosing active surveillance vs definitive treatment.</div>';
-  if(r.indexOf('High risk')===0)return '<div class="v143-alert"><b>High-risk / locally advanced feature:</b> at least one high-risk variable is present. Confirm cT, Grade Group, PSA, N stage and metastatic imaging before treatment selection.</div>';
-  return '<div class="v143-alert"><b>Risk group incomplete:</b> enter PSA, Grade Group and clinical T stage. Do not force a treatment branch from incomplete data.</div>';
+  var src=' <span style="color:#64748b">(EAU 2026 risk table)</span>';
+  var t2c=(t==='T2c'&&r!=='High risk'&&r!=='Locally advanced')?'<div class="v143-note"><b>cT2c:</b> the EAU 2026 risk table classifies localised disease by Grade Group and PSA, but the EAU treatment algorithm still shows cT2c within high-risk localised disease. Review the risk group at MDT before choosing a branch.</div>':'';
+  if(r==='Low risk')return '<div class="v143-ok"><b>EAU low risk:</b> ISUP GG1, PSA &lt;10 ng/mL and cT1–2.'+src+'</div>'+t2c;
+  if(r==='Favourable intermediate risk')return '<div class="v143-note"><b>EAU favourable intermediate risk:</b> GG2 with PSA &lt;10 ng/mL, or GG1 with PSA 10–20 ng/mL (cT1–2).'+src+' Selected patients may be considered for active surveillance after MRI review and counselling.</div>'+t2c;
+  if(r==='Unfavourable intermediate risk')return '<div class="v143-note"><b>EAU unfavourable intermediate risk:</b> GG2 with PSA 10–20 ng/mL, or GG3 (cT1–2).'+src+' Active surveillance is generally not appropriate; discuss definitive treatment.</div>'+t2c;
+  if(r==='High risk')return '<div class="v143-alert"><b>EAU high risk:</b> ISUP GG4–5 or PSA &gt;20 ng/mL.'+src+' Complete N and M staging before treatment selection.</div>';
+  if(r==='Locally advanced')return '<div class="v143-alert"><b>EAU locally advanced:</b> cT3–4 and/or cN+, any GG, any PSA.'+src+' Confirm N and M staging before treatment selection.</div>';
+  return '<div class="v143-alert"><b>Risk group incomplete:</b> enter PSA, Gleason patterns and clinical T stage. No treatment branch is shown until the risk group can be assigned.</div>';
 }
 
 function generate(){
   var psa=num('v143PSA'), g1=Number(val('v143Gleason1')), g2=Number(val('v143Gleason2'));
   var gg=gradeGroup(g1,g2), t=val('v143T'), n=val('v143N'), m=val('v143M'), life=val('v143Life'), symptoms=val('v143Symptoms');
   var pos=num('v143PositiveCores'), total=num('v143TotalCores'), maxPct=num('v143MaxCorePct');
-  var r=risk(psa,gg,t), html='';
+  var r=risk(psa,gg,t,n), html='';
 
   if(!gg||!t||!n||!m){
     q('v143Result').innerHTML='<div class="v143-alert"><b>Staging/pathology incomplete.</b> Required before treatment navigation: Gleason primary + secondary pattern, clinical T, N and M stage. PSA is also required for risk classification.</div>';
@@ -163,12 +172,12 @@ function generate(){
 
   if(m==='M1'){
     html+=metastaticPathway();
-  }else if(t==='T3a'||t==='T3b'||t==='T4'||r.indexOf('High risk')===0){
+  }else if(r==='High risk'||r==='Locally advanced'){
     html+=highRiskPathway(n,life);
   }else if(r==='Low risk'){
     html+=lowRiskPathway(life);
-  }else{
-    html+=intermediatePathway(life,pos,total);
+  }else if(r.indexOf('intermediate risk')>-1){
+    html+=intermediatePathway(life,pos,total,r);
   }
 
   if(symptoms&&symptoms!=='No major cancer complication'){
@@ -192,13 +201,15 @@ function lowRiskPathway(life){
   return '<div class="v143-section"><div class="v143-label">Treatment pathway — low risk</div><div class="v143-note"><b>Active surveillance:</b> discuss as the standard disease-management strategy for appropriately selected low-risk patients with sufficient life expectancy. Define PSA, DRE/MRI and repeat-biopsy triggers using the local AS protocol.</div><div class="v143-note"><b>Definitive treatment:</b> radical prostatectomy or radiotherapy can be considered when surveillance is unsuitable or declined, after shared decision-making.</div></div>';
 }
 
-function intermediatePathway(life,pos,total){
+function intermediatePathway(life,pos,total,r){
   var burden='';
   if(pos!==null&&total!==null&&total>0){
     burden=(pos/total)<0.5?'Lower core burden entered.':'Higher core burden entered.';
   }
   return '<div class="v143-section"><div class="v143-label">Treatment pathway — intermediate risk</div>'+
-    '<div class="v143-note"><b>Favourable intermediate-risk phenotype:</b> selected patients, particularly with ISUP GG2 and low-volume disease, may be considered for active surveillance after full review. '+esc(burden)+'</div>'+
+    (r==='Favourable intermediate risk'
+      ?'<div class="v143-note"><b>Favourable intermediate risk:</b> selected patients, particularly ISUP GG2 with low-volume disease, low PSA density and concordant MRI, may be offered active surveillance after counselling. '+esc(burden)+'</div>'
+      :'<div class="v143-alert"><b>Unfavourable intermediate risk:</b> active surveillance is generally not recommended. '+esc(burden)+'</div>')+
     '<div class="v143-note"><b>Definitive options:</b> radical prostatectomy in selected patients or external-beam radiotherapy. For unfavourable intermediate-risk disease, radiotherapy is generally combined with short-course ADT; surgical candidates may undergo radical prostatectomy with pelvic-node assessment as indicated.</div>'+
     (life==='≤10 years'?'<div class="v143-note"><b>Life expectancy:</b> with ≤10 years, conservative/watchful-waiting management should be discussed rather than automatically pursuing curative treatment.</div>':'')+
     '</div>';
@@ -214,11 +225,17 @@ function highRiskPathway(n,life){
 }
 
 function metastaticPathway(){
-  return '<div class="v143-section"><div class="v143-label">Treatment pathway — metastatic hormone-sensitive prostate cancer</div>'+
+  return '<div class="v143-section"><div class="v143-label">Treatment pathway — metastatic hormone-sensitive prostate cancer (mHSPC / mAPMN/S)</div>'+
     '<div class="v143-note"><b>Do not use ADT monotherapy routinely</b> when combination therapy is appropriate and the patient has sufficient life expectancy and accepts the added toxicity.</div>'+
     '<div class="v143-note"><b>Core systemic options:</b> ADT + abiraterone/prednisone, apalutamide, enzalutamide or rezvilutamide; darolutamide is also an option in selected fit patients. Choose according to disease volume/risk, comorbidity, interactions, access and patient priorities.</div>'+
     '<div class="v143-note"><b>Triplet therapy:</b> in patients fit for docetaxel, EAU 2026 recommends docetaxel only as part of ADT + abiraterone or ADT + darolutamide rather than docetaxel + ADT alone when an appropriate ARPI is available.</div>'+
-    '<div class="v143-note"><b>Genomics:</b> assess germline/somatic homologous-recombination repair alterations in metastatic disease; selected HRR-mutated patients may qualify for PARP-inhibitor combinations according to current indications.</div>'+
+    '<div class="v143-note"><b>Genomics and biomarkers at diagnosis:</b> test germline/somatic HRR genes, and PTEN status and PSMA PET where these would change treatment.</div>'+
+    '<div class="v143-note"><b>Biomarker-directed options (FDA approvals 2025–2026, metastatic androgen pathway modulation-naïve/-sensitive disease, formerly mHSPC):</b>'+
+      '<br>• <b>HRR-mutated</b> (12-gene panel incl. BRCA1/2, ATM, CDK12, PALB2): talazoparib 0.5 mg daily + enzalutamide 160 mg daily + ADT (TALAPRO-3, FDA Oct 2026).'+
+      '<br>• <b>BRCA2-mutated:</b> niraparib + abiraterone/prednisone + ADT (AMPLITUDE, FDA Dec 2025).'+
+      '<br>• <b>PTEN-deficient</b> (validated IHC assay): capivasertib 400 mg twice daily, 4 days on / 3 days off + abiraterone 1000 mg + prednisone 5 mg daily + ADT (CAPItello-281, FDA Jun 2026).'+
+      '<br>• <b>PSMA-positive:</b> Lu-177 PSMA-617 7.4 GBq every 6 weeks × 6 + an ARPI (PSMAddition, FDA Jul 2026).'+
+      '<br><span style="color:#64748b">These are regulatory approvals; check the current EAU recommendation strength, local approval and funding before use.</span></div>'+
     '</div>';
 }
 

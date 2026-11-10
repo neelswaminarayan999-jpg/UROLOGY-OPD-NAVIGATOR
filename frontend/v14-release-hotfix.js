@@ -62,6 +62,9 @@
   }
 
   function optimizeInvestigationImages(){
+    // V15.10: disabled. It replaced the files after the AI Lab had already read them, so it never helped;
+    // the AI Lab now downscales photos itself in fileToData12().
+    return;
     const input=document.querySelector('#onlineAiView input[type="file"]');
     if(!input || input.dataset.v14Optimized==='1') return;
     input.dataset.v14Optimized='1';
@@ -78,6 +81,13 @@
     });
   }
 
+
+  /* V15.10: this helper was called but never defined, so the 1.2 s timer threw and later tasks never ran.
+     Only legacy-format errors are converted; the AI Lab now writes its own specific messages (data-ai-error). */
+  function findAIErrorContainers(){
+    return [...document.querySelectorAll('#onlineAiView .v12-alert:not([data-ai-error])')]
+      .filter(el=>/Online AI is not connected|All configured AI providers failed/i.test(el.innerText||''));
+  }
 
   function friendlyAIError(){
     findAIErrorContainers().forEach(el=>{
@@ -352,7 +362,8 @@
   addMobileUX();
   setTimeout(addMobileUX,500);
   setTimeout(optimizeInvestigationImages,1000);
-  setInterval(()=>{optimizeInvestigationImages();friendlyAIError();rewriteClinicalProgressLabel();polishClinicalLanguage();},1200);
+  // Each task runs independently so one failure cannot block the others.
+  setInterval(()=>{[optimizeInvestigationImages,friendlyAIError,rewriteClinicalProgressLabel,polishClinicalLanguage].forEach(fn=>{try{fn();}catch(e){console.warn('[v14 hotfix]',fn.name,e);}});},1200);
 
   /* V14 clinical-audit hardening: wire modal actions, reset state, stone modifiers, emergency alert and print layout. */
   window.modal=function(title,html){
