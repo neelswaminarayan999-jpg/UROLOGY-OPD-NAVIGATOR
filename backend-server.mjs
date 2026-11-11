@@ -175,6 +175,7 @@ RULES:
 - Write ${n} new MCQs. Each must test a clinically important decision, threshold, classification or management step stated in the SOURCE.
 - The correct answer must be directly supported by the SOURCE. Do not use facts that are not in it.
 - Exactly 4 options; exactly one correct; three plausible but clearly wrong distractors; no "all of the above" / "none of the above".
+- A distractor must never overlap with, include or be a broader category of the correct answer (wrong: correct "cisplatin-based chemotherapy" with distractor "platinum-based chemotherapy"). Every distractor must be definitely wrong for this exact stem.
 - "answer" is the 0-based index of the correct option.
 - "section" must be copied exactly from one of these SOURCE headings: ${referenceSections(reference).join(' | ')}
 - "explanation": 1–2 sentences on why the answer is right and the key distractor is wrong.
