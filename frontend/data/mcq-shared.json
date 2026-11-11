@@ -1,0 +1,6 @@
+{
+ "about": "Shared weekly MCQ bank. Written by tools/weekly-mcqs.mjs from the app guideline text, checked by the server, approved by merging the weekly pull request. One question per line.",
+ "updated": "",
+ "questions": [
+ ]
+}
