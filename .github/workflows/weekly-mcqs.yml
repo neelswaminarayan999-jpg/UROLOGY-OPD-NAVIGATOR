@@ -1,0 +1,54 @@
+name: Weekly MCQs
+# Every Monday 07:47 IST: write 50 new MCQs for the shared bank and open a pull request for review.
+# This file must also be on the default branch (main) for the schedule to run; it works on v13.2-final.
+on:
+  schedule:
+    - cron: '17 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      count:
+        description: 'How many new questions'
+        default: '50'
+        required: true
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SITE: https://urology-opd-navigator.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v13.2-final
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Skip if last week's questions are still waiting for review
+        id: open
+        run: |
+          n=$(gh pr list --base v13.2-final --state open --search "head:mcq-weekly-" --json number --jq length)
+          echo "open=$n" >> "$GITHUB_OUTPUT"
+          if [ "$n" != "0" ]; then echo "### Skipped: last week's MCQ pull request is still open. Merge or close it first." >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Wake the site (free Render services sleep)
+        if: steps.open.outputs.open == '0'
+        run: for i in 1 2 3 4 5 6; do curl -fsS "$SITE/health" && break; sleep 20; done
+      - name: Generate questions
+        id: gen
+        if: steps.open.outputs.open == '0'
+        run: node tools/weekly-mcqs.mjs "$SITE" "${{ inputs.count || '50' }}"
+      - name: Open pull request
+        if: steps.open.outputs.open == '0' && steps.gen.outputs.added != '0'
+        run: |
+          d=$(date -u +%Y-%m-%d)
+          git config user.name "weekly-mcq-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "mcq-weekly-$d"
+          git add frontend/data/mcq-shared.json
+          git commit -m "Weekly MCQs $d: ${{ steps.gen.outputs.added }} new questions"
+          git push origin "mcq-weekly-$d"
+          gh pr create --base v13.2-final --head "mcq-weekly-$d" --title "Weekly MCQs $d (${{ steps.gen.outputs.added }} new)" --body-file mcq-review.md
+          cat mcq-review.md >> "$GITHUB_STEP_SUMMARY"
