@@ -95,6 +95,33 @@ for (const [re, why] of banned) assert.ok(!re.test(html), `regression: ${why}`);
   riskCases.push(...cases);
 }
 
+// 7. V16.8 offline MCQ bank: well-formed, one correct answer, cited section exists in the app
+{
+  const ctx = {}; vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync('frontend/data/clinical.js', 'utf8') + '\n' + fs.readFileSync('frontend/data/mcq-bank.js', 'utf8') + ';this.D=DISEASES;this.B=MCQ_BANK;', ctx);
+  const ids = new Set();
+  for (const q of ctx.B) {
+    assert.ok(!ids.has(q.id), `MCQ id ${q.id} duplicated`); ids.add(q.id);
+    assert.ok(ctx.D[q.topic], `MCQ ${q.id}: unknown topic ${q.topic}`);
+    assert.ok(ctx.D[q.topic].sections.some(s => s.title === q.section), `MCQ ${q.id}: section "${q.section}" not in ${q.topic}`);
+    assert.equal(q.options.length, 4, `MCQ ${q.id}: needs 4 options`);
+    assert.equal(new Set(q.options.map(o => o.toLowerCase())).size, 4, `MCQ ${q.id}: duplicate options`);
+    assert.ok(Number.isInteger(q.answer) && q.answer >= 0 && q.answer < 4, `MCQ ${q.id}: bad answer index`);
+    assert.ok(q.stem.length > 15 && q.explain.length > 15, `MCQ ${q.id}: stem/explanation too short`);
+    assert.ok(['intern', 'resident', 'exam'].includes(q.level), `MCQ ${q.id}: bad level`);
+  }
+  for (const t of Object.keys(ctx.D)) assert.ok(ctx.B.filter(q => q.topic === t).length >= 4, `MCQ bank: fewer than 4 questions on ${t}`);
+  facts.push([/./, `${ctx.B.length} MCQs`]);
+  // shared weekly bank: same rules, plus unique ids across both banks
+  const shared = JSON.parse(fs.readFileSync('frontend/data/mcq-shared.json', 'utf8'));
+  assert.ok(Array.isArray(shared.questions), 'mcq-shared.json must have a questions array');
+  for (const q of shared.questions) {
+    assert.ok(!ids.has(q.id), `shared MCQ id ${q.id} duplicated`); ids.add(q.id);
+    assert.ok(ctx.D[q.topic] && ctx.D[q.topic].sections.some(s => s.title === q.section), `shared MCQ ${q.id}: section "${q.section}" not in ${q.topic}`);
+    assert.ok(q.options.length === 4 && new Set(q.options.map(o => o.toLowerCase())).size === 4 && Number.isInteger(q.answer) && q.answer >= 0 && q.answer < 4, `shared MCQ ${q.id}: malformed`);
+  }
+}
+
 // 4. Lastverified freshness: warn (not fail) if older than 120 days
 const lv = html.match(/lastVerified:\s*"([\d-]+)"/)[1];
 const ageDays = (Date.now() - Date.parse(lv)) / 864e5;

@@ -119,7 +119,101 @@ function stripDataUrl(dataUrl) {
   const m = String(dataUrl || '').match(/^data:([^;]+);base64,(.+)$/s);
   return m ? { mimeType: m[1], data: m[2] } : null;
 }
+
+// ---------------- V16.7 Viva mode: a strict senior consultant examines on a synthetic case ----------------
+const VIVA_KEYS = ['case_title','vignette','verdict','score','feedback','model_answer','guideline_section','next_question'];
+const VIVA_LEVELS = { intern: 'an intern / house officer: core facts, safe first steps, red flags', resident: 'a urology resident: guideline-based work-up, staging, risk groups, treatment choice', exam: 'a final-year resident at exit exam (MCh/DNB/FEBU) level: nuances, trial evidence, controversies, complications' };
+function vivaPrompt(body) {
+  const topic = String(body.topic || 'urology').slice(0, 80);
+  const level = VIVA_LEVELS[body.level] || VIVA_LEVELS.resident;
+  const reference = String(body.reference || '').slice(0, 12000);
+  const history = (Array.isArray(body.history) ? body.history : []).slice(-6).map((h, i) =>
+    `Q${i + 1}: ${String(h.q || '').slice(0, 600)}\nCandidate: ${String(h.a || '').slice(0, 1500)}\nYour mark: ${String(h.score ?? '')}/10`).join('\n\n');
+  const total = Math.min(Math.max(Number(body.total) || 5, 3), 8);
+  const number = Number(body.question_no) || 1;
+  const grounding = reference ? `\nVERIFIED REFERENCE CONTENT for ${topic} (this app's EAU 2026-checked text). Base every case detail, mark and model answer on it. Name the section you used in "guideline_section". If a point is not covered, say "not covered by the app reference" in guideline_section and mark only on widely accepted guideline practice.\n${reference}\n` : `\nNo app reference is available for this topic: base marks on current EAU/AUA guideline practice and set guideline_section to "General guideline knowledge (not checked against app content)".\n`;
+  const persona = `You are a strict but fair senior urology consultant taking a viva on ward rounds in an Indian teaching hospital. The candidate is ${level}. Be direct and exacting: reward precision, penalise vague or unsafe answers, and push for the next step ("And then?", "What exactly would you do?"). Never mock or humiliate; correct errors clearly. The case is synthetic and for teaching only: invent no identifiers and use a bed number, not a name.`;
+  if (body.step === 'start') {
+    return `${persona}${grounding}
+TASK: Start a viva on ${topic}. Write a realistic, concise ward-round vignette (Bed ${Math.floor(Math.random() * 20) + 1}, age, presentation, key examination and investigation results). Make it test a decision a ${body.level || 'resident'} must get right. Then ask question 1 of ${total}: one focused question.
+Return JSON with keys ${VIVA_KEYS.join(', ')}. Set verdict, feedback, model_answer, guideline_section to "" and score to 0. Put the vignette in "vignette", a 3–6 word title in "case_title", and the question in "next_question".`;
+  }
+  const last = number >= total;
+  return `${persona}${grounding}
+CASE: ${String(body.vignette || '').slice(0, 2000)}
+${history ? 'EARLIER IN THIS VIVA:\n' + history + '\n' : ''}
+CURRENT QUESTION (Q${number} of ${total}): ${String(body.question || '').slice(0, 800)}
+CANDIDATE'S ANSWER: ${String(body.answer || '').slice(0, 2000) || '(no answer)'}
+TASK: Mark the answer out of 10 (10 = complete, precise and safe; 5 = partly right; 0–2 = wrong or unsafe; any unsafe recommendation caps the mark at 3). Verdict is exactly one of "Correct", "Partly correct", "Incorrect", "Unsafe". In "feedback" (2–4 sentences, speaking to the candidate) say what was right, what was missing or wrong, and why it matters for the patient. In "model_answer" give the answer you expected, as short points. ${last ? 'This was the final question: set next_question to "" and end feedback with one line on the single most important thing to revise.' : `Then ask Q${number + 1} of ${total} in "next_question": build on the case (next step, complication, result of an investigation, or a twist). Do not repeat earlier questions.`}
+Return JSON with keys ${VIVA_KEYS.join(', ')}; repeat case_title and vignette unchanged.`;
+}
+function vivaSchema() {
+  return { type: 'object', properties: { case_title: { type: 'string' }, vignette: { type: 'string' }, verdict: { type: 'string' }, score: { type: 'integer' }, feedback: { type: 'string' }, model_answer: { type: 'string' }, guideline_section: { type: 'string' }, next_question: { type: 'string' } }, required: VIVA_KEYS };
+}
+function validateVivaOutput(text) {
+  let obj; try { obj = JSON.parse(stripJsonFences(text)); } catch { const e = new Error('Provider returned non-JSON content; expected viva JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  if (!obj || typeof obj !== 'object') { const e = new Error('Invalid viva JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  const out = {};
+  for (const k of VIVA_KEYS) { const v = obj[k]; out[k] = k === 'score' ? Math.max(0, Math.min(10, Math.round(Number(v) || 0))) : (Array.isArray(v) ? v.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join('\n') : String(v ?? '')); }
+  if (!out.vignette && !out.feedback) { const e = new Error('Viva response was empty.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  return { cleaned: JSON.stringify(out), obj: out };
+}
+
+// ---------------- V16.8 MCQ generator: new offline questions, grounded in the app's guideline text ----------------
+function referenceSections(reference) { return [...String(reference || '').matchAll(/^## (.+)$/gm)].map(m => m[1].trim()); }
+function mcqPrompt(body) {
+  const topic = String(body.topic || '').slice(0, 80);
+  const reference = String(body.reference || '').slice(0, 12000);
+  const avoid = (Array.isArray(body.avoid) ? body.avoid : []).slice(-40).map(x => '- ' + String(x).slice(0, 160)).join('\n');
+  const n = Math.min(Math.max(Number(body.count) || 5, 1), 8);
+  return `You write single-best-answer MCQs for urology residents, for an offline revision bank.
+TOPIC: ${topic}
+SOURCE (the ONLY material you may use: this app's EAU 2026-checked guideline text):
+${reference}
+
+RULES:
+- Write ${n} new MCQs. Each must test a clinically important decision, threshold, classification or management step stated in the SOURCE.
+- The correct answer must be directly supported by the SOURCE. Do not use facts that are not in it.
+- Exactly 4 options; exactly one correct; three plausible but clearly wrong distractors; no "all of the above" / "none of the above".
+- "answer" is the 0-based index of the correct option.
+- "section" must be copied exactly from one of these SOURCE headings: ${referenceSections(reference).join(' | ')}
+- "explanation": 1–2 sentences on why the answer is right and the key distractor is wrong.
+- "level": one of intern, resident, exam. Mix levels.
+- Use short clinical vignettes (age, key findings) where useful. Use no names or identifiers.
+- Do not repeat or closely paraphrase these existing questions:
+${avoid || '- (none)'}
+Return JSON: {"questions":[{"stem","options","answer","explanation","section","level"}]}`;
+}
+function mcqSchema() {
+  return { type: 'object', properties: { questions: { type: 'array', items: { type: 'object', properties: { stem: { type: 'string' }, options: { type: 'array', items: { type: 'string' } }, answer: { type: 'integer' }, explanation: { type: 'string' }, section: { type: 'string' }, level: { type: 'string' } }, required: ['stem', 'options', 'answer', 'explanation', 'section', 'level'] } } }, required: ['questions'] };
+}
+// Keeps only well-formed questions whose cited section really exists in the reference that was sent.
+function cleanMcqs(obj, reference) {
+  const sections = referenceSections(reference);
+  const list = Array.isArray(obj) ? obj : Array.isArray(obj?.questions) ? obj.questions : [];
+  const out = [];
+  for (const q of list) {
+    const options = Array.isArray(q?.options) ? q.options.map(o => String(o ?? '').trim()) : [];
+    const answer = Number(q?.answer);
+    const stem = String(q?.stem || '').trim(), explanation = String(q?.explanation || '').trim(), section = String(q?.section || '').trim();
+    if (stem.length < 15 || options.length !== 4 || options.some(o => !o) || new Set(options.map(o => o.toLowerCase())).size !== 4) continue;
+    if (!Number.isInteger(answer) || answer < 0 || answer > 3 || !explanation) continue;
+    if (/all of the above|none of the above/i.test(options.join(' '))) continue;
+    if (sections.length && !sections.includes(section)) continue;
+    out.push({ stem: stem.slice(0, 600), options: options.map(o => o.slice(0, 240)), answer, explanation: explanation.slice(0, 600), section, level: ['intern', 'resident', 'exam'].includes(q?.level) ? q.level : 'resident' });
+  }
+  return out;
+}
+function validateMcqOutput(text) {
+  let obj; try { obj = JSON.parse(stripJsonFences(text)); } catch { const e = new Error('Provider returned non-JSON content; expected MCQ JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  const qs = Array.isArray(obj) ? obj : obj?.questions;
+  if (!Array.isArray(qs) || !qs.length) { const e = new Error('MCQ response contained no questions.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  return { cleaned: JSON.stringify({ questions: qs }), obj: { questions: qs } };
+}
+
 function makePrompt(body) {
+  if (body.mode === 'viva') return vivaPrompt(body);
+  if (body.mode === 'mcq') return mcqPrompt(body);
   const study = String(body.study || 'investigation');
   const ctx = body.context || {};
   const canonical = ['Ca Prostate','Ca Bladder','UTUC','Ca Penis','Ca Testis','Ca Kidney','Urethral Cancer','Adrenal / Neuroendocrine','Urethral Stricture','BPH / Male LUTS','Stone Disease'];
@@ -388,7 +482,7 @@ async function callGemini(body, model = MODEL) {
     contents: [{ role: 'user', parts }],
     generationConfig: {
       responseMimeType: 'application/json',
-      responseSchema: outputSchema(),
+      responseSchema: body.mode === 'viva' ? vivaSchema() : body.mode === 'mcq' ? mcqSchema() : outputSchema(),
       thinkingConfig: { thinkingLevel: 'medium' },
       maxOutputTokens: 3500
     }
@@ -398,14 +492,14 @@ async function callGemini(body, model = MODEL) {
   const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
   if (!r.ok) { const err = new Error(`Gemini HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
   const output_text = extractGeminiText(data); if (!output_text) throw new Error('Gemini returned an empty response.');
-  const valid = validateOracleOutput(output_text);
+  const valid = body.mode === 'viva' ? validateVivaOutput(output_text) : body.mode === 'mcq' ? validateMcqOutput(output_text) : validateOracleOutput(output_text);
   return { output_text: valid.cleaned, model, provider: 'Gemini' };
 }
 
 async function callOpenAICompatible(body, cfg) {
   if (!cfg.apiKey) throw new Error(`${cfg.name} is not configured.`);
   const messages = buildCompatMessages(body);
-  const systemSuffix = '\n\nReturn valid JSON only. Do not wrap JSON in markdown fences. The JSON must contain exactly these top-level keys: technical_adequacy, observations, interpretation, differential, urgent_flags, missing_data, uncertainty, suggested_disease, suggested_oracle_values, pathway_link, teaching. pathway_link.requires_clinician_confirmation must be true.';
+  const systemSuffix = body.mode === 'mcq' ? '\n\nReturn valid JSON only, no markdown fences: {"questions":[{"stem","options","answer","explanation","section","level"}]}.' : body.mode === 'viva' ? `\n\nReturn valid JSON only, no markdown fences, with exactly these keys: ${VIVA_KEYS.join(', ')}. score is an integer 0-10.` : '\n\nReturn valid JSON only. Do not wrap JSON in markdown fences. The JSON must contain exactly these top-level keys: technical_adequacy, observations, interpretation, differential, urgent_flags, missing_data, uncertainty, suggested_disease, suggested_oracle_values, pathway_link, teaching. pathway_link.requires_clinician_confirmation must be true.';
   if (Array.isArray(messages[0]?.content)) messages[0].content = messages[0].content.map((p,i) => i===0 && p.type==='text' ? { ...p, text: p.text + systemSuffix } : p);
   else messages[0].content = String(messages[0].content || '') + systemSuffix;
   const hasImageParts = messages.some(m => Array.isArray(m?.content) && m.content.some(p => p?.type === 'image_url'));
@@ -418,7 +512,7 @@ async function callOpenAICompatible(body, cfg) {
   const request = {
     model,
     messages,
-    temperature: 0.1,
+    temperature: body.mode === 'viva' ? 0.6 : body.mode === 'mcq' ? 0.5 : 0.1,
     max_tokens: 3500,
     response_format: { type: 'json_object' }
   };
@@ -449,7 +543,7 @@ async function callOpenAICompatible(body, cfg) {
 
   const output_text = extractOpenAIText(data);
   if (!output_text) throw new Error(`${cfg.name} returned an empty response.`);
-  const valid = validateOracleOutput(output_text);
+  const valid = body.mode === 'viva' ? validateVivaOutput(output_text) : body.mode === 'mcq' ? validateMcqOutput(output_text) : validateOracleOutput(output_text);
   return { output_text: valid.cleaned, model: data.model || model, provider: cfg.name };
 }
 
@@ -541,13 +635,35 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && (req.url || '').split('?')[0] === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.0.0', release: 'V16 rebuild', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.8.0', release: 'V16.8 MCQ bank', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
       const raw = await readBody(req);
       let body = {}; try { body = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
       return json(res, 200, await callWithFallback(body), origin);
+    }
+    if (req.method === 'POST' && req.url === '/api/viva') {
+      if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
+      const raw = await readBody(req);
+      let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
+      // Only the viva fields are passed on: no images, no free-form prompt from the browser.
+      const body = { mode: 'viva', step: b.step === 'start' ? 'start' : 'answer', topic: b.topic, level: b.level, reference: b.reference, history: b.history, vignette: b.vignette, question: b.question, answer: b.answer, question_no: b.question_no, total: b.total };
+      const r = await callWithFallback(body);
+      let viva = {}; try { viva = JSON.parse(r.output_text); } catch {}
+      return json(res, 200, { viva, provider: r.provider, model: r.model, fallback_attempts: r.fallback_attempts }, origin);
+    }
+    if (req.method === 'POST' && req.url === '/api/mcq') {
+      if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
+      const raw = await readBody(req);
+      let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
+      const reference = String(b.reference || '').slice(0, 12000);
+      if (!referenceSections(reference).length) return json(res, 400, { error: 'MCQs are only generated from app guideline text.' }, origin);
+      const body = { mode: 'mcq', topic: b.topic, reference, avoid: b.avoid, count: b.count };
+      const r = await callWithFallback(body);
+      let parsed = {}; try { parsed = JSON.parse(r.output_text); } catch {}
+      const questions = cleanMcqs(parsed, reference);
+      return json(res, 200, { questions, rejected: ((parsed.questions || []).length - questions.length), provider: r.provider, model: r.model }, origin);
     }
     if (req.method === 'GET') {
       let urlPath = (req.url || '/').split('?')[0];

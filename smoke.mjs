@@ -64,7 +64,7 @@ try {
   await new Promise(r => setTimeout(r, 400));
   const health = await get('/health');
   assert.equal(health.status, 200);
-  assert.match(health.body, /"version":"16.0.0"/);
+  assert.match(health.body, /"version":"16.8.0"/);
   assert.match(health.body, /"provider":"Multi-provider fallback"/);
   assert.match(health.body, /"configured":\{"Gemini":(true|false),"Groq":(true|false),"Cerebras":(true|false),"OpenRouter":/);
   assert.match(health.body, /"freeTier":true/);
@@ -72,7 +72,7 @@ try {
   const index = await get('/');
   assert.equal(index.status, 200);
   // V16: index.html lists every module itself; check each is referenced and served.
-  const mods = ['/data/clinical.js', '/app/00-core.js', '/app/01-core-init.js', '/app/02-book-lab.js', '/app/03-ai-online-v11.js', '/app/04-figure-meta.js', '/app/05-ai-lab.js', '/app/06-oracle-deep.js', '/app/07-oracle-workstation.js', '/app/10-ui-hotfix.js', '/app/11-opd-suite.js', '/app/12-core-hardening.js', '/app/13-navigation.js', '/app/20-engines.js', '/app/30-operative-atlas.js', '/app/40-opd-workflow.js', '/app/50-campbell13.js'];
+  const mods = ['/app/00-offline.js', '/data/clinical.js', '/app/00-core.js', '/app/01-core-init.js', '/app/02-book-lab.js', '/app/03-ai-online-v11.js', '/app/04-figure-meta.js', '/app/05-ai-lab.js', '/app/06-oracle-deep.js', '/app/07-oracle-workstation.js', '/app/10-ui-hotfix.js', '/app/11-opd-suite.js', '/app/12-core-hardening.js', '/app/13-navigation.js', '/app/20-engines.js', '/app/30-operative-atlas.js', '/app/40-opd-workflow.js', '/app/50-campbell13.js', '/app/60-viva.js', '/data/mcq-bank.js', '/app/61-mcq.js'];
   for (const m of mods) {
     assert.ok(index.body.includes(`src="${m}"`), `index.html must load ${m}`);
     const r = await get(m); assert.equal(r.status, 200, `${m} must be served`);

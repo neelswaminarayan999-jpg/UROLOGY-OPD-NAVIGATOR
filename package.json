@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node backend-server.mjs",
-    "test": "node smoke.mjs && node content-pack.test.mjs && node provider-regression.test.mjs && node ui-regression.test.mjs && node provider-order.test.mjs && node clinical-eval.test.mjs && node oracle-fields.test.mjs"
+    "test": "node smoke.mjs && node content-pack.test.mjs && node provider-regression.test.mjs && node ui-regression.test.mjs && node provider-order.test.mjs && node clinical-eval.test.mjs && node oracle-fields.test.mjs && node offline.test.mjs"
   },
   "engines": {
     "node": ">=20"
