@@ -45,3 +45,17 @@ Stone disease, BPH / male LUTS and urethral stricture each have one decision eng
 - `clinical-eval.test.mjs`: EAU 2026 prostate risk groups, EAU NMIBC four-group risk, key content facts, source coverage.
 - `oracle-fields.test.mjs`: every Oracle safety rule tests a value the form can actually produce.
 - `eval/run-ai-eval.mjs` (manual, uses model quota): 12 synthetic cases against the live AI.
+
+## Offline mode (V16.6)
+
+- `frontend/sw.js` is the offline worker. It saves all 27 app files on the first visit. After that, the app opens from the phone's copy instantly, even with no signal or while the free Render server is asleep. The AI Lab and `/health` always go to the server. Book figures are saved the first time they are opened.
+- `frontend/app/00-offline.js` registers the worker, shows a bar when the phone is offline, and shows "A new version of the app is ready — Update now" when a new release has been downloaded.
+- **`sw.js` is generated.** After changing any file in `frontend/`, run `node tools/build-sw.mjs` and upload the new `frontend/sw.js` with your change. `offline.test.mjs` fails (and Render won't deploy) if you forget, so phones never keep an outdated copy.
+
+## MCQ banks (V16.8–V16.9)
+
+- `frontend/data/mcq-bank.js`: 43 starter questions written from the guideline sections. They are part of the app and change only with an app upload.
+- `frontend/data/mcq-shared.json`: the **weekly shared bank**. Every Monday at 07:47 IST, `.github/workflows/weekly-mcqs.yml` runs `tools/weekly-mcqs.mjs`, which asks the live server's `/api/mcq` for 50 new questions on the thinnest topics. The server checks each question (4 distinct options, one valid answer, a cited section that exists). The job then opens a pull request, `Weekly MCQs <date>`, listing every question with its answer. **Merging it publishes the questions to every phone**, without an app update. To drop a question, delete its line in the file in that pull request before merging.
+- While a weekly pull request is open, the next week's run is skipped, so merge or close each one.
+- Phones save the shared file for offline use and refresh it in the background.
+- The workflow file must exist on `main` (GitHub runs schedules only from the default branch) as well as on `v13.2-final`.
