@@ -59,3 +59,10 @@ Stone disease, BPH / male LUTS and urethral stricture each have one decision eng
 - While a weekly pull request is open, the next week's run is skipped, so merge or close each one.
 - Phones save the shared file for offline use and refresh it in the background.
 - The workflow file must exist on `main` (GitHub runs schedules only from the default branch) as well as on `v13.2-final`.
+
+## Topic pages with diagrams and engines (V16.11)
+
+- A topic is a `DISEASES[...]` entry in `frontend/data/clinical.js`. Non-cancer topics set `badges`, `campbellChapter(s)`, `engine` (a `window` function name), optional `engineArg`/`engineLabel`, and `classificationSection`.
+- Diagrams: `DISEASE_FIGURES[topic]` arrays of `{title, caption, svg}` in `frontend/data/fistula-figures.js` and `frontend/data/functional-figures.js` (original schematics, `currentColor` text for dark mode).
+- Engines: `frontend/app/21-fistula.js` (urinary fistulae) and `frontend/app/22-functional.js` (continence plan, UDS calculator with BOOI/BCI/BOOIf/Defreitas, POP-Q stager, nocturia FVC indices). Pure maths is on `window.functionalCalc` and tested in `clinical-eval.test.mjs` section 9.
+- Every new topic needs at least 4 starter MCQs in `frontend/data/mcq-bank.js` whose `section` matches a section title.
