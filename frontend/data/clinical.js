@@ -856,3 +856,371 @@ TRIALS.push(
 );
 
 
+
+/* ===== V16.11: Urinary Tract Fistulae (follows Campbell-Walsh-Wein 13e, Chapter 121 "Urinary Tract Fistulae") =====
+   Original summary written for this app; checked against the ICI fistula algorithms and WHO obstetric fistula guidance. */
+Object.assign(SOURCES, {
+  "ICI-Fistula": { name: "International Consultation on Incontinence — fistula algorithms (ICS/ICUD)", url: "https://www.ics.org/folder/standardisation/ici-algorithms/d/4-fistulae/download" },
+  "WHO-Fistula": { name: "WHO Obstetric fistula: guiding principles for clinical management (2006) and WHO catheter-duration recommendation (2018)", url: "https://www.who.int/publications/i/item/9241593679" },
+  "EAU-Trauma": { name: "EAU Urological Trauma guideline 2026 (iatrogenic bladder/ureteric injury)", url: "https://uroweb.org/guidelines/urological-trauma" },
+  "Campbell-121": { name: "Campbell-Walsh-Wein Urology 13e, Chapter 121 — Urinary Tract Fistulae (read for depth)", url: "https://shop.elsevier.com/search?query=campbell-walsh-wein%20urology" }
+});
+DISEASES["Urinary Tract Fistulae"] = {
+  sources: ["ICI-Fistula", "WHO-Fistula", "EAU-Trauma", "Campbell-121"],
+  emoji: "🩺", color: "violet",
+  tagline: "Campbell 13e Ch. 121 • VVF • ureterovaginal • urethrovaginal • vesicouterine • colovesical • rectourethral • radiation fistulae",
+  campbellChapter: 121, engine: "oracleOpenFistula", classificationSection: 1,
+  badges: ["Campbell 13e Ch. 121", "ICI / WHO fistula guidance"],
+  sections: [
+   {title:"1. Definitions, types & classification",src:["ICI-Fistula","WHO-Fistula","Campbell-121"],verified:"2026-11-11",items:[
+    ["Definition","A fistula is an abnormal epithelialised communication between two epithelial surfaces. Urinary fistulae connect the urinary tract with the genital tract (urogenital), the bowel (uro-enteric), the skin (urocutaneous) or, rarely, a blood vessel (uro-vascular)."],
+    ["Urogenital types","Vesicovaginal (VVF, the commonest), urethrovaginal, ureterovaginal, vesicouterine, vesicocervical and complex combined (for example vesico-uretero-vaginal or with a rectovaginal fistula)."],
+    ["Uro-enteric and other types","Colovesical (the commonest uro-enteric), rectovesical / rectourethral, enterovesical (small bowel, typically Crohn's), pyelo- or uretero-enteric, urethrocutaneous, and ureteroarterial (rare, life-threatening haematuria)."],
+    ["Simple vs complex (WHO / ICI)","Simple: single, small (roughly under 4 cm), urethral closure mechanism not involved, not circumferential, minimal scarring, no ureteric involvement, first repair. Complex: large, involves the urethra or bladder neck, circumferential, heavy scarring, ureteric or rectal involvement, after radiation or malignancy, or a previous failed repair. Complex fistulae belong in experienced hands."],
+    ["Goh classification (obstetric VVF)","Type by distance of the distal edge from the external urethral meatus: type 1 >3.5 cm, type 2 2.5–3.5 cm, type 3 1.5–<2.5 cm, type 4 <1.5 cm. Size: a <1.5 cm, b 1.5–3 cm, c >3 cm. Scarring: i none or mild, ii moderate or severe, iii special considerations (post-radiation, ureteric involvement, circumferential, previous repair). The closer to the meatus (types 3–4), the higher the risk of residual incontinence after closure."],
+    ["Waaldijk classification","Type I: not involving the urethral closing mechanism. Type II: involving the closing mechanism (IIA without, IIB with subtotal or total urethral involvement; each with or without circumferential defect). Type III: miscellaneous, such as ureteric and other exceptional fistulae."]
+   ]},
+   {title:"2. Aetiology & epidemiology",src:["WHO-Fistula","ICI-Fistula","Campbell-121"],verified:"2026-11-11",items:[
+    ["Low-resource settings","Obstetric fistula from prolonged obstructed labour dominates. The fetal head compresses the bladder, urethra and vagina against the pubis, causing ischaemic pressure necrosis; the slough separates days after delivery. It is a 'field injury': look for rectovaginal fistula, foot drop (lumbosacral plexus injury), vaginal stenosis, amenorrhoea, infertility and stillbirth, with major social consequences."],
+    ["High-resource settings","Mostly iatrogenic. Benign hysterectomy is the commonest cause of VVF; others are caesarean section, anti-incontinence and prolapse surgery (including mesh), colorectal surgery, pelvic radiotherapy and pelvic malignancy."],
+    ["Ureterovaginal fistula","Usually follows hysterectomy, especially radical or laparoscopic hysterectomy (thermal injury), caesarean section or pelvic oncological surgery."],
+    ["Colovesical fistula","Diverticular disease is the commonest cause, followed by colorectal cancer, Crohn's disease and radiation. Men are affected more often, because the uterus usually shields the bladder in women."],
+    ["Rectourethral fistula","Follows radical prostatectomy (rectal injury), radiotherapy or brachytherapy, cryotherapy or HIFU, trauma, or Crohn's disease. Radiation-related fistulae are larger, poorly vascularised and harder to close."],
+    ["Radiation and malignant fistulae","Can appear months to years after radiotherapy. Always exclude tumour recurrence with a biopsy of the fistula edge."]
+   ]},
+   {title:"3. Presentation & evaluation",src:["ICI-Fistula","EAU-Trauma","Campbell-121"],verified:"2026-11-11",items:[
+    ["Classic presentation","Continuous, painless urinary leakage per vaginam, day and night. After hysterectomy it typically starts about 7–14 days post-operatively, when necrotic tissue separates; leakage in the first 24–48 hours suggests an unrecognised direct injury. Some patients still void normally, especially with small or ureteric fistulae."],
+    ["History and examination","Record the cause, timing and previous repairs; radiotherapy; malignancy; renal symptoms (loin pain or fever suggests ureteric obstruction); bowel symptoms; and sexual function. Examine with a speculum, in the knee-chest or lithotomy position, and palpate the vault, anterior wall and urethra. Note size, site, scarring, vaginal capacity, and the distance from the meatus and from the ureteric orifices."],
+    ["Dye tests","Instil methylene blue into the bladder with a tampon or swabs in the vagina. A blue swab means a vesicovaginal or urethrovaginal fistula. A swab that is wet with clear or yellow urine but not blue suggests a ureterovaginal fistula. In the double-dye test, oral phenazopyridine stains renal urine orange: orange staining means ureteric, blue means bladder. In the three-swab test, the level of staining localises the leak."],
+    ["Cystoscopy","Shows the fistula site, size and its relation to the ureteric orifices and trigone; tissue quality; and any stone, suture or mesh. Biopsy the edge if there is a history of radiation or malignancy."],
+    ["Upper-tract imaging is mandatory","Use CT urography (or retrograde pyelography): a coexisting ureteric injury or ureterovaginal fistula is found in roughly 10% of VVFs and changes the operation. Ureteric obstruction with leakage needs drainage first."],
+    ["Other imaging","Cystography with lateral views shows a VVF or vesicouterine fistula. MRI helps with complex pelvic or radiation fistulae. For colovesical fistula, CT is the most useful test (air in the bladder, thickened bowel wall next to the bladder); the poppy-seed test is cheap and sensitive. Colonoscopy is essential to exclude malignancy."],
+    ["Basic tests","Urine culture, serum creatinine and, for drain or vaginal fluid of uncertain origin, fluid creatinine compared with serum (much higher in urine). In obstetric fistula, also assess nutrition, anaemia, HIV status, foot drop and psychological state."]
+   ]},
+   {title:"4. Timing & conservative management",src:["ICI-Fistula","WHO-Fistula","Campbell-121"],verified:"2026-11-11",items:[
+    ["Early catheter drainage","Start continuous bladder drainage as soon as a fresh fistula is recognised. Small, recent, non-irradiated fistulae can close spontaneously, especially obstetric ones when catheterised within days (closure of 10% or more is reported). Reassess weekly. A fistula still leaking after about 4–6 weeks of good drainage is unlikely to close, so plan repair."],
+    ["Timing of repair","There is no proven benefit to delaying repair of an uncomplicated iatrogenic VVF (ICI). Repair as soon as the tissues are healthy, non-infected and free of slough; very early repair (within days) is also possible when tissues are clean. Obstetric fistulae are often repaired once slough and inflammation have settled, typically around 2–3 months. Post-radiation fistulae: wait about 6–12 months, biopsy to exclude recurrence, and plan vascularised tissue interposition."],
+    ["Minimally invasive options","Very small tracts (a few mm) may close after fulguration or de-epithelialisation with fibrin glue and catheter drainage. The evidence is limited and this is for selected cases only."],
+    ["Supportive care","Use continence products and barrier skin care. Treat urinary infection. Give topical vaginal oestrogen in postmenopausal women before repair. Optimise nutrition and anaemia, and give psychological support and counselling. In obstetric fistula, add physiotherapy for foot drop and contractures."],
+    ["Ureterovaginal fistula","First try retrograde (or antegrade) ureteric stenting. If a stent passes, leave it about 6–8 weeks: many fistulae heal, but follow up for later stricture. If the stent cannot be passed, place a nephrostomy and perform ureteroneocystostomy (psoas hitch or Boari flap if needed) once the patient is fit."]
+   ]},
+   {title:"5. Principles of surgical repair",src:["ICI-Fistula","WHO-Fistula","Campbell-121"],verified:"2026-11-11",items:[
+    ["The first repair is the best chance","Success falls with each failed attempt. Plan the first repair carefully, with the right surgeon, approach and interposition."],
+    ["Technical principles","Good exposure; protect the ureters (catheterise them if the fistula is near the orifices); wide mobilisation of the bladder from the vagina; excision of the tract is optional; tension-free, watertight closure in at least two layers; non-overlapping suture lines; well-vascularised tissue (add an interposition flap when tissue is poor); and free bladder drainage afterwards."],
+    ["Choice of route","Use the route the surgeon does best that gives the best exposure. Most VVFs, including post-hysterectomy vault fistulae, can be repaired vaginally. Use the abdominal or robotic route for high or inaccessible fistulae, a narrow vagina, the need to reimplant a ureter or augment the bladder, coexisting abdominal pathology, or some failed vaginal repairs."],
+    ["Interposition flaps","Martius (labial fibrofatty or bulbocavernosus) flap for low, urethral, large, recurrent or radiated vaginal repairs. Peritoneal flap for apical vaginal repairs. Omentum for abdominal repairs. Gracilis, or rectus abdominis, for large, radiated or rectourethral repairs."],
+    ["Stress incontinence","If the urethral closure mechanism is involved, add a closure-mechanism repair (pubocervical fascia repair and refixation, or a sling) at the time of repair or later. Counsel that the fistula can close while incontinence persists."]
+   ]},
+   {title:"6. Vaginal approaches",src:["ICI-Fistula","Campbell-121"],verified:"2026-11-11",items:[
+    ["Layered (flap-splitting) repair","Circumscribe the fistula, develop vaginal flaps, close the bladder (or urethra) in one or two layers without tension, add interposition if needed, then close the vaginal wall with a non-overlapping suture line. This is the workhorse for most VVFs and urethrovaginal fistulae."],
+    ["Latzko partial colpocleisis","For a post-hysterectomy fistula at the vaginal vault: denude the vaginal epithelium around the fistula, then close the vaginal walls over it in layers, without opening the bladder. Simple, with high success; it shortens the vagina slightly, so discuss sexual function."],
+    ["Advantages","Less pain, shorter stay and faster recovery than the abdominal route, with first-attempt closure of about 90% in experienced hands for simple fistulae."],
+    ["Pitfalls","Do not close under tension. Avoid devitalised, radiated tissue without interposition. Watch for ureteric injury near the orifices, catheter malposition through the fistula, and vaginal stenosis."]
+   ]},
+   {title:"7. Abdominal, laparoscopic & robotic approaches",src:["ICI-Fistula","Campbell-121"],verified:"2026-11-11",items:[
+    ["O'Connor transvesical repair","Bivalve the bladder down to the fistula, excise the tract, separate the bladder from the vagina, close each in layers, and interpose omentum between them. Used for supratrigonal, large or recurrent fistulae, and when the ureters are close or need reimplantation."],
+    ["Extravesical and minimally invasive","Laparoscopic or robotic repair (transvesical or extravesical) follows the same principles, with outcomes similar to open surgery in expert hands and less morbidity. Omental or peritoneal interposition is usually used."],
+    ["Combined procedures","The abdominal route allows ureteroneocystostomy, augmentation cystoplasty for a small contracted bladder, or management of associated bowel pathology at the same sitting."]
+   ]},
+   {title:"8. Ureterovaginal, vesicouterine & urethrovaginal fistulae",src:["ICI-Fistula","EAU-Trauma","Campbell-121"],verified:"2026-11-11",items:[
+    ["Ureterovaginal: diagnosis","Leakage with normal voiding, often with flank pain or fever. CT urography shows extravasation or hydroureteronephrosis. A cystogram or dye test excludes a coexisting VVF, and a double-dye test helps."],
+    ["Ureterovaginal: management","Stent first (retrograde, or antegrade through a nephrostomy). If that fails, ureteroneocystostomy (psoas hitch or Boari flap) once infection and urinoma are controlled. Early repair is acceptable when the patient is fit. Remove the stent at about 6 weeks, with imaging to detect stricture."],
+    ["Vesicouterine fistula","Usually follows caesarean section. Youssef syndrome is cyclical haematuria (menouria), amenorrhoea and continence, because the uterine isthmus acts as a sphincter. Small fistulae may close with prolonged catheter drainage or hormonal suppression of menses. Otherwise, repair transabdominally (or robotically) with separation, layered closure and interposition, with or without hysterectomy depending on fertility wishes."],
+    ["Urethrovaginal fistula","Follows anterior repair, urethral diverticulectomy, slings or mesh, obstetric injury, or radiation. A distal fistula (beyond the sphincter) may be asymptomatic and need no surgery. A proximal fistula causes continuous leakage. Repair vaginally, usually with a Martius flap; reconstruct the urethra if there is tissue loss; and plan for stress incontinence (consider an autologous sling, never synthetic mesh in a fistula bed)."]
+   ]},
+   {title:"9. Uro-enteric fistulae",src:["Campbell-121"],verified:"2026-11-11",items:[
+    ["Colovesical: features","Pneumaturia (most specific), faecaluria, and recurrent polymicrobial UTI. Suprapubic pain and bowel symptoms are variable."],
+    ["Colovesical: work-up","CT shows bladder gas and a thickened, adherent colon. Cystoscopy shows focal oedema or a papillary-bullous area, and biopsy excludes carcinoma. Colonoscopy excludes colorectal cancer. Poppy-seed or charcoal tests can confirm."],
+    ["Colovesical: treatment","Most patients need segmental colectomy (usually sigmoid for diverticular disease) with primary anastomosis, excision or closure of the bladder defect, and omental interposition, often as a one-stage laparoscopic or open operation. Small bladder defects may only need debridement and catheter drainage for about 7–10 days. If cancer is present, resect en bloc with a partial cystectomy. Conservative management is for frail patients with minimal symptoms."],
+    ["Enterovesical (Crohn's)","Treat medically first (biologic therapy) and correct nutrition. Resect the diseased bowel if the fistula persists or is symptomatic; the bladder side usually needs only simple closure."],
+    ["Rectourethral: management","Small, non-irradiated fistulae after prostatectomy may close with urinary catheter drainage, with or without temporary faecal diversion. Persistent or complex fistulae: faecal diversion first (especially after radiation), then repair once inflammation settles. Use the transperineal approach with gracilis (or dartos) interposition, or the posterior transanal transsphincteric (York-Mason) approach for non-irradiated fistulae. Severe radiated destruction may need permanent urinary and faecal diversion."]
+   ]},
+   {title:"10. Radiation, malignant & irreparable fistulae",src:["ICI-Fistula","Campbell-121"],verified:"2026-11-11",items:[
+    ["Radiation fistulae","Spontaneous closure is very rare. Biopsy to exclude recurrence, wait for the radiation injury to mature (about 6–12 months), excise poorly vascularised tissue, and always interpose well-vascularised tissue (Martius, gracilis, rectus abdominis or omentum). Closure rates are lower than for non-radiated fistulae."],
+    ["When repair isn't feasible","With a small contracted bladder, a destroyed urethra, recurrent pelvic malignancy or poor prognosis, offer urinary diversion: an ileal conduit or continent diversion, with or without cystectomy. Palliative options include bilateral nephrostomies with ureteric occlusion."],
+    ["Irreparable obstetric fistula","When the urethra or bladder is destroyed after obstructed labour, management is urinary diversion. Use it only where long-term follow-up and stoma care are available, which needs careful discussion in low-resource settings."]
+   ]},
+   {title:"11. Post-operative care, outcomes & prevention",src:["WHO-Fistula","ICI-Fistula","EAU-Trauma"],verified:"2026-11-11",items:[
+    ["Bladder drainage","Continuous, free catheter drainage is crucial: check for kinking and blockage, and encourage high fluid intake. Typical duration is 10–14 days for iatrogenic repairs and longer (about 2–3 weeks) after radiation or complex repair, with a cystogram before removal if in doubt. WHO (2018): for simple obstetric fistula, a short catheterisation of about 7 days is not inferior to 14 days."],
+    ["After discharge","No intercourse or tampons for about 3 months. Use anticholinergics for bladder spasm if needed. Do a dye test or examine if leakage recurs."],
+    ["Outcomes","First-attempt closure is roughly 85–95% for simple iatrogenic VVF. Obstetric fistula closure is high, but residual (stress or mixed) incontinence persists in a significant minority, more often with urethral involvement, circumferential defects or extensive scarring. Report closure and continence separately."],
+    ["Future pregnancy","After repair of an obstetric fistula, deliver subsequent pregnancies by planned caesarean section in a facility, to protect the repair."],
+    ["Prevention and intraoperative recognition","Obstetric: access to skilled birth attendance, partograph use, timely caesarean section, and catheterisation after prolonged labour. Surgical: recognise bladder or ureteric injury during the operation (cystoscopy, with dye given if needed, after difficult hysterectomy), repair immediately in layers, and drain the bladder."]
+   ]}
+  ]
+};
+
+/* ===== V16.11: Female & functional urology (Campbell-Walsh-Wein 13e Chs 28, 103–119, 122) =====
+   Original summaries for this app, checked against EAU Non-neurogenic Female LUTS, AUA/SUFU SUI (2023), AUA/SUFU OAB (2024),
+   ICS Good Urodynamic Practices, AUA/SUFU urodynamics, AUA IC/BPS (2022), EAU Chronic Pelvic Pain and NICE NG123. */
+Object.assign(SOURCES, {
+  "EAU-FLUTS": { name: "EAU Non-neurogenic Female LUTS guideline (current edition)", url: "https://uroweb.org/guidelines/non-neurogenic-female-luts" },
+  "AUA-SUI": { name: "AUA/SUFU Surgical Treatment of Female SUI (2017, amended 2023)", url: "https://www.auanet.org/guidelines-and-quality/guidelines/stress-urinary-incontinence-(sui)-guideline" },
+  "AUA-OAB": { name: "AUA/SUFU Diagnosis and Treatment of Idiopathic OAB (2024)", url: "https://www.auanet.org/guidelines-and-quality/guidelines/idiopathic-overactive-bladder" },
+  "ICS-GUP": { name: "ICS Good Urodynamic Practices and terms (Rosier et al., Neurourol Urodyn 2017)", url: "https://doi.org/10.1002/nau.23124" },
+  "AUA-UDS": { name: "AUA/SUFU Adult Urodynamics guideline (Winters et al., J Urol 2012; amended)", url: "https://doi.org/10.1016/j.juro.2012.09.081" },
+  "AUA-ICBPS": { name: "AUA Diagnosis and Treatment of IC/BPS (Clemens et al., J Urol 2022)", url: "https://doi.org/10.1097/JU.0000000000002756" },
+  "EAU-CPP": { name: "EAU Chronic Pelvic Pain guideline (current edition)", url: "https://uroweb.org/guidelines/chronic-pelvic-pain" },
+  "NICE-NG123": { name: "NICE NG123: Urinary incontinence and pelvic organ prolapse in women (2019)", url: "https://www.nice.org.uk/guidance/ng123" },
+  "POP-Q": { name: "ICS/IUGA POP-Q standardisation (Bump et al., Am J Obstet Gynecol 1996)", url: "https://doi.org/10.1016/S0002-9378(96)70243-0" },
+  "Campbell-FFU": { name: "Campbell-Walsh-Wein Urology 13e, Vol. II female & functional chapters (read for depth)", url: "https://shop.elsevier.com/search?query=campbell-walsh-wein%20urology" }
+});
+
+DISEASES["Female Urinary Incontinence"] = {
+  sources: ["EAU-FLUTS", "AUA-SUI", "NICE-NG123", "Campbell-FFU"], emoji: "💧", color: "sky",
+  tagline: "Campbell 13e Chs 105, 108, 114, 116, 118, 119 • SUI • mixed UI • slings • colposuspension • bulking • mesh complications",
+  campbellChapters: [105, 108, 114, 116, 118, 119], engine: "oracleOpenFunctional", engineArg: "continence", engineLabel: "Continence plan", classificationSection: 1,
+  badges: ["Campbell 13e Chs 105–119", "EAU Female LUTS • AUA/SUFU SUI 2023"],
+  sections: [
+   {title:"1. Definitions & types",src:["EAU-FLUTS","AUA-SUI","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Stress UI (SUI)","Involuntary leakage on effort or exertion, sneezing or coughing. Mechanisms: urethral hypermobility (loss of the supporting 'hammock') and/or intrinsic sphincter deficiency (ISD)."],
+    ["Urgency UI (UUI)","Leakage accompanied or immediately preceded by urgency. It is the 'wet' end of the overactive bladder spectrum (see Overactive Bladder & Nocturia)."],
+    ["Mixed UI (MUI)","Both stress and urgency leakage. Classify as stress-predominant or urgency-predominant, because this decides which component to treat first."],
+    ["Other types","Continuous leakage (think fistula or ectopic ureter), overflow or retention-associated leakage, functional incontinence (mobility or cognition), coital and nocturnal enuresis."],
+    ["Index vs complicated patient (AUA/SUFU)","Index: healthy woman, pure or stress-predominant SUI, little or no prolapse, normal emptying, no previous SUI surgery. Complicated (non-index): previous anti-incontinence or pelvic surgery, prolapse grade 3–4, urgency-predominant MUI, neurogenic LUTD, incomplete emptying, radiation, mesh complications, or inability to demonstrate SUI. Complicated patients need fuller evaluation, usually including urodynamics."],
+    ["Risk factors","Age, parity and vaginal delivery, obesity, menopause (genitourinary syndrome of menopause), chronic cough, constipation, previous pelvic surgery or radiation, and connective-tissue disorders."]
+   ]},
+   {title:"2. Evaluation",src:["EAU-FLUTS","AUA-SUI","NICE-NG123"],verified:"2026-11-11",items:[
+    ["History","Type and severity of leakage, bother (validated questionnaire such as ICIQ-UI SF), pad use, fluid intake, bowel and sexual function, obstetric and surgical history, medications (diuretics, alpha-blockers), neurological symptoms and patient goals."],
+    ["Bladder diary","A 3-day frequency-volume chart: frequency, voided volumes, incontinence episodes and nocturnal volume. It is the most useful cheap test and guides behavioural therapy."],
+    ["Examination","Abdominal and pelvic examination with a comfortable full bladder. Look for a cough stress test (leakage synchronous with cough confirms SUI), urethral hypermobility, prolapse (POP-Q), vaginal atrophy, pelvic floor muscle strength and focal neurological signs."],
+    ["Basic tests","Urinalysis (exclude infection and haematuria) and post-void residual (bladder scan). Use a pad test when quantifying leakage would help."],
+    ["Urodynamics","Not needed before primary surgery in the index patient with demonstrable SUI and normal emptying (ValUE trial: non-inferior outcomes without UDS). Do urodynamics when the result would change management: urgency-predominant MUI, voiding dysfunction or raised PVR, previous SUI or prolapse surgery, neurogenic LUTD, or failure to demonstrate SUI on examination."],
+    ["Cystoscopy","Not routine for SUI. Do it for haematuria, recurrent UTI, suspected fistula or mesh in the bladder or urethra, and after mesh complications."]
+   ]},
+   {title:"3. Conservative & non-surgical treatment",src:["EAU-FLUTS","NICE-NG123","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Lifestyle","Weight loss when BMI is raised (strong evidence), adjusting fluid and caffeine intake, treating constipation and chronic cough, and stopping smoking."],
+    ["Pelvic floor muscle training (PFMT)","First-line for SUI and MUI. Use a supervised programme of at least 3 months, ideally with a physiotherapist (for example 8 contractions, 3 times a day). Biofeedback or electrical stimulation can help women who cannot contract the pelvic floor."],
+    ["Vaginal oestrogen","For postmenopausal women with genitourinary syndrome of menopause. It improves symptoms and tissue quality before surgery. Systemic HRT does not treat incontinence and may worsen it."],
+    ["Devices","Continence pessaries and vaginal or urethral inserts for activity-related leakage, or while awaiting or avoiding surgery. Use containment products when needed."],
+    ["Duloxetine","Has a modest effect on SUI but frequent side effects (nausea), with many women stopping it. Use only with clear counselling, not as routine first-line treatment."],
+    ["Not recommended","Vaginal laser for SUI: evidence is insufficient (EAU). Electromagnetic chairs: limited evidence."]
+   ]},
+   {title:"4. Surgery for uncomplicated SUI",src:["EAU-FLUTS","AUA-SUI","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Shared decision making","Offer surgery after conservative treatment fails or when the woman prefers it. Discuss the options, success rates, and mesh-specific risks (exposure, pain, dyspareunia, voiding dysfunction), and record the discussion."],
+    ["Mid-urethral sling (MUS)","Retropubic (TVT) or transobturator (TOT) synthetic tape. Cure about 80–90% at 1 year with durable long-term results. Retropubic: more bladder perforation and voiding dysfunction, but preferred for ISD or low urethral pressure. Transobturator: more groin and thigh pain, fewer bladder injuries. Do cystoscopy during retropubic sling placement. Single-incision slings are an option where outcome data support the specific device."],
+    ["Colposuspension (Burch)","Open or laparoscopic suspension of the paravaginal tissue to Cooper's ligament. Efficacy is similar to MUS with no mesh, but it is more invasive and causes more posterior compartment prolapse later. A good option when the abdomen is being opened anyway, or when the woman declines mesh."],
+    ["Autologous fascial (pubovaginal) sling","Rectus fascia or fascia lata sling at the bladder neck. Effective, especially for ISD, recurrent SUI or when mesh is contraindicated or declined. Voiding dysfunction is more common, and the operation is more morbid than MUS."],
+    ["Urethral bulking agents","Periurethral or transurethral injection (for example polyacrylamide hydrogel). Low morbidity, but lower and less durable efficacy with frequent re-injection. Suits frail women, women who want to avoid surgery, or those with a fixed urethra or ISD who accept lower success."],
+    ["Mesh context","Synthetic mesh for SUI is restricted or under enhanced governance in several countries (for example the UK pause in 2018). Where offered, it needs accredited surgeons, registries and full consent. Transvaginal mesh for prolapse is a separate issue: withdrawn in the US and UK."]
+   ]},
+   {title:"5. Complicated & recurrent SUI, MUI",src:["EAU-FLUTS","AUA-SUI","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Recurrent SUI after surgery","Re-evaluate with urodynamics (with or without video) and cystoscopy. Options: a further MUS (usually retropubic), colposuspension, an autologous sling, bulking, or an artificial urinary sphincter or adjustable device in expert centres."],
+    ["Mixed UI","Treat the predominant component first. Behavioural therapy and PFMT help both components. For urgency-predominant MUI, treat OAB first. For stress-predominant MUI, a MUS cures or improves urgency in many women, but warn that urgency may persist or start de novo."],
+    ["Concomitant procedures","Do not place a synthetic MUS at the same time as urethral diverticulectomy, urethrovaginal fistula repair or urethral mesh excision (AUA). Use an autologous sling instead. Avoid mesh where wound healing is poor (radiation, heavy scarring)."],
+    ["SUI with prolapse","Test for occult SUI with the prolapse reduced. A concomitant MUS lowers postoperative SUI but adds sling-related adverse events, so discuss and decide together."],
+    ["Elderly or frail","Bulking agents or devices may be preferable. Assess mobility, cognition and toileting access."]
+   ]},
+   {title:"6. Complications of slings & mesh",src:["AUA-SUI","EAU-FLUTS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Voiding dysfunction or retention","A raised PVR or retention after a sling: catheterise or start CISC early. If it persists, loosen or incise the sling early (within about 2–6 weeks). Later obstruction needs sling incision or urethrolysis. Watch for de novo urgency as an obstruction sign."],
+    ["Vaginal mesh exposure","Small, asymptomatic exposures may respond to vaginal oestrogen. Symptomatic or persistent exposure needs excision of the exposed mesh and vaginal closure."],
+    ["Mesh in the urethra or bladder (erosion)","Presents with recurrent UTI, haematuria, pain or stones. Excise endoscopically or by an open or vaginal approach, with layered repair and interposition as needed. Avoid a synthetic sling at the same sitting."],
+    ["Pain and dyspareunia","Groin or thigh pain (more with transobturator slings) and vaginal pain. Treat with pelvic floor physiotherapy, analgesia, trigger-point injection, and partial or complete mesh removal in specialist mesh centres."],
+    ["Bladder perforation","Recognise it at intraoperative cystoscopy. Withdraw and re-pass the trocar, and drain the bladder briefly."]
+   ]},
+   {title:"7. Follow-up & outcomes",src:["AUA-SUI","EAU-FLUTS"],verified:"2026-11-11",items:[
+    ["Post-operative review","Review at about 6 weeks to 6 months. Ask about residual leakage, ease of voiding and stream, UTI, pain, sexual function, and new or worse OAB symptoms (AUA). Check PVR if there are voiding symptoms."],
+    ["Reporting","Report objective cure (cough test, pad test), subjective cure and patient-reported outcomes separately, with the follow-up time."]
+   ]}
+  ]
+};
+
+DISEASES["Overactive Bladder & Nocturia"] = {
+  sources: ["AUA-OAB", "EAU-FLUTS", "NICE-NG123", "Campbell-FFU"], emoji: "⏱️", color: "amber",
+  tagline: "Campbell 13e Chs 110, 112, 113, 115 • OAB wet/dry • antimuscarinics • β3 agonists • botulinum toxin • SNM • PTNS • nocturia",
+  campbellChapters: [110, 112, 113, 115], engine: "oracleOpenFunctional", engineArg: "nocturia", engineLabel: "Nocturia calculator", classificationSection: 1,
+  badges: ["Campbell 13e Chs 110–115", "AUA/SUFU OAB 2024 • EAU Female LUTS"],
+  sections: [
+   {title:"1. Definitions",src:["AUA-OAB","EAU-FLUTS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Overactive bladder (ICS)","Urinary urgency, usually with frequency and nocturia, with or without urgency incontinence (OAB-wet or OAB-dry), in the absence of UTI or other obvious pathology. It is a symptom diagnosis. Detrusor overactivity (DO) is a urodynamic observation, and the two do not always coincide."],
+    ["Urgency","A sudden compelling desire to void that is difficult to defer. This differs from the normal, gradually increasing urge."],
+    ["Nocturia (ICS 2019)","Waking to pass urine during the main sleep period, with each void preceded and followed by sleep. Two or more episodes a night are usually bothersome."],
+    ["Nocturia phenotypes","Nocturnal polyuria: nocturnal urine volume above about 33% of the 24-hour volume in older adults (above about 20% in young adults). Global (24-hour) polyuria: above 40 mL/kg per 24 hours. Reduced bladder capacity (OAB, BOO, BPS). Sleep disorders. These often coexist."]
+   ]},
+   {title:"2. Evaluation",src:["AUA-OAB","EAU-FLUTS"],verified:"2026-11-11",items:[
+    ["Core work-up (AUA)","History and examination, urinalysis to exclude microhaematuria and infection, and PVR in selected patients (those with emptying symptoms, previous retention, or neurological disease). Use a bladder diary and symptom questionnaires to measure the baseline."],
+    ["Look for causes and mimics","UTI, stones, carcinoma in situ (urgency with haematuria needs cystoscopy and cytology), BOO, incomplete emptying, neurogenic disease, BPS, polyuria (diabetes, diuretics, high intake), genitourinary syndrome of menopause, and constipation."],
+    ["Urodynamics and cystoscopy","Not routine for uncomplicated OAB. Use them in refractory cases, before invasive therapy when the diagnosis is unclear, or when obstruction, retention, neurogenic disease or haematuria is suspected."],
+    ["Nocturia work-up","A 3-day frequency-volume chart is essential (nocturnal polyuria index, 24-hour volume, maximum voided volume). Screen for diabetes, heart failure, peripheral oedema, obstructive sleep apnoea, evening fluids and medications."]
+   ]},
+   {title:"3. Behavioural & first-line treatment",src:["AUA-OAB","EAU-FLUTS","NICE-NG123"],verified:"2026-11-11",items:[
+    ["Bladder training","Offer to all patients with OAB (AUA strong, grade A): scheduled voiding with gradually increasing intervals and urge-suppression techniques."],
+    ["Behavioural and lifestyle measures","Fluid management (avoid excess, reduce caffeine and alcohol), weight loss, treat constipation, and PFMT with urge suppression. Combine with drugs for additive benefit."],
+    ["Incontinence management","Pads, containment products and toileting aids, for comfort and safety alongside treatment."],
+    ["Vaginal oestrogen","Improves OAB symptoms in postmenopausal women with vaginal atrophy."]
+   ]},
+   {title:"4. Pharmacotherapy",src:["AUA-OAB","EAU-FLUTS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Who and when","Offer an antimuscarinic or a β3 agonist (AUA strong). Drugs can be started together with behavioural therapy; strict step therapy is not required. Review efficacy and side effects at about 4–8 weeks, and try a different drug or dose before moving on."],
+    ["β3 agonists","Mirabegron 25–50 mg, vibegron 75 mg. Efficacy is similar to antimuscarinics, without anticholinergic side effects or cognitive burden. Check blood pressure; avoid mirabegron in severe uncontrolled hypertension. Note interactions (mirabegron inhibits CYP2D6). They are increasingly preferred, especially in older patients."],
+    ["Antimuscarinics","Oxybutynin (highest anticholinergic burden), tolterodine, fesoterodine, solifenacin, darifenacin, trospium (quaternary amine, crosses the blood-brain barrier least). Side effects: dry mouth, constipation, blurred vision, retention. Contraindicated in uncontrolled narrow-angle glaucoma, urinary or gastric retention and myasthenia gravis."],
+    ["Cognition","Discuss the risk of dementia and cognitive impairment with patients taking antimuscarinics (AUA clinical principle). The risk appears cumulative and dose-related. Prefer a β3 agonist in older or cognitively vulnerable patients, and review total anticholinergic burden."],
+    ["Combination","An antimuscarinic plus a β3 agonist for an inadequate response to monotherapy. In men with BPH and OAB, an alpha-blocker plus an antimuscarinic or β3 agonist (check PVR)."]
+   ]},
+   {title:"5. Third-line & refractory OAB",src:["AUA-OAB","EAU-FLUTS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Intradetrusor onabotulinumtoxinA","100 U for idiopathic OAB, as a cystoscopic office procedure. Effect lasts about 6–9 months and repeat injections are needed. Risks: UTI and raised PVR or retention needing CISC (about 5–10%), so the patient must be willing and able to self-catheterise."],
+    ["Sacral neuromodulation (SNM)","Test phase (percutaneous nerve evaluation or staged lead), then an implanted pulse generator if symptoms improve by at least 50%. Also treats non-obstructive retention and faecal incontinence. Counsel about MRI compatibility of the specific device, revision and battery life."],
+    ["Percutaneous tibial nerve stimulation (PTNS)","12 weekly 30-minute sessions, then maintenance. Low risk but time-intensive. Implantable tibial devices are emerging."],
+    ["Last resort","Augmentation cystoplasty or urinary diversion for severe refractory OAB with a small bladder, in carefully selected patients. Indwelling catheters only as a last resort for those who cannot use other options."]
+   ]},
+   {title:"6. Nocturia management",src:["EAU-FLUTS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Treat the phenotype","Behavioural first: limit evening fluids, caffeine and alcohol; time diuretics earlier in the day (for example early afternoon); elevate the legs in the evening for oedema; improve sleep; and treat OSA, heart failure and diabetes."],
+    ["Desmopressin for nocturnal polyuria","Low-dose oral or sublingual (for example 25 µg in women, 50 µg in men as licensed). Hyponatraemia risk rises with age, heart failure, renal impairment and interacting drugs. Check sodium at baseline, within the first week and at 1 month, and after dose changes. Avoid it where hyponatraemia risk is high."],
+    ["Reduced capacity","Treat the cause (OAB drugs, BOO treatment, BPS management)."]
+   ]}
+  ]
+};
+
+DISEASES["Urodynamics"] = {
+  sources: ["ICS-GUP", "AUA-UDS", "EAU-FLUTS", "Campbell-FFU"], emoji: "📈", color: "teal",
+  tagline: "Campbell 13e Ch. 107 (with Chs 103–104) • uroflow • PVR • filling cystometry • pressure-flow • BOOI/BCI • female BOO • videourodynamics",
+  campbellChapters: [103, 104, 107], engine: "oracleOpenFunctional", engineArg: "uds", engineLabel: "UDS calculator", classificationSection: 3,
+  badges: ["Campbell 13e Ch. 107", "ICS Good Urodynamic Practices • AUA/SUFU"],
+  sections: [
+   {title:"1. When to do urodynamics",src:["AUA-UDS","EAU-FLUTS","ICS-GUP"],verified:"2026-11-11",items:[
+    ["Principle","Do urodynamics (UDS) only when the result could change management. Before the test, write down the urodynamic question (for example: is there BOO? DO? low compliance? ISD?)."],
+    ["Typical indications","Complicated or recurrent SUI; urgency-predominant MUI before surgery; refractory OAB before invasive therapy; voiding dysfunction or raised PVR; suspected BOO before surgery (men with equivocal BPO, women with suspected obstruction); neurogenic LUTD (baseline and surveillance of upper-tract risk); and failed previous surgery."],
+    ["Not needed","Uncomplicated index SUI with demonstrable leakage and normal emptying, and uncomplicated OAB before first-line or drug treatment."],
+    ["Preparation","Bladder diary, symptom scores and a negative urinalysis (do not test during an active UTI). Explain the test. Consider antibiotic prophylaxis only for selected high-risk patients."]
+   ]},
+   {title:"2. Uroflowmetry & PVR",src:["ICS-GUP","EAU-FLUTS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Valid flow","Voided volume of at least 150 mL, in private and at normal desire. Repeat if it is unrepresentative. Report Qmax (corrected for artefact spikes), voided volume, PVR, and curve shape."],
+    ["Curve shapes","Bell-shaped: normal. Flattened, prolonged plateau: stricture (constrictive). Prolonged, low and irregular: BPO or detrusor underactivity (DU). Intermittent or fluctuating: abdominal straining or dysfunctional voiding. 'Superflow' (very high Qmax, short duration): low outlet resistance, common in women with SUI."],
+    ["Limits","Qmax cannot tell obstruction from detrusor underactivity; only a pressure-flow study can. Women void at lower pressures and higher flows than men."],
+    ["PVR","Measure by ultrasound bladder scan straight after voiding, and repeat if raised. There is no single threshold. Repeatedly above about 100–150 mL, or above one-third of bladder capacity, is significant and needs explanation."]
+   ]},
+   {title:"3. Filling cystometry",src:["ICS-GUP","AUA-UDS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Set-up and quality control","Zero the transducers to atmospheric pressure, with the reference level at the upper edge of the symphysis pubis. Resting pressures should be plausible: Pves and Pabd similar, and Pdet near zero (about 0–6 cmH2O; negative Pdet means an artefact). Cough at the start, regularly during filling and before voiding: the Pves and Pabd deflections must be equal. Fill at a physiological rate (for adults, at most about body weight in kg ÷ 4 mL/min; slower in neurogenic bladders)."],
+    ["Sensation","First sensation, first desire, strong desire and maximum cystometric capacity. Sensation can be increased (urgency at low volume: OAB or BPS), reduced or absent (neurological disease, chronic retention)."],
+    ["Detrusor overactivity (DO)","Involuntary detrusor contractions during filling, spontaneous or provoked (by cough, change of position or running water). Phasic or terminal. With leakage, this is DO incontinence. Neurogenic DO occurs with a relevant neurological condition."],
+    ["Compliance","Change in volume ÷ change in Pdet (mL/cmH2O). Low compliance (roughly below 20 mL/cmH2O, judged together with Pdet) is a danger sign. A filling Pdet persistently above 40 cmH2O risks upper-tract damage (the McGuire threshold) in neurogenic and obstructed bladders."],
+    ["Stress incontinence and leak point pressures","Urodynamic SUI: leakage on raised abdominal pressure without a detrusor contraction. Abdominal (Valsalva) leak point pressure below about 60 cmH2O suggests ISD; above about 90 suggests hypermobility. Detrusor leak point pressure above 40 cmH2O signals upper-tract risk. Maximum urethral closure pressure below about 20 cmH2O suggests ISD (variably defined)."]
+   ]},
+   {title:"4. Pressure-flow study & indices",src:["ICS-GUP","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Men: BOOI (ICS)","BOOI = PdetQmax − 2 × Qmax. Above 40: obstructed; 20–40: equivocal; below 20: unobstructed."],
+    ["Men: BCI","BCI = PdetQmax + 5 × Qmax. Above 150: strong contractility; 100–150: normal; below 100: weak (detrusor underactivity). Plotted together on the ICS/Schäfer nomogram."],
+    ["Women: obstruction","There is no universally accepted index. Commonly used: Defreitas criteria (Qmax at most 12 mL/s with PdetQmax at least 25 cmH2O); the Blaivas-Groutz nomogram (free Qmax and maximum Pdet); the Solomon-Greenwell female BOO index (BOOIf = PdetQmax − 2.2 × Qmax; above about 18 suggests obstruction, below 0 makes it unlikely); and the videourodynamic definition (radiographic narrowing between the bladder neck and meatus during a sustained detrusor contraction)."],
+    ["Women: contractility","There is no validated female BCI. The projected isovolumetric pressure (PIP1 = PdetQmax + Qmax) has been proposed. Interpret with the flow pattern, straining and the clinical picture."],
+    ["Artefacts to recognise","Straining (rises in Pabd mirrored in Pves), catheter displacement or loss of pressure transmission (cough test fails), rectal contractions (fall in Pdet that is not real), and 'stop test' or interrupted flow. Always read the raw traces, not just the summary numbers."]
+   ]},
+   {title:"5. Videourodynamics & special situations",src:["ICS-GUP","AUA-UDS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Videourodynamics (VUDS)","Combines pressure studies with fluoroscopy. Shows vesicoureteric reflux and the pressure at which it occurs, bladder neck behaviour (primary bladder neck obstruction), the site of obstruction, diverticula and trabeculation, and the cause of leakage. Indicated in neurogenic LUTD, complex or failed surgery, and suspected primary bladder neck obstruction."],
+    ["Neurogenic LUTD","Assess detrusor-sphincter dyssynergia, compliance and storage pressures, detrusor leak point pressure, autonomic dysreflexia risk (spinal cord injury at T6 or above: monitor blood pressure, fill slowly) and upper-tract risk. Follow the EAU Neuro-urology guideline."],
+    ["Ambulatory urodynamics","Natural filling over hours. Use when conventional UDS fails to reproduce the symptoms (for example suspected DO not seen in the laboratory)."],
+    ["Report","Answer the urodynamic question. Include quality-control notes, sensations, DO, compliance, capacity, leakage, pressure-flow indices with the nomogram class, PVR, and whether the patient's symptoms were reproduced."]
+   ]}
+  ]
+};
+
+DISEASES["Pelvic Organ Prolapse"] = {
+  sources: ["EAU-FLUTS", "NICE-NG123", "POP-Q", "Campbell-FFU"], emoji: "🔻", color: "rose",
+  tagline: "Campbell 13e Chs 105, 117, 119 • POP-Q • pessary • native-tissue repair • sacrocolpopexy • colpocleisis • occult SUI",
+  campbellChapters: [105, 108, 117, 119], engine: "oracleOpenFunctional", engineArg: "popq", engineLabel: "POP-Q stager", classificationSection: 2,
+  badges: ["Campbell 13e Ch. 117", "POP-Q • EAU • NICE NG123"],
+  sections: [
+   {title:"1. Definitions & symptoms",src:["EAU-FLUTS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Compartments","Anterior (cystocele or anterior vaginal wall), apical (uterine or cervical, or vaginal vault after hysterectomy), and posterior (rectocele or enterocele). They often coexist; apical support is central to durable repair."],
+    ["Symptoms","Vaginal bulge or heaviness (the most specific), voiding difficulty (manual reduction or splinting to void), incomplete emptying, urgency, occult SUI unmasked by reduction, obstructed defaecation, and sexual dysfunction. Severe procidentia can cause ureteric obstruction and hydronephrosis."],
+    ["Risk factors","Vaginal childbirth, age, menopause, obesity, chronic straining or cough, connective-tissue disorders and previous hysterectomy."]
+   ]},
+   {title:"2. POP-Q staging",src:["POP-Q","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Points","Measured in cm relative to the hymen (0), at maximal straining: above the hymen is negative, below is positive. Aa and Ba (anterior wall), C (cervix or vault), D (posterior fornix; omitted after hysterectomy), Ap and Bp (posterior wall). Also gh (genital hiatus), pb (perineal body) and tvl (total vaginal length)."],
+    ["Aa and Ap","Fixed points 3 cm proximal to the hymen. They range from −3 to +3."],
+    ["Stages (by the most distal point)","Stage 0: no prolapse (Aa, Ap, Ba and Bp at −3; C and D at −tvl to −(tvl−2)). Stage I: the most distal point is more than 1 cm above the hymen (below −1). Stage II: the most distal point is within 1 cm of the hymen (−1 to +1). Stage III: more than 1 cm beyond the hymen, but less than tvl − 2 cm. Stage IV: complete eversion (at least tvl − 2)."],
+    ["Practical","Examine supine and, if the symptoms aren't reproduced, standing. Use the 3 × 3 grid to record points. The Baden-Walker halfway system is simpler, but less reproducible."]
+   ]},
+   {title:"3. Evaluation",src:["EAU-FLUTS","NICE-NG123"],verified:"2026-11-11",items:[
+    ["Bother and goals","Treatment is for symptomatic prolapse. Asymptomatic anatomical prolapse needs no treatment. Record bladder, bowel and sexual symptoms and goals (validated questionnaires such as PFDI-20)."],
+    ["Bladder","Check PVR, and test for occult SUI with the prolapse reduced (pessary, speculum or swab). UDS when there are voiding problems, before combined surgery, or when the results would change the plan."],
+    ["Upper tracts","Renal ultrasound for stage III–IV prolapse with raised PVR, voiding difficulty or recurrent UTI (hydronephrosis)."]
+   ]},
+   {title:"4. Conservative treatment",src:["NICE-NG123","EAU-FLUTS"],verified:"2026-11-11",items:[
+    ["Watchful waiting and lifestyle","For mild or asymptomatic prolapse: weight loss, treat constipation, avoid heavy lifting."],
+    ["Supervised PFMT","At least 16 weeks for symptomatic stage I–II prolapse. It reduces symptoms but may not reverse anatomy."],
+    ["Vaginal pessary","Ring (with or without support) or space-filling (Gellhorn, cube). Most women can be fitted. Change or clean about every 3–6 months (sooner for self-managers), using vaginal oestrogen to reduce erosion. Complications: discharge, ulceration, and rarely fistula if neglected. A good option for the frail, the pregnant, those awaiting surgery, or those who decline surgery."]
+   ]},
+   {title:"5. Surgery",src:["EAU-FLUTS","NICE-NG123","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Principles","Repair every symptomatic compartment. Always assess and support the apex, since apical failure drives recurrence. Discuss recurrence (often 10–30% anatomical), sexual function, mesh issues, and future childbearing."],
+    ["Anterior and posterior native-tissue repair","Anterior colporrhaphy for cystocele; posterior repair or site-specific defect repair for rectocele. Low morbidity, with higher anatomical recurrence in the anterior compartment."],
+    ["Apical repair: vaginal","Sacrospinous ligament fixation or uterosacral ligament suspension (with vaginal hysterectomy or for vault prolapse). Sacrospinous hysteropexy is an option for uterine preservation."],
+    ["Apical repair: abdominal","Sacrocolpopexy (open, laparoscopic or robotic) with lightweight polypropylene mesh. The most durable apical repair, especially for recurrent vault prolapse and in younger, active women. Risks: mesh exposure (higher with concurrent total hysterectomy) and bowel or vascular injury."],
+    ["Obliterative surgery (colpocleisis)","For elderly or frail women who no longer want vaginal intercourse. High success with low morbidity; it ends vaginal intercourse permanently, so confirm consent clearly."],
+    ["Transvaginal mesh for POP","Withdrawn in the US (FDA 2019) and paused or restricted in the UK and elsewhere, because of exposure, pain and dyspareunia with no clear long-term benefit over native tissue. Use only within research or strict governance."],
+    ["Occult SUI","Positive stress test with the prolapse reduced: concomitant MUS lowers post-operative SUI but adds sling risks. Alternatively, do a staged approach (prolapse first, sling later if needed). Decide together with the patient."]
+   ]}
+  ]
+};
+
+DISEASES["Bladder Pain Syndrome / Interstitial Cystitis"] = {
+  sources: ["AUA-ICBPS", "EAU-CPP", "Campbell-FFU"], emoji: "🔥", color: "red",
+  tagline: "Campbell 13e Ch. 28 • ESSIC • Hunner lesion • multimodal pain care • oral and intravesical therapy • neuromodulation",
+  campbellChapters: [28], classificationSection: 1,
+  badges: ["Campbell 13e Ch. 28", "AUA IC/BPS 2022 • EAU Chronic Pelvic Pain"],
+  sections: [
+   {title:"1. Definition & phenotypes",src:["AUA-ICBPS","EAU-CPP","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Definition","An unpleasant sensation (pain, pressure or discomfort) perceived to be related to the bladder, with lower urinary tract symptoms, for more than 6 weeks (AUA; ESSIC uses 6 months). There must be no infection or other identifiable cause."],
+    ["Hunner lesion (ulcer) subtype","A distinct inflammatory phenotype: circumscribed reddened mucosa with small vessels radiating to a central scar, which bleeds or ruptures on distension. Older patients, smaller capacity, and a response to lesion-directed treatment. Classified as ESSIC type 3C."],
+    ["Non-Hunner BPS","More often has systemic pain overlap (IBS, fibromyalgia, vulvodynia, chronic fatigue, migraine), central sensitisation and pelvic floor myofascial dysfunction."],
+    ["Glomerulations","Petechial haemorrhages after hydrodistension. Not specific or diagnostic, and found in asymptomatic women."]
+   ]},
+   {title:"2. Evaluation",src:["AUA-ICBPS","EAU-CPP"],verified:"2026-11-11",items:[
+    ["Baseline","History (pain linked to bladder filling and relieved by voiding; flares with diet or intercourse), examination (pelvic floor tenderness and trigger points, vaginal examination), urinalysis and culture, PVR, a frequency-volume chart (frequent small voids), and symptom and pain scores (for example O'Leary-Sant, ICSI/ICPI)."],
+    ["Exclude confusable diseases","UTI, CIS or bladder cancer (urine cytology and cystoscopy if there is haematuria, smoking history or risk factors), stones, radiation or ketamine cystitis, TB, endometriosis, urethral diverticulum, gynaecological pathology and neurological disease."],
+    ["Cystoscopy","Do it when the diagnosis is in doubt, when there are risk factors for malignancy, or to look for Hunner lesions, which changes treatment. Hydrodistension is not required for diagnosis."],
+    ["Urodynamics","Not needed for diagnosis. May be used when the diagnosis is unclear or another LUT dysfunction is suspected."]
+   ]},
+   {title:"3. Treatment principles",src:["AUA-ICBPS","EAU-CPP","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Multimodal and phenotype-directed","AUA 2022 dropped the strict tiers. Combine education, self-care, pain management and physical therapy from the start, and add oral or intravesical therapy by phenotype. Reassess regularly; stop ineffective treatments."],
+    ["Self-care","Identify dietary triggers (common ones are coffee, citrus, spicy food, alcohol and artificial sweeteners), adjust fluids, manage stress, apply heat or cold, and treat constipation."],
+    ["Pain management","Multimodal analgesia, including neuropathic agents. Involve chronic pain services early for refractory pain. Avoid long-term opioids where possible."],
+    ["Pelvic floor physical therapy","Manual myofascial release and trigger-point therapy for pelvic floor tenderness. Avoid Kegel strengthening exercises, which can worsen pain."]
+   ]},
+   {title:"4. Oral, intravesical & procedural therapy",src:["AUA-ICBPS","EAU-CPP"],verified:"2026-11-11",items:[
+    ["Oral","Amitriptyline (titrate from 10 mg at night), cimetidine, hydroxyzine, and pentosan polysulfate (PPS). PPS causes a pigmentary maculopathy: discuss the risk, and arrange a baseline eye examination and regular retinal checks during treatment. Cyclosporine A for refractory Hunner or non-Hunner disease, in experienced hands."],
+    ["Intravesical","DMSO, heparin, alkalinised lidocaine (lignocaine), and hyaluronic acid or chondroitin sulfate (used in Europe). Cocktails are often used, either as rescue for flares or as a course."],
+    ["Hunner lesions","Fulguration, laser ablation or resection of the lesions, or submucosal triamcinolone injection, in the presence of Hunner lesions. These give good, often repeatable, relief."],
+    ["Refractory","Intradetrusor botulinum toxin (with hydrodistension in some protocols; warn about retention), and sacral or pudendal neuromodulation."],
+    ["Last resort","Major surgery (urinary diversion with or without cystectomy, or augmentation) only for end-stage small-capacity bladders unresponsive to everything else, in expert centres. Pain may persist after cystectomy in non-Hunner disease."],
+    ["Do not use","Long-term oral antibiotics, intravesical BCG, intravesical resiniferatoxin, high-pressure long-duration hydrodistension, or long-term systemic glucocorticoids (AUA)."]
+   ]}
+  ]
+};
+
+DISEASES["Female Voiding Dysfunction & Urethral Diverticulum"] = {
+  sources: ["EAU-FLUTS", "ICS-GUP", "AUA-SUI", "Campbell-FFU"], emoji: "🔄", color: "indigo",
+  tagline: "Campbell 13e Chs 111, 122 • female BOO • Fowler's syndrome • detrusor underactivity • post-sling obstruction • urethral diverticulum",
+  campbellChapters: [111, 122], engine: "oracleOpenFunctional", engineArg: "uds", engineLabel: "UDS calculator", classificationSection: 1,
+  badges: ["Campbell 13e Chs 111, 122", "EAU Female LUTS • ICS"],
+  sections: [
+   {title:"1. Female voiding dysfunction: causes",src:["EAU-FLUTS","Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Anatomical BOO","Iatrogenic (after a sling or colposuspension, the commonest anatomical cause), prolapse (urethral kinking), urethral stricture or meatal stenosis, urethral diverticulum, Skene's gland cyst, and pelvic masses."],
+    ["Functional BOO","Dysfunctional voiding (learned pelvic floor contraction during voiding), primary bladder neck obstruction (failure of the bladder neck to open, best shown on videourodynamics), and Fowler's syndrome."],
+    ["Fowler's syndrome","Young women with painless urinary retention (often more than 1 L) without urgency, and difficult or painful catheter removal. Caused by failure of the striated urethral sphincter to relax. Abnormal sphincter EMG (complex repetitive discharges, decelerating bursts) and increased sphincter volume on ultrasound. SNM is the treatment with the best evidence."],
+    ["Detrusor underactivity (DU)","A contraction of reduced strength or duration, causing prolonged or incomplete emptying. Underactive bladder (UAB) is the symptom complex. Causes: ageing, diabetes, neurological disease, chronic overdistension, drugs and pelvic surgery. Diagnosed on pressure-flow studies; there is no validated female contractility index."]
+   ]},
+   {title:"2. Evaluation & management",src:["EAU-FLUTS","ICS-GUP","AUA-SUI"],verified:"2026-11-11",items:[
+    ["Evaluation","Symptoms, bladder diary, flow with PVR, examination for prolapse, urethral mobility, masses and pelvic floor tone, a neurological screen, and pressure-flow study (ideally videourodynamics) to tell BOO from DU. Use cystourethroscopy or a urethral calibration if a stricture is suspected."],
+    ["Retention: protect the bladder","Clean intermittent self-catheterisation (CISC) is the safest long-term drainage. Avoid long-term indwelling catheters where possible. Treat constipation and stop drugs that worsen retention."],
+    ["Dysfunctional voiding","Pelvic floor relaxation biofeedback, timed voiding and bowel management. Botulinum toxin to the sphincter in selected cases."],
+    ["Primary bladder neck obstruction","Alpha-blockers (off-label) and, if refractory, bladder neck incision (unilateral, carefully, to avoid SUI or fistula) in expert centres."],
+    ["Detrusor underactivity","Timed and double voiding, CISC, and SNM for non-obstructive retention. Drugs (for example bethanechol) have little proven benefit and are not recommended."],
+    ["Post-sling obstruction","Early (within about 2–6 weeks): loosen or incise the sling. Later: sling incision or excision of a segment, or urethrolysis (transvaginal, retropubic or suprameatal). Warn of recurrent SUI (in a minority). Expect symptom improvement even without classic pressure-flow obstruction if timing and symptoms fit."],
+    ["Female urethral stricture","Uncommon. Dilatation has a high recurrence rate. Urethroplasty (dorsal or ventral graft, such as buccal mucosa, or flap) gives durable results in experienced hands."]
+   ]},
+   {title:"3. Urethral diverticulum: features & imaging",src:["Campbell-FFU","EAU-FLUTS"],verified:"2026-11-11",items:[
+    ["What it is","An outpouching of the urethra into the periurethral tissue, usually from infected, obstructed periurethral (Skene's) glands. Typically mid-to-distal, posterolateral, and may be 'saddlebag' (wrapping around the urethra) or circumferential."],
+    ["Symptoms","The classic '3 Ds' are dysuria, dyspareunia and post-void dribbling. Also recurrent UTI, urgency and frequency, pain, haematuria, and a tender anterior vaginal mass, sometimes with pus or urine expressed from the meatus on compression. Often misdiagnosed for years."],
+    ["Imaging","Pelvic MRI (T2-weighted, ideally with endovaginal or endorectal coil) is the most accurate: it shows the size, configuration, communication, a saddlebag shape and any solid component. Transvaginal or translabial ultrasound is a useful alternative. VCUG and double-balloon urethrography are less sensitive. Urethroscopy may show the ostium."],
+    ["Malignancy","Rare, but adenocarcinoma (most common), urothelial or squamous carcinoma can arise within a diverticulum. Investigate a solid or enhancing component, haematuria or a hard mass, and send the excised specimen for histology."]
+   ]},
+   {title:"4. Urethral diverticulum: treatment",src:["Campbell-FFU","AUA-SUI"],verified:"2026-11-11",items:[
+    ["Who to operate on","Symptomatic diverticula: transvaginal diverticulectomy. Asymptomatic small ones may be observed. Marsupialisation (Spence procedure) is an option for distal diverticula only."],
+    ["Diverticulectomy principles","Inverted-U anterior vaginal incision. Preserve the periurethral fascia as a separate layer. Excise the sac completely to its neck. Close the urethra watertight over a catheter, then close the periurethral fascia and vaginal flap in non-overlapping layers. Use a Martius flap if tissue is poor or the defect is large."],
+    ["SUI with a diverticulum","Assess beforehand (UDS for SUI symptoms). If an anti-incontinence procedure is needed at the same time, use an autologous fascial sling, never a synthetic MUS (AUA)."],
+    ["Complications","Urethrovaginal fistula, recurrent diverticulum (incomplete excision), de novo SUI, urethral stricture, UTI and dyspareunia. Keep the catheter about 10–14 days, with a voiding cystourethrogram before removal if repair was complex."]
+   ]},
+   {title:"5. Bladder diverticula",src:["Campbell-FFU"],verified:"2026-11-11",items:[
+    ["Overview","Usually acquired, from bladder outlet obstruction (in men) or neurogenic bladder. Congenital forms occur (a Hutch diverticulum at the ureterovesical junction, which may cause reflux). Complications: stasis, infection, stones, ureteric obstruction or reflux, and malignancy within the diverticulum, which is hard to stage."],
+    ["Management","Treat the outlet obstruction first. Do diverticulectomy (open, laparoscopic or robotic) for recurrent infection, stones, upper-tract effects, significant residual after outlet treatment, or a tumour in the diverticulum."]
+   ]}
+  ]
+};
