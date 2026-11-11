@@ -49,7 +49,7 @@ function aiFocusDisease12(){
   if(aiState.focus&&DISEASES[aiState.focus])return aiState.focus;
   const s=((q('v12Study')?.value||'')+' '+(q('v12Report')?.value||'')).toLowerCase();
   const st=q('v12Study')?.value||'';const BY={mpmri:'Ca Prostate',trus:'Ca Prostate',renalmass:'Ca Kidney',adrenal:'Adrenal / Neuroendocrine',scrotal:'Ca Testis',cystoscopy:'Ca Bladder'};if(BY[st])return BY[st];
-  if(/psma|prostat|pi-rads|gleason|isup/.test(s))return 'Ca Prostate';
+  if(/fistul|vesicovaginal|ureterovaginal|urethrovaginal|colovesical|rectourethral/.test(s))return 'Urinary Tract Fistulae';if(/psma|prostat|pi-rads|gleason|isup/.test(s))return 'Ca Prostate';
   if(/bladder|cystoscop|turbt|urothelial/.test(s))return 'Ca Bladder';
   if(/renal mass|kidney|bosniak|rcc/.test(s))return 'Ca Kidney';
   if(/testi|scrot|afp|hcg/.test(s))return 'Ca Testis';
