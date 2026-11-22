@@ -14,7 +14,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 90);
 
 const ctx = {}; vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(ROOT + 'frontend/data/clinical.js', 'utf8') + '\n' + fs.readFileSync(ROOT + 'frontend/data/mcq-bank.js', 'utf8') + ';this.D=DISEASES;this.B=MCQ_BANK;', ctx);
+vm.runInContext(fs.readFileSync(ROOT + 'frontend/data/clinical.js', 'utf8') + '\n' + (fs.existsSync(ROOT + 'frontend/data/formulary.js') ? fs.readFileSync(ROOT + 'frontend/data/formulary.js', 'utf8') : '') + '\n' + fs.readFileSync(ROOT + 'frontend/data/mcq-bank.js', 'utf8') + ';this.D=DISEASES;this.B=MCQ_BANK;', ctx);
 const shared = JSON.parse(fs.readFileSync(SHARED, 'utf8'));
 const topics = Object.keys(ctx.D);
 
