@@ -20,9 +20,9 @@
 #newsTicker .nt-win{flex:1;overflow:hidden;white-space:nowrap;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 92%,transparent)}
 #newsTicker .nt-track{display:inline-block;padding-left:100%;animation:ntScroll var(--nt-dur,60s) linear infinite;font-size:13px;font-weight:700}
 #newsTicker:hover .nt-track,#newsTicker:focus .nt-track{animation-play-state:paused}
-#newsTicker .nt-track span{margin-right:28px}#newsTicker .nt-track i{font-style:normal;color:#7dd3fc;margin-right:6px}
+#newsTicker .nt-track span,#newsTicker .nt-track a{margin-right:28px;color:#fff;text-decoration:none}#newsTicker .nt-track a:active{text-decoration:underline}#newsTicker .nt-track i{font-style:normal;color:#7dd3fc;margin-right:6px}
 #newsTicker .nt-go{flex:none;font-size:12px;font-weight:900;color:#7dd3fc}
-#newsTicker .nt-track,#newsTicker .nt-track span,#newsTicker .nt-track i{display:inline!important;white-space:nowrap!important}#newsTicker .nt-track{display:inline-block!important}
+#newsTicker .nt-track,#newsTicker .nt-track span,#newsTicker .nt-track a,#newsTicker .nt-track i{display:inline!important;white-space:nowrap!important}#newsTicker .nt-track{display:inline-block!important}
 #homeV2 .h2-p b,#homeV2 .h2-t b,#homeV2 .h2-row b{color:#0f172a!important;display:block}#homeV2 .h2-p.dark b{color:#fff!important}
 html[data-oracle-theme="dark"] #homeV2 .h2-p b,html[data-oracle-theme="dark"] #homeV2 .h2-t b,html[data-oracle-theme="dark"] #homeV2 .h2-row b{color:#f1f5f9!important}
 #homeV2 .h2-p span:not(.ic){display:block}
@@ -60,18 +60,18 @@ html[data-oracle-theme="dark"] #newsTicker{background:linear-gradient(90deg,#020
     return fetch('/data/news.json').then(r => r.ok ? r.json() : null).then(j => {
       const items = (j?.items || []);
       const weekly = items.filter(x => !x.pinned), pinned = items.filter(x => x.pinned);
-      headlines = [...weekly.slice(0, 8), ...pinned.slice(0, 4)].map(x => ({ cat: x.category || 'News', t: x.title }));
+      headlines = [...weekly.slice(0, 8), ...pinned.slice(0, 4)].map(x => ({ cat: x.category || 'News', t: x.title, url: x.url || (x.pmid ? 'https://pubmed.ncbi.nlm.nih.gov/' + x.pmid + '/' : '') }));
       return headlines;
     }).catch(() => (headlines = []));
   }
   function ticker() {
-    const b = document.createElement('button'); b.id = 'newsTicker'; b.type = 'button'; b.setAttribute('aria-label', "Open what's new in urology");
+    const b = document.createElement('div'); b.id = 'newsTicker'; b.setAttribute('role', 'button'); b.tabIndex = 0; b.setAttribute('aria-label', "Open what's new in urology");
     b.innerHTML = `<span class="nt-badge"><span class="nt-dot"></span>NEW</span><span class="nt-win"><span class="nt-track">Loading this week's urology news…</span></span><span class="nt-go">Open ›</span>`;
-    b.onclick = () => call('openNews');
+    b.onclick = e => { if (e.target.closest('a')) return; call('openNews'); };
     loadHeadlines().then(h => {
       const tr = b.querySelector('.nt-track');
       if (!h.length) { tr.textContent = "What's new in urology — weekly research digest"; return; }
-      tr.innerHTML = h.map(x => `<span><i>${esc(x.cat)}</i>${esc(x.t)}</span>`).join('');
+      tr.innerHTML = h.map(x => x.url ? `<a class="nt-a" href="${esc(x.url)}" target="_blank" rel="noopener"><i>${esc(x.cat)}</i>${esc(x.t)}</a>` : `<span><i>${esc(x.cat)}</i>${esc(x.t)}</span>`).join('');
       const chars = h.reduce((n, x) => n + x.t.length + x.cat.length, 0);
       b.style.setProperty('--nt-dur', Math.max(30, Math.round(chars / 9)) + 's');
     });
