@@ -3,7 +3,6 @@
  "trials": {
   "ProtecT": {
    "q": "Hamdy[1au] AND 2016[dp] AND \"N Engl J Med\"[ta] AND prostate[ti]",
-   "count": 1,
    "pmid": "27626136",
    "title": "10-Year Outcomes after Monitoring, Surgery, or Radiotherapy for Localized Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -12,7 +11,6 @@
   },
   "CHAARTED": {
    "q": "Sweeney[1au] AND 2015[dp] AND \"N Engl J Med\"[ta]",
-   "count": 1,
    "pmid": "26244877",
    "title": "Chemohormonal Therapy in Metastatic Hormone-Sensitive Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -21,7 +19,6 @@
   },
   "LATITUDE": {
    "q": "Fizazi[1au] AND 2017[dp] AND \"N Engl J Med\"[ta] AND abiraterone[ti]",
-   "count": 2,
    "pmid": "28578607",
    "title": "Abiraterone plus Prednisone in Metastatic, Castration-Sensitive Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -30,7 +27,6 @@
   },
   "STAMPEDE": {
    "q": "James[1au] AND 2017[dp] AND \"N Engl J Med\"[ta] AND abiraterone[ti]",
-   "count": 2,
    "pmid": "28578639",
    "title": "Abiraterone for Prostate Cancer Not Previously Treated with Hormone Therapy.",
    "journal": "N Engl J Med",
@@ -39,7 +35,6 @@
   },
   "TITAN": {
    "q": "Chi[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND apalutamide[ti]",
-   "count": 1,
    "pmid": "31150574",
    "title": "Apalutamide for Metastatic, Castration-Sensitive Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -48,7 +43,6 @@
   },
   "ENZAMET": {
    "q": "Davis[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]",
-   "count": 2,
    "pmid": "31157964",
    "title": "Enzalutamide with Standard First-Line Therapy in Metastatic Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -57,7 +51,6 @@
   },
   "ARCHES": {
    "q": "Armstrong[1au] AND 2019[dp] AND \"J Clin Oncol\"[ta] AND enzalutamide[ti]",
-   "count": 1,
    "pmid": "31329516",
    "title": "ARCHES: A Randomized, Phase III Study of Androgen Deprivation Therapy With Enzalutamide or Placebo in Men With Metastatic Hormone-Sensitive Prostate Cancer.",
    "journal": "J Clin Oncol",
@@ -66,7 +59,6 @@
   },
   "ARASENS": {
    "q": "Smith[1au] AND 2022[dp] AND \"N Engl J Med\"[ta] AND darolutamide[ti]",
-   "count": 2,
    "pmid": "35179323",
    "title": "Darolutamide and Survival in Metastatic, Hormone-Sensitive Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -75,7 +67,6 @@
   },
   "PEACE-1": {
    "q": "Fizazi[1au] AND 2022[dp] AND \"Lancet\"[ta] AND abiraterone[ti]",
-   "count": 1,
    "pmid": "35405085",
    "title": "Abiraterone plus prednisone added to androgen deprivation therapy and docetaxel in de novo metastatic castration-sensitive prostate cancer (PEACE-1): a multicentre, open-label, randomised, phase 3 study with a 2 × 2 factorial design.",
    "journal": "Lancet",
@@ -84,7 +75,6 @@
   },
   "EMBARK": {
    "q": "Freedland[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]",
-   "count": 1,
    "pmid": "37851874",
    "title": "Improved Outcomes with Enzalutamide in Biochemically Recurrent Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -93,7 +83,6 @@
   },
   "ARANOTE": {
    "q": "Saad[1au] AND 2024[dp] AND \"J Clin Oncol\"[ta] AND darolutamide[ti]",
-   "count": 1,
    "pmid": "39279580",
    "title": "Darolutamide in Combination With Androgen-Deprivation Therapy in Patients With Metastatic Hormone-Sensitive Prostate Cancer From the Phase III ARANOTE Trial.",
    "journal": "J Clin Oncol",
@@ -102,7 +91,6 @@
   },
   "PROfound": {
    "q": "de Bono[1au] AND 2020[dp] AND \"N Engl J Med\"[ta] AND olaparib[ti]",
-   "count": 2,
    "pmid": "32343890",
    "title": "Olaparib for Metastatic Castration-Resistant Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -111,7 +99,6 @@
   },
   "MAGNITUDE": {
    "q": "Chi[1au] AND 2023[dp] AND \"J Clin Oncol\"[ta] AND niraparib[ti]",
-   "count": 1,
    "pmid": "36952634",
    "title": "Niraparib and Abiraterone Acetate for Metastatic Castration-Resistant Prostate Cancer.",
    "journal": "J Clin Oncol",
@@ -120,7 +107,6 @@
   },
   "TALAPRO-2": {
    "q": "Agarwal[1au] AND 2023[dp] AND \"Lancet\"[ta] AND talazoparib[ti]",
-   "count": 1,
    "pmid": "37285865",
    "title": "Talazoparib plus enzalutamide in men with first-line metastatic castration-resistant prostate cancer (TALAPRO-2): a randomised, placebo-controlled, phase 3 trial.",
    "journal": "Lancet",
@@ -129,7 +115,6 @@
   },
   "VISION": {
    "q": "Sartor[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND lutetium[ti]",
-   "count": 2,
    "pmid": "34161051",
    "title": "Lutetium-177-PSMA-617 for Metastatic Castration-Resistant Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -137,11 +122,15 @@
    "locked": true
   },
   "PSMAfore": {
-   "q": "Morris[1au] AND 2024[dp] AND \"Lancet\"[ta] AND PSMA[ti]"
+   "q": "Morris[1au] AND 2024[dp] AND \"Lancet\"[ta] AND PSMA[ti]",
+   "pmid": "39293462",
+   "title": "(177)Lu-PSMA-617 versus a change of androgen receptor pathway inhibitor therapy for taxane-naive patients with progressive metastatic castration-resistant prostate cancer (PSMAfore): a phase 3, randomised, controlled trial.",
+   "journal": "Lancet",
+   "year": "2024",
+   "locked": true
   },
   "CARD": {
    "q": "de Wit[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND cabazitaxel[ti]",
-   "count": 1,
    "pmid": "31566937",
    "title": "Cabazitaxel versus Abiraterone or Enzalutamide in Metastatic Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -150,7 +139,6 @@
   },
   "SWOG 8507": {
    "q": "Lamm[1au] AND 2000[dp] AND \"J Urol\"[ta] AND bacillus[ti]",
-   "count": 1,
    "pmid": "10737480",
    "title": "Maintenance bacillus Calmette-Guerin immunotherapy for recurrent TA, T1 and carcinoma in situ transitional cell carcinoma of the bladder: a randomized Southwest Oncology Group Study.",
    "journal": "J Urol",
@@ -159,7 +147,6 @@
   },
   "KEYNOTE-057": {
    "q": "Balar[1au] AND 2021[dp] AND \"Lancet Oncol\"[ta] AND pembrolizumab[ti]",
-   "count": 2,
    "pmid": "34051177",
    "title": "Pembrolizumab monotherapy for the treatment of high-risk non-muscle-invasive bladder cancer unresponsive to BCG (KEYNOTE-057): an open-label, single-arm, multicentre, phase 2 study.",
    "journal": "Lancet Oncol",
@@ -168,7 +155,6 @@
   },
   "QUILT 3032": {
    "q": "Chamie[1au] AND N-803[tiab] AND BCG[tiab]",
-   "count": 3,
    "pmid": "38320011",
    "title": "IL-15 Superagonist NAI in BCG-Unresponsive Non-Muscle-Invasive Bladder Cancer.",
    "journal": "NEJM Evid",
@@ -177,7 +163,6 @@
   },
   "VESPER": {
    "q": "Pfister[1au] AND 2022[dp] AND \"J Clin Oncol\"[ta]",
-   "count": 2,
    "pmid": "35254888",
    "title": "Dose-Dense Methotrexate, Vinblastine, Doxorubicin, and Cisplatin or Gemcitabine and Cisplatin as Perioperative Chemotherapy for Patients With Nonmetastatic Muscle-Invasive Bladder Cancer: Results of the GETUG-AFU V05 VESPER Trial.",
    "journal": "J Clin Oncol",
@@ -186,7 +171,6 @@
   },
   "CheckMate 274": {
    "q": "Bajorin[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND nivolumab[ti]",
-   "count": 2,
    "pmid": "34077643",
    "title": "Adjuvant Nivolumab versus Placebo in Muscle-Invasive Urothelial Carcinoma.",
    "journal": "N Engl J Med",
@@ -195,7 +179,6 @@
   },
   "NIAGARA": {
    "q": "Powles[1au] AND 2024[dp] AND \"N Engl J Med\"[ta] AND durvalumab[ti]",
-   "count": 1,
    "pmid": "39282910",
    "title": "Perioperative Durvalumab with Neoadjuvant Chemotherapy in Operable Bladder Cancer.",
    "journal": "N Engl J Med",
@@ -204,7 +187,6 @@
   },
   "EV-302": {
    "q": "Powles[1au] AND 2024[dp] AND \"N Engl J Med\"[ta] AND enfortumab[ti]",
-   "count": 1,
    "pmid": "38446675",
    "title": "Enfortumab Vedotin and Pembrolizumab in Untreated Advanced Urothelial Cancer.",
    "journal": "N Engl J Med",
@@ -213,7 +195,6 @@
   },
   "KEYNOTE-A39": {
    "q": "Powles[1au] AND 2024[dp] AND \"N Engl J Med\"[ta] AND enfortumab[ti]",
-   "count": 1,
    "pmid": "38446675",
    "title": "Enfortumab Vedotin and Pembrolizumab in Untreated Advanced Urothelial Cancer.",
    "journal": "N Engl J Med",
@@ -222,7 +203,6 @@
   },
   "JAVELIN Bladder 100": {
    "q": "Powles[1au] AND 2020[dp] AND \"N Engl J Med\"[ta] AND avelumab[ti]",
-   "count": 2,
    "pmid": "32945632",
    "title": "Avelumab Maintenance Therapy for Advanced or Metastatic Urothelial Carcinoma.",
    "journal": "N Engl J Med",
@@ -231,7 +211,6 @@
   },
   "POUT": {
    "q": "Birtle[1au] AND 2020[dp] AND \"Lancet\"[ta]",
-   "count": 1,
    "pmid": "32145825",
    "title": "Adjuvant chemotherapy in upper tract urothelial carcinoma (the POUT trial): a phase 3, open-label, randomised controlled trial.",
    "journal": "Lancet",
@@ -240,7 +219,6 @@
   },
   "KEYNOTE-564": {
    "q": "Choueiri[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND pembrolizumab[ti]",
-   "count": 2,
    "pmid": "34407342",
    "title": "Adjuvant Pembrolizumab after Nephrectomy in Renal-Cell Carcinoma.",
    "journal": "N Engl J Med",
@@ -249,7 +227,6 @@
   },
   "LITESPARK-005": {
    "q": "Choueiri[1au] AND 2024[dp] AND \"N Engl J Med\"[ta] AND belzutifan[ti]",
-   "count": 1,
    "pmid": "39167807",
    "title": "Belzutifan versus Everolimus for Advanced Renal-Cell Carcinoma.",
    "journal": "N Engl J Med",
@@ -258,7 +235,6 @@
   },
   "KEYNOTE-426": {
    "q": "Rini[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND pembrolizumab[ti]",
-   "count": 1,
    "pmid": "30779529",
    "title": "Pembrolizumab plus Axitinib versus Sunitinib for Advanced Renal-Cell Carcinoma.",
    "journal": "N Engl J Med",
@@ -267,7 +243,6 @@
   },
   "CheckMate-214": {
    "q": "Motzer[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND nivolumab[ti]",
-   "count": 1,
    "pmid": "29562145",
    "title": "Nivolumab plus Ipilimumab versus Sunitinib in Advanced Renal-Cell Carcinoma.",
    "journal": "N Engl J Med",
@@ -276,7 +251,6 @@
   },
   "CLEAR": {
    "q": "Motzer[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND lenvatinib[ti]",
-   "count": 2,
    "pmid": "33616314",
    "title": "Lenvatinib plus Pembrolizumab or Everolimus for Advanced Renal Cell Carcinoma.",
    "journal": "N Engl J Med",
@@ -285,7 +259,6 @@
   },
   "CheckMate 9ER": {
    "q": "Choueiri[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND cabozantinib[ti]",
-   "count": 1,
    "pmid": "33657295",
    "title": "Nivolumab plus Cabozantinib versus Sunitinib for Advanced Renal-Cell Carcinoma.",
    "journal": "N Engl J Med",
@@ -294,7 +267,6 @@
   },
   "CARMENA": {
    "q": "Méjean[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND sunitinib[ti]",
-   "count": 1,
    "pmid": "29860937",
    "title": "Sunitinib Alone or after Nephrectomy in Metastatic Renal-Cell Carcinoma.",
    "journal": "N Engl J Med",
@@ -303,7 +275,6 @@
   },
   "SURTIME": {
    "q": "Bex[1au] AND 2019[dp] AND \"JAMA Oncol\"[ta]",
-   "count": 1,
    "pmid": "30543350",
    "title": "Comparison of Immediate vs Deferred Cytoreductive Nephrectomy in Patients With Synchronous Metastatic Renal Cell Carcinoma Receiving Sunitinib: The SURTIME Randomized Clinical Trial.",
    "journal": "JAMA Oncol",
@@ -312,7 +283,6 @@
   },
   "SWOG 1500": {
    "q": "Pal[1au] AND 2021[dp] AND \"Lancet\"[ta] AND papillary[ti]",
-   "count": 1,
    "pmid": "33592176",
    "title": "A comparison of sunitinib with cabozantinib, crizotinib, and savolitinib for treatment of advanced papillary renal cell carcinoma: a randomised, open-label, phase 2 trial.",
    "journal": "Lancet",
@@ -321,7 +291,6 @@
   },
   "PAPMET": {
    "q": "Pal[1au] AND 2021[dp] AND \"Lancet\"[ta] AND papillary[ti]",
-   "count": 1,
    "pmid": "33592176",
    "title": "A comparison of sunitinib with cabozantinib, crizotinib, and savolitinib for treatment of advanced papillary renal cell carcinoma: a randomised, open-label, phase 2 trial.",
    "journal": "Lancet",
@@ -330,7 +299,6 @@
   },
   "TIP phase II": {
    "q": "Pagliaro[1au] AND 2010[dp] AND \"J Clin Oncol\"[ta] AND penile[ti]",
-   "count": 1,
    "pmid": "20625118",
    "title": "Neoadjuvant paclitaxel, ifosfamide, and cisplatin chemotherapy for metastatic penile cancer: a phase II study.",
    "journal": "J Clin Oncol",
@@ -339,7 +307,6 @@
   },
   "PREVAIL": {
    "q": "Beer[1au] AND 2014[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]",
-   "count": 2,
    "pmid": "24881730",
    "title": "Enzalutamide in metastatic prostate cancer before chemotherapy.",
    "journal": "N Engl J Med",
@@ -348,7 +315,6 @@
   },
   "AFFIRM": {
    "q": "Scher[1au] AND 2012[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]",
-   "count": 1,
    "pmid": "22894553",
    "title": "Increased survival with enzalutamide in prostate cancer after chemotherapy.",
    "journal": "N Engl J Med",
@@ -357,7 +323,6 @@
   },
   "COU-AA-301": {
    "q": "de Bono[1au] AND 2011[dp] AND \"N Engl J Med\"[ta] AND abiraterone[ti]",
-   "count": 1,
    "pmid": "21612468",
    "title": "Abiraterone and increased survival in metastatic prostate cancer.",
    "journal": "N Engl J Med",
@@ -366,7 +331,6 @@
   },
   "COU-AA-302": {
    "q": "Ryan[1au] AND 2013[dp] AND \"N Engl J Med\"[ta] AND abiraterone[ti]",
-   "count": 2,
    "pmid": "23228172",
    "title": "Abiraterone in metastatic prostate cancer without previous chemotherapy.",
    "journal": "N Engl J Med",
@@ -375,7 +339,6 @@
   },
   "SPARTAN": {
    "q": "Smith[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND apalutamide[ti]",
-   "count": 2,
    "pmid": "29420164",
    "title": "Apalutamide Treatment and Metastasis-free Survival in Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -384,7 +347,6 @@
   },
   "PROSPER": {
    "q": "Hussain[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]",
-   "count": 2,
    "pmid": "29949494",
    "title": "Enzalutamide in Men with Nonmetastatic, Castration-Resistant Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -393,7 +355,6 @@
   },
   "ARAMIS": {
    "q": "Fizazi[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND darolutamide[ti]",
-   "count": 1,
    "pmid": "30763142",
    "title": "Darolutamide in Nonmetastatic, Castration-Resistant Prostate Cancer.",
    "journal": "N Engl J Med",
@@ -402,7 +363,6 @@
   },
   "ALSYMPCA": {
    "q": "Parker[1au] AND 2013[dp] AND \"N Engl J Med\"[ta] AND alpha emitter[ti]",
-   "count": 1,
    "pmid": "23863050",
    "title": "Alpha emitter radium-223 and survival in metastatic prostate cancer.",
    "journal": "N Engl J Med",
@@ -411,7 +371,6 @@
   },
   "TheraP": {
    "q": "Hofman[1au] AND 2021[dp] AND \"Lancet\"[ta]",
-   "count": 2,
    "pmid": "33581798",
    "title": "[(177)Lu]Lu-PSMA-617 versus cabazitaxel in patients with metastatic castration-resistant prostate cancer (TheraP): a randomised, open-label, phase 2 trial.",
    "journal": "Lancet",
@@ -420,7 +379,6 @@
   },
   "THOR": {
    "q": "Loriot[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND erdafitinib[ti]",
-   "count": 1,
    "pmid": "37870920",
    "title": "Erdafitinib or Chemotherapy in Advanced or Metastatic Urothelial Carcinoma.",
    "journal": "N Engl J Med",
@@ -429,7 +387,6 @@
   },
   "CheckMate 901": {
    "q": "van der Heijden[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND nivolumab[ti]",
-   "count": 1,
    "pmid": "37870949",
    "title": "Nivolumab plus Gemcitabine-Cisplatin in Advanced Urothelial Carcinoma.",
    "journal": "N Engl J Med",
@@ -438,7 +395,6 @@
   },
   "EV-301": {
    "q": "Powles[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND enfortumab[ti]",
-   "count": 1,
    "pmid": "33577729",
    "title": "Enfortumab Vedotin in Previously Treated Advanced Urothelial Carcinoma.",
    "journal": "N Engl J Med",
@@ -447,7 +403,6 @@
   },
   "IMvigor130": {
    "q": "Galsky[1au] AND 2020[dp] AND \"Lancet\"[ta] AND atezolizumab[ti]",
-   "count": 1,
    "pmid": "32416780",
    "title": "Atezolizumab with or without chemotherapy in metastatic urothelial cancer (IMvigor130): a multicentre, randomised, placebo-controlled phase 3 trial.",
    "journal": "Lancet",
@@ -456,7 +411,6 @@
   },
   "KEYNOTE-361": {
    "q": "Powles[1au] AND 2021[dp] AND \"Lancet Oncol\"[ta] AND pembrolizumab[ti]",
-   "count": 1,
    "pmid": "34051178",
    "title": "Pembrolizumab alone or combined with chemotherapy versus chemotherapy as first-line therapy for advanced urothelial carcinoma (KEYNOTE-361): a randomised, open-label, phase 3 trial.",
    "journal": "Lancet Oncol",
@@ -464,11 +418,15 @@
    "locked": true
   },
   "MRC TE20": {
-   "q": "Oliver[1au] AND 2005[dp] AND \"Lancet\"[ta] AND carboplatin[ti] AND radiotherapy[ti]"
+   "q": "Oliver[1au] AND 2005[dp] AND \"Lancet\"[ta] AND carboplatin[ti] AND radiotherapy[ti]",
+   "pmid": "16039331",
+   "title": "Radiotherapy versus single-dose carboplatin in adjuvant treatment of stage I seminoma: a randomised trial.",
+   "journal": "Lancet",
+   "year": "2005",
+   "locked": true
   },
   "CONTACT-03": {
    "q": "Pal[1au] AND 2023[dp] AND \"Lancet\"[ta] AND atezolizumab[ti]",
-   "count": 1,
    "pmid": "37290461",
    "title": "Atezolizumab plus cabozantinib versus cabozantinib monotherapy for patients with renal cell carcinoma after progression with previous immune checkpoint inhibitor treatment (CONTACT-03): a multicentre, randomised, open-label, phase 3 trial.",
    "journal": "Lancet",
@@ -477,7 +435,6 @@
   },
   "OLYMPUS": {
    "q": "Kleinmann[1au] AND 2020[dp] AND \"Lancet Oncol\"[ta]",
-   "count": 1,
    "pmid": "32631491",
    "title": "Primary chemoablation of low-grade upper tract urothelial carcinoma using UGN-101, a mitomycin-containing reverse thermal gel (OLYMPUS): an open-label, single-arm, phase 3 trial.",
    "journal": "Lancet Oncol",
@@ -486,7 +443,6 @@
   },
   "PIVOT": {
    "q": "Wilt[1au] AND 2012[dp] AND \"N Engl J Med\"[ta] AND prostatectomy[ti]",
-   "count": 1,
    "pmid": "22808955",
    "title": "Radical prostatectomy versus observation for localized prostate cancer.",
    "journal": "N Engl J Med",
@@ -495,7 +451,6 @@
   },
   "SPCG-4": {
    "q": "Bill-Axelson[1au] AND 2014[dp] AND \"N Engl J Med\"[ta]",
-   "count": 1,
    "pmid": "24597866",
    "title": "Radical prostatectomy or watchful waiting in early prostate cancer.",
    "journal": "N Engl J Med",
@@ -504,7 +459,6 @@
   },
   "NOSTONE": {
    "q": "Dhayat[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND hydrochlorothiazide[ti]",
-   "count": 1,
    "pmid": "36856614",
    "title": "Hydrochlorothiazide and Prevention of Kidney-Stone Recurrence.",
    "journal": "N Engl J Med",
@@ -513,7 +467,6 @@
   },
   "TRAVERSE": {
    "q": "Lincoff[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND testosterone[ti]",
-   "count": 1,
    "pmid": "37326322",
    "title": "Cardiovascular Safety of Testosterone-Replacement Therapy.",
    "journal": "N Engl J Med",
@@ -521,11 +474,15 @@
    "locked": true
   },
   "ALTAR": {
-   "q": "Harding[1au] AND 2022[dp] AND \"recurrent urinary tract infections\"[ti]"
+   "q": "Harding[1au] AND 2022[dp] AND \"recurrent urinary tract infections\"[ti]",
+   "pmid": "35264408",
+   "title": "Alternative to prophylactic antibiotics for the treatment of recurrent urinary tract infections in women: multicentre, open label, randomised, non-inferiority trial.",
+   "journal": "BMJ",
+   "year": "2022",
+   "locked": true
   },
   "MERIT": {
    "q": "Hayward[1au] AND 2024[dp] AND \"JAMA Intern Med\"[ta] AND mannose[ti]",
-   "count": 1,
    "pmid": "38587819",
    "title": "d-Mannose for Prevention of Recurrent Urinary Tract Infection Among Women: A Randomized Clinical Trial.",
    "journal": "JAMA Intern Med",
@@ -534,7 +491,6 @@
   },
   "MTOPS": {
    "q": "McConnell[1au] AND 2003[dp] AND \"N Engl J Med\"[ta] AND doxazosin[ti]",
-   "count": 1,
    "pmid": "14681504",
    "title": "The long-term effect of doxazosin, finasteride, and combination therapy on the clinical progression of benign prostatic hyperplasia.",
    "journal": "N Engl J Med",
@@ -543,7 +499,6 @@
   },
   "CombAT": {
    "q": "Roehrborn[1au] AND 2010[dp] AND \"Eur Urol\"[ta] AND dutasteride[ti]",
-   "count": 3,
    "pmid": "19825505",
    "title": "The effects of combination therapy with dutasteride and tamsulosin on clinical outcomes in men with symptomatic benign prostatic hyperplasia: 4-year results from the CombAT study.",
    "journal": "Eur Urol",
@@ -552,7 +507,6 @@
   },
   "ValUE": {
    "q": "Nager[1au] AND 2012[dp] AND \"N Engl J Med\"[ta] AND urodynamic[ti]",
-   "count": 1,
    "pmid": "22551104",
    "title": "A randomized trial of urodynamic testing before stress-incontinence surgery.",
    "journal": "N Engl J Med",
@@ -561,7 +515,6 @@
   },
   "EAGLE-2": {
    "q": "Wagenlehner[1au] AND 2024[dp] AND \"Lancet\"[ta] AND gepotidacin[ti]",
-   "count": 1,
    "pmid": "38342126",
    "title": "Oral gepotidacin versus nitrofurantoin in patients with uncomplicated urinary tract infection (EAGLE-2 and EAGLE-3): two randomised, controlled, double-blind, double-dummy, phase 3, non-inferiority trials.",
    "journal": "Lancet",
@@ -570,7 +523,6 @@
   },
   "EAGLE-3": {
    "q": "Wagenlehner[1au] AND 2024[dp] AND \"Lancet\"[ta] AND gepotidacin[ti]",
-   "count": 1,
    "pmid": "38342126",
    "title": "Oral gepotidacin versus nitrofurantoin in patients with uncomplicated urinary tract infection (EAGLE-2 and EAGLE-3): two randomised, controlled, double-blind, double-dummy, phase 3, non-inferiority trials.",
    "journal": "Lancet",
@@ -578,11 +530,15 @@
    "locked": true
   },
   "SUSPEND": {
-   "q": "Pickard[1au] AND 2015[dp] AND \"Lancet\"[ta] AND expulsive[ti]"
+   "q": "Pickard[1au] AND 2015[dp] AND \"Lancet\"[ta] AND expulsive[ti]",
+   "pmid": "25998582",
+   "title": "Medical expulsive therapy in adults with ureteric colic: a multicentre, randomised, placebo-controlled trial.",
+   "journal": "Lancet",
+   "year": "2015",
+   "locked": true
   },
   "CARES": {
    "q": "White[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND febuxostat[ti]",
-   "count": 2,
    "pmid": "29527974",
    "title": "Cardiovascular Safety of Febuxostat or Allopurinol in Patients with Gout.",
    "journal": "N Engl J Med",
@@ -591,7 +547,6 @@
   },
   "PCPT": {
    "q": "Thompson[1au] AND 2003[dp] AND \"N Engl J Med\"[ta] AND finasteride[ti]",
-   "count": 1,
    "pmid": "12824459",
    "title": "The influence of finasteride on the development of prostate cancer.",
    "journal": "N Engl J Med",
@@ -600,7 +555,6 @@
   },
   "REDUCE": {
    "q": "Andriole[1au] AND 2010[dp] AND \"N Engl J Med\"[ta] AND dutasteride[ti]",
-   "count": 1,
    "pmid": "20357281",
    "title": "Effect of dutasteride on the risk of prostate cancer.",
    "journal": "N Engl J Med",
@@ -609,7 +563,6 @@
   },
   "SWOG S0337": {
    "q": "Messing[1au] AND 2018[dp] AND \"JAMA\"[ta] AND gemcitabine[ti]",
-   "count": 1,
    "pmid": "29801011",
    "title": "Effect of Intravesical Instillation of Gemcitabine vs Saline Immediately Following Resection of Suspected Low-Grade Non-Muscle-Invasive Bladder Cancer on Tumor Recurrence: SWOG S0337 Randomized Clinical Trial.",
    "journal": "JAMA",
@@ -618,7 +571,6 @@
   },
   "CAPItello-281": {
    "q": "\"CAPItello-281\"[tiab]",
-   "count": 9,
    "pmid": "41120017",
    "title": "Capivasertib plus abiraterone in PTEN-deficient metastatic hormone-sensitive prostate cancer: CAPItello-281 phase III study.",
    "journal": "Ann Oncol",
@@ -627,7 +579,6 @@
   },
   "PSMAddition": {
    "q": "\"PSMAddition\"[tiab]",
-   "count": 15,
    "pmid": "42561994",
    "title": "[(177)Lu]Lu-PSMA-617 in patients with PSMA-positive metastatic androgen pathway modulator-naive/sensitive prostate cancer (PSMAddition): a phase 3 randomised, controlled trial.",
    "journal": "Lancet",
@@ -635,20 +586,39 @@
    "locked": true
   },
   "TALAPRO-3": {
-   "q": "\"TALAPRO-3\"[tiab] AND talazoparib[tiab]"
+   "q": "\"TALAPRO-3\"[tiab] AND talazoparib[tiab]",
+   "pmid": "37882449",
+   "title": "TALAPRO-3 clinical trial protocol: phase III study of talazoparib plus enzalutamide in metastatic castration-sensitive prostate cancer.",
+   "journal": "Future Oncol",
+   "year": "2024",
+   "locked": true
   },
   "AMPLITUDE": {
-   "q": "\"AMPLITUDE\"[tiab] AND niraparib[tiab]"
+   "q": "\"AMPLITUDE\"[tiab] AND niraparib[tiab]",
+   "pmid": "41057655",
+   "title": "Niraparib and abiraterone acetate plus prednisone for HRR-deficient metastatic castration-sensitive prostate cancer: a randomized phase 3 trial.",
+   "journal": "Nat Med",
+   "year": "2025",
+   "locked": true
   },
   "POTOMAC": {
-   "q": "\"POTOMAC\"[tiab] AND durvalumab[tiab]"
+   "q": "\"POTOMAC\"[tiab] AND durvalumab[tiab]",
+   "pmid": "41115436",
+   "title": "Durvalumab in combination with BCG for BCG-naive, high-risk, non-muscle-invasive bladder cancer (POTOMAC): final analysis of a randomised, open-label, phase 3 trial.",
+   "journal": "Lancet",
+   "year": "2025",
+   "locked": true
   },
   "CREST": {
-   "q": "\"CREST\"[tiab] AND sasanlimab[tiab]"
+   "q": "\"CREST\"[tiab] AND sasanlimab[tiab]",
+   "pmid": "38189180",
+   "title": "CREST: phase III study of sasanlimab and Bacillus Calmette-Guérin for patients with Bacillus Calmette-Guérin-naïve high-risk non-muscle-invasive bladder cancer.",
+   "journal": "Future Oncol",
+   "year": "2024",
+   "locked": true
   },
   "SunRISe-1": {
    "q": "\"SunRISe-1\"[tiab]",
-   "count": 17,
    "pmid": "40737582",
    "title": "TAR-200 for Bacillus Calmette-Guérin-Unresponsive High-Risk Non-Muscle-Invasive Bladder Cancer: Results From the Phase IIb SunRISe-1 Study.",
    "journal": "J Clin Oncol",
@@ -656,23 +626,41 @@
    "locked": true
   },
   "THOR-2": {
-   "q": "\"THOR-2\"[tiab] AND erdafitinib[tiab]"
+   "q": "\"THOR-2\"[tiab] AND erdafitinib[tiab]",
+   "pmid": "41062389",
+   "title": "Erdafitinib in Patients with High- and Intermediate-risk Non-muscle-invasive Bladder Cancer: Final Analysis of THOR-2 Study.",
+   "journal": "Eur Urol",
+   "year": "2026",
+   "locked": true
   },
   "KEYNOTE-905": {
-   "q": "(\"KEYNOTE-905\"[tiab] OR \"EV-303\"[tiab]) AND enfortumab[ti]"
+   "q": "(\"KEYNOTE-905\"[tiab] OR \"EV-303\"[tiab]) AND enfortumab[ti]",
+   "pmid": "41707170",
+   "title": "Perioperative Enfortumab Vedotin and Pembrolizumab in Bladder Cancer.",
+   "journal": "N Engl J Med",
+   "year": "2026",
+   "locked": true
   },
   "EV-303": {
-   "q": "(\"KEYNOTE-905\"[tiab] OR \"EV-303\"[tiab]) AND enfortumab[ti]"
+   "q": "(\"KEYNOTE-905\"[tiab] OR \"EV-303\"[tiab]) AND enfortumab[ti]",
+   "pmid": "41707170",
+   "title": "Perioperative Enfortumab Vedotin and Pembrolizumab in Bladder Cancer.",
+   "journal": "N Engl J Med",
+   "year": "2026",
+   "locked": true
   },
   "KEYNOTE-B15": {
-   "q": "(\"KEYNOTE-B15\"[tiab] OR \"EV-304\"[tiab]) AND enfortumab[ti]"
+   "q": "\"KEYNOTE-B15\"[tiab] OR \"EV-304\"[tiab]",
+   "locked": true,
+   "note": "no single paper confirmed; opens a focused PubMed search"
   },
   "EV-304": {
-   "q": "(\"KEYNOTE-B15\"[tiab] OR \"EV-304\"[tiab]) AND enfortumab[ti]"
+   "q": "\"KEYNOTE-B15\"[tiab] OR \"EV-304\"[tiab]",
+   "locked": true,
+   "note": "no single paper confirmed; opens a focused PubMed search"
   },
   "IMvigor011": {
    "q": "\"IMvigor011\"[tiab]",
-   "count": 20,
    "pmid": "41124204",
    "title": "ctDNA-Guided Adjuvant Atezolizumab in Muscle-Invasive Bladder Cancer.",
    "journal": "N Engl J Med",
@@ -681,7 +669,6 @@
   },
   "LITESPARK-022": {
    "q": "\"LITESPARK-022\"[tiab]",
-   "count": 9,
    "pmid": "42384869",
    "title": "Adjuvant Pembrolizumab plus Belzutifan for Renal-Cell Carcinoma.",
    "journal": "N Engl J Med",
@@ -689,23 +676,44 @@
    "locked": true
   },
   "LITESPARK-011": {
-   "q": "\"LITESPARK-011\"[tiab] AND belzutifan[tiab]"
+   "q": "\"LITESPARK-011\"[tiab] AND belzutifan[tiab]",
+   "pmid": "36752726",
+   "title": "LITESPARK-011: belzutifan plus lenvatinib vs cabozantinib in advanced renal cell carcinoma after anti-PD-1/PD-L1 therapy.",
+   "journal": "Future Oncol",
+   "year": "2023",
+   "locked": true
   },
   "InPACT": {
-   "q": "\"InPACT\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"InPACT\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])",
+   "pmid": "31160252",
+   "title": "The International Penile Advanced Cancer Trial (InPACT): Rationale and Current Status.",
+   "journal": "Eur Urol Focus",
+   "year": "2019",
+   "locked": true
   },
   "HERCULES": {
-   "q": "\"HERCULES\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"HERCULES\"[tiab] AND (penile[tiab] OR penis[tiab])",
+   "locked": true,
+   "note": "no single paper confirmed; opens a focused PubMed search"
   },
   "PERICLES": {
-   "q": "\"PERICLES\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"PERICLES\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])",
+   "pmid": "37487169",
+   "title": "Atezolizumab With or Without Radiotherapy for Advanced Squamous Cell Carcinoma of the Penis (The PERICLES Study): A Phase II Trial.",
+   "journal": "J Clin Oncol",
+   "year": "2023",
+   "locked": true
   },
   "ORPHEUS": {
-   "q": "\"ORPHEUS\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"ORPHEUS\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])",
+   "pmid": "38749903",
+   "title": "Retifanlimab in Advanced Penile Squamous Cell Carcinoma: The Phase 2 ORPHEUS Study.",
+   "journal": "Eur Urol Oncol",
+   "year": "2025",
+   "locked": true
   },
   "EV-103": {
    "q": "\"EV-103\"[tiab]",
-   "count": 15,
    "pmid": "37369081",
    "title": "Enfortumab Vedotin With or Without Pembrolizumab in Cisplatin-Ineligible Patients With Previously Untreated Locally Advanced or Metastatic Urothelial Cancer.",
    "journal": "J Clin Oncol",
@@ -721,22 +729,40 @@
    "locked": true
   },
   "CheckMate-358": {
-   "q": "(\"CheckMate 358\"[tiab] OR \"CheckMate-358\"[tiab]) AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"CheckMate 358\"[tiab] OR \"CheckMate-358\"[tiab]",
+   "locked": true,
+   "note": "no single paper confirmed; opens a focused PubMed search"
   },
   "SEMITEP": {
-   "q": "\"SEMITEP\"[tiab] AND seminoma[tiab] AND (trial[tiab] OR carboplatin[tiab] OR etoposide[tiab])"
+   "q": "\"SEMITEP\"[tiab]",
+   "locked": true,
+   "note": "no single paper confirmed; opens a focused PubMed search"
   },
   "ALFAUR": {
-   "q": "McNeill[1au] AND alfuzosin[ti] AND retention[ti]"
+   "q": "McNeill[1au] AND alfuzosin[ti] AND retention[ti]",
+   "pmid": "10510105",
+   "title": "Sustained-release alfuzosin and trial without catheter after acute urinary retention: a prospective, placebo-controlled.",
+   "journal": "BJU Int",
+   "year": "1999",
+   "locked": true
   },
   "SOFIA": {
-   "q": "Wagg[1au] AND fesoterodine[ti]"
+   "q": "Wagg[1au] AND 2013[dp] AND fesoterodine[ti]",
+   "locked": true,
+   "note": "no single paper confirmed; opens a focused PubMed search"
   },
   "NEPTUNE": {
-   "q": "Drake[1au] AND 2015[dp] AND solifenacin[tiab] AND tamsulosin[tiab]"
+   "q": "Drake[1au] AND 2015[dp] AND solifenacin[tiab] AND tamsulosin[tiab]",
+   "pmid": "25070148",
+   "title": "Long-term safety and efficacy of single-tablet combinations of solifenacin and tamsulosin oral controlled absorption system in men with storage and voiding lower urinary tract symptoms: results from the NEPTUNE Study and NEPTUNE II open-label extension.",
+   "journal": "Eur Urol",
+   "year": "2015",
+   "locked": true
   },
   "ALLHAT": {
-   "q": "ALLHAT[tiab] AND doxazosin[ti]"
+   "q": "ALLHAT[tiab] AND doxazosin[ti] AND 2000[dp]",
+   "locked": true,
+   "note": "no single paper confirmed; opens a focused PubMed search"
   }
  }
 }
