@@ -1,0 +1,302 @@
+{
+ "about": "Direct links for trial names. q = PubMed query; pmid/title are filled by tools/resolve-trials.mjs (GitHub Action 'Resolve trial links') and reviewed by pull request.",
+ "trials": {
+  "ProtecT": {
+   "q": "Hamdy[1au] AND 2016[dp] AND \"N Engl J Med\"[ta] AND prostate[ti]"
+  },
+  "CHAARTED": {
+   "q": "Sweeney[1au] AND 2015[dp] AND \"N Engl J Med\"[ta]"
+  },
+  "LATITUDE": {
+   "q": "Fizazi[1au] AND 2017[dp] AND \"N Engl J Med\"[ta] AND abiraterone[ti]"
+  },
+  "STAMPEDE": {
+   "q": "James[1au] AND 2017[dp] AND \"N Engl J Med\"[ta] AND abiraterone[ti]"
+  },
+  "TITAN": {
+   "q": "Chi[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND apalutamide[ti]"
+  },
+  "ENZAMET": {
+   "q": "Davis[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]"
+  },
+  "ARCHES": {
+   "q": "Armstrong[1au] AND 2019[dp] AND \"J Clin Oncol\"[ta] AND enzalutamide[ti]"
+  },
+  "ARASENS": {
+   "q": "Smith[1au] AND 2022[dp] AND \"N Engl J Med\"[ta] AND darolutamide[ti]"
+  },
+  "PEACE-1": {
+   "q": "Fizazi[1au] AND 2022[dp] AND \"Lancet\"[ta] AND abiraterone[ti]"
+  },
+  "EMBARK": {
+   "q": "Freedland[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]"
+  },
+  "ARANOTE": {
+   "q": "Saad[1au] AND 2024[dp] AND \"J Clin Oncol\"[ta] AND darolutamide[ti]"
+  },
+  "PROfound": {
+   "q": "de Bono[1au] AND 2020[dp] AND \"N Engl J Med\"[ta] AND olaparib[ti]"
+  },
+  "MAGNITUDE": {
+   "q": "Chi[1au] AND 2023[dp] AND \"J Clin Oncol\"[ta] AND niraparib[ti]"
+  },
+  "TALAPRO-2": {
+   "q": "Agarwal[1au] AND 2023[dp] AND \"Lancet\"[ta] AND talazoparib[ti]"
+  },
+  "VISION": {
+   "q": "Sartor[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND lutetium[ti]"
+  },
+  "PSMAfore": {
+   "q": "Morris[1au] AND 2024[dp] AND \"Lancet\"[ta]"
+  },
+  "CARD": {
+   "q": "de Wit[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND cabazitaxel[ti]"
+  },
+  "SWOG 8507": {
+   "q": "Lamm[1au] AND 2000[dp] AND \"J Urol\"[ta] AND bacillus[ti]"
+  },
+  "KEYNOTE-057": {
+   "q": "Balar[1au] AND 2021[dp] AND \"Lancet Oncol\"[ta] AND pembrolizumab[ti]"
+  },
+  "QUILT 3032": {
+   "q": "Chamie[1au] AND N-803[tiab] AND BCG[tiab]"
+  },
+  "VESPER": {
+   "q": "Pfister[1au] AND 2022[dp] AND \"J Clin Oncol\"[ta]"
+  },
+  "CheckMate 274": {
+   "q": "Bajorin[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND nivolumab[ti]"
+  },
+  "NIAGARA": {
+   "q": "Powles[1au] AND 2024[dp] AND \"N Engl J Med\"[ta] AND durvalumab[ti]"
+  },
+  "EV-302": {
+   "q": "Powles[1au] AND 2024[dp] AND \"N Engl J Med\"[ta] AND enfortumab[ti]"
+  },
+  "KEYNOTE-A39": {
+   "q": "Powles[1au] AND 2024[dp] AND \"N Engl J Med\"[ta] AND enfortumab[ti]"
+  },
+  "JAVELIN Bladder 100": {
+   "q": "Powles[1au] AND 2020[dp] AND \"N Engl J Med\"[ta] AND avelumab[ti]"
+  },
+  "POUT": {
+   "q": "Birtle[1au] AND 2020[dp] AND \"Lancet\"[ta]"
+  },
+  "KEYNOTE-564": {
+   "q": "Choueiri[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND pembrolizumab[ti]"
+  },
+  "LITESPARK-005": {
+   "q": "Choueiri[1au] AND 2024[dp] AND \"N Engl J Med\"[ta] AND belzutifan[ti]"
+  },
+  "KEYNOTE-426": {
+   "q": "Rini[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND pembrolizumab[ti]"
+  },
+  "CheckMate-214": {
+   "q": "Motzer[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND nivolumab[ti]"
+  },
+  "CLEAR": {
+   "q": "Motzer[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND lenvatinib[ti]"
+  },
+  "CheckMate 9ER": {
+   "q": "Choueiri[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND cabozantinib[ti]"
+  },
+  "CARMENA": {
+   "q": "Méjean[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND sunitinib[ti]"
+  },
+  "SURTIME": {
+   "q": "Bex[1au] AND 2019[dp] AND \"JAMA Oncol\"[ta]"
+  },
+  "SWOG 1500": {
+   "q": "Pal[1au] AND 2021[dp] AND \"Lancet\"[ta] AND papillary[ti]"
+  },
+  "PAPMET": {
+   "q": "Pal[1au] AND 2021[dp] AND \"Lancet\"[ta] AND papillary[ti]"
+  },
+  "TIP phase II": {
+   "q": "Pagliaro[1au] AND 2010[dp] AND \"J Clin Oncol\"[ta] AND penile[ti]"
+  },
+  "PREVAIL": {
+   "q": "Beer[1au] AND 2014[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]"
+  },
+  "AFFIRM": {
+   "q": "Scher[1au] AND 2012[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]"
+  },
+  "COU-AA-301": {
+   "q": "de Bono[1au] AND 2011[dp] AND \"N Engl J Med\"[ta] AND abiraterone[ti]"
+  },
+  "COU-AA-302": {
+   "q": "Ryan[1au] AND 2013[dp] AND \"N Engl J Med\"[ta] AND abiraterone[ti]"
+  },
+  "SPARTAN": {
+   "q": "Smith[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND apalutamide[ti]"
+  },
+  "PROSPER": {
+   "q": "Hussain[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND enzalutamide[ti]"
+  },
+  "ARAMIS": {
+   "q": "Fizazi[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND darolutamide[ti]"
+  },
+  "ALSYMPCA": {
+   "q": "Parker[1au] AND 2013[dp] AND \"N Engl J Med\"[ta] AND alpha emitter[ti]"
+  },
+  "TheraP": {
+   "q": "Hofman[1au] AND 2021[dp] AND \"Lancet\"[ta]"
+  },
+  "THOR": {
+   "q": "Loriot[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND erdafitinib[ti]"
+  },
+  "CheckMate 901": {
+   "q": "van der Heijden[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND nivolumab[ti]"
+  },
+  "EV-301": {
+   "q": "Powles[1au] AND 2021[dp] AND \"N Engl J Med\"[ta] AND enfortumab[ti]"
+  },
+  "IMvigor130": {
+   "q": "Galsky[1au] AND 2020[dp] AND \"Lancet\"[ta] AND atezolizumab[ti]"
+  },
+  "KEYNOTE-361": {
+   "q": "Powles[1au] AND 2021[dp] AND \"Lancet Oncol\"[ta] AND pembrolizumab[ti]"
+  },
+  "MRC TE20": {
+   "q": "Oliver[1au] AND 2005[dp] AND \"Lancet\"[ta] AND carboplatin[ti]"
+  },
+  "CONTACT-03": {
+   "q": "Pal[1au] AND 2023[dp] AND \"Lancet\"[ta] AND atezolizumab[ti]"
+  },
+  "OLYMPUS": {
+   "q": "Kleinmann[1au] AND 2020[dp] AND \"Lancet Oncol\"[ta]"
+  },
+  "PIVOT": {
+   "q": "Wilt[1au] AND 2012[dp] AND \"N Engl J Med\"[ta] AND prostatectomy[ti]"
+  },
+  "SPCG-4": {
+   "q": "Bill-Axelson[1au] AND 2014[dp] AND \"N Engl J Med\"[ta]"
+  },
+  "NOSTONE": {
+   "q": "Dhayat[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND hydrochlorothiazide[ti]"
+  },
+  "TRAVERSE": {
+   "q": "Lincoff[1au] AND 2023[dp] AND \"N Engl J Med\"[ta] AND testosterone[ti]"
+  },
+  "ALTAR": {
+   "q": "Harding[1au] AND 2022[dp] AND \"BMJ\"[ta] AND methenamine[ti]"
+  },
+  "MERIT": {
+   "q": "Hayward[1au] AND 2024[dp] AND \"JAMA Intern Med\"[ta] AND mannose[ti]"
+  },
+  "MTOPS": {
+   "q": "McConnell[1au] AND 2003[dp] AND \"N Engl J Med\"[ta] AND doxazosin[ti]"
+  },
+  "CombAT": {
+   "q": "Roehrborn[1au] AND 2010[dp] AND \"Eur Urol\"[ta] AND dutasteride[ti]"
+  },
+  "ValUE": {
+   "q": "Nager[1au] AND 2012[dp] AND \"N Engl J Med\"[ta] AND urodynamic[ti]"
+  },
+  "EAGLE-2": {
+   "q": "Wagenlehner[1au] AND 2024[dp] AND \"Lancet\"[ta] AND gepotidacin[ti]"
+  },
+  "EAGLE-3": {
+   "q": "Wagenlehner[1au] AND 2024[dp] AND \"Lancet\"[ta] AND gepotidacin[ti]"
+  },
+  "SUSPEND": {
+   "q": "Pickard[1au] AND 2015[dp] AND \"Lancet\"[ta]"
+  },
+  "CARES": {
+   "q": "White[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND febuxostat[ti]"
+  },
+  "PCPT": {
+   "q": "Thompson[1au] AND 2003[dp] AND \"N Engl J Med\"[ta] AND finasteride[ti]"
+  },
+  "REDUCE": {
+   "q": "Andriole[1au] AND 2010[dp] AND \"N Engl J Med\"[ta] AND dutasteride[ti]"
+  },
+  "SWOG S0337": {
+   "q": "Messing[1au] AND 2018[dp] AND \"JAMA\"[ta] AND gemcitabine[ti]"
+  },
+  "CAPItello-281": {
+   "q": "\"CAPItello-281\"[tiab]"
+  },
+  "PSMAddition": {
+   "q": "\"PSMAddition\"[tiab]"
+  },
+  "TALAPRO-3": {
+   "q": "\"TALAPRO-3\"[tiab]"
+  },
+  "AMPLITUDE": {
+   "q": "\"AMPLITUDE\"[tiab]"
+  },
+  "POTOMAC": {
+   "q": "\"POTOMAC\"[tiab]"
+  },
+  "CREST": {
+   "q": "\"CREST\"[tiab]"
+  },
+  "SunRISe-1": {
+   "q": "\"SunRISe-1\"[tiab]"
+  },
+  "THOR-2": {
+   "q": "\"THOR-2\"[tiab]"
+  },
+  "KEYNOTE-905": {
+   "q": "\"KEYNOTE-905\"[tiab]"
+  },
+  "EV-303": {
+   "q": "\"EV-303\"[tiab]"
+  },
+  "KEYNOTE-B15": {
+   "q": "\"KEYNOTE-B15\"[tiab]"
+  },
+  "EV-304": {
+   "q": "\"EV-304\"[tiab]"
+  },
+  "IMvigor011": {
+   "q": "\"IMvigor011\"[tiab]"
+  },
+  "LITESPARK-022": {
+   "q": "\"LITESPARK-022\"[tiab]"
+  },
+  "LITESPARK-011": {
+   "q": "\"LITESPARK-011\"[tiab]"
+  },
+  "InPACT": {
+   "q": "\"InPACT\"[tiab]"
+  },
+  "HERCULES": {
+   "q": "\"HERCULES\"[tiab]"
+  },
+  "PERICLES": {
+   "q": "\"PERICLES\"[tiab]"
+  },
+  "ORPHEUS": {
+   "q": "\"ORPHEUS\"[tiab]"
+  },
+  "QED": {
+   "q": "\"QED\"[tiab]"
+  },
+  "EV-103": {
+   "q": "\"EV-103\"[tiab]"
+  },
+  "KEYNOTE-869": {
+   "q": "\"KEYNOTE-869\"[tiab]"
+  },
+  "CheckMate-358": {
+   "q": "\"CheckMate-358\"[tiab]"
+  },
+  "SEMITEP": {
+   "q": "\"SEMITEP\"[tiab]"
+  },
+  "ALFAUR": {
+   "q": "\"ALFAUR\"[tiab]"
+  },
+  "SOFIA": {
+   "q": "\"SOFIA\"[tiab]"
+  },
+  "NEPTUNE": {
+   "q": "\"NEPTUNE\"[tiab]"
+  },
+  "ALLHAT": {
+   "q": "\"ALLHAT\"[tiab]"
+  }
+ }
+}
