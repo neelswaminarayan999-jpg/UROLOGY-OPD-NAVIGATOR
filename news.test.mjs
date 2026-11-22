@@ -23,3 +23,8 @@ assert.ok(Array.isArray(news.items) && news.items.length >= 3 && news.updated);
 for (const x of news.items) { assert.ok(x.id && x.title && x.url && /^https:\/\//.test(x.url), 'news item ' + x.id); }
 assert.equal(new Set(news.items.map(x => x.id)).size, news.items.length, 'unique ids');
 console.log('weekly news: PASS — ranking, filters, abstract parsing and news.json');
+// V16.15 trial links: every trial has a PubMed query; resolved ones have a numeric PMID.
+const tl = JSON.parse(fs.readFileSync('frontend/data/trial-links.json', 'utf8'));
+assert.ok(Object.keys(tl.trials).length >= 60);
+for (const [n, t] of Object.entries(tl.trials)) { assert.ok(t.q && t.q.length > 5, 'query for ' + n); if (t.pmid) assert.match(String(t.pmid), /^\d+$/); }
+console.log('trial links: PASS —', Object.keys(tl.trials).length, 'trials');
