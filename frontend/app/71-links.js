@@ -8,7 +8,7 @@
   const SKIP_NAMES = /^(IGCCCG cohorts|De-escalation programmes|TIP phase II|LITESPARK|carboplatin studies|CheckMate 274 UTUC subgroup)$/;
   let trialRe = null;
   function trialNames() {
-    const raw = (typeof TRIALS !== 'undefined' ? TRIALS.map(t => t[1]) : []).flatMap(n => String(n).split(/\s*\/\s*/)).concat(EXTRA);
+    const raw = (typeof TRIALS !== 'undefined' ? TRIALS.map(t => t[1]) : []).flatMap(n => String(n).split(/\s*\/\s*/)).concat(EXTRA, Object.keys(LINKS));
     return [...new Set(raw.map(s => s.replace(/\s*\(.*?\)\s*/g, '').trim()).filter(s => s.length >= 4 && !SKIP_NAMES.test(s)))].sort((a, b) => b.length - a.length);
   }
   function getTrialRe() {
@@ -18,7 +18,16 @@
     trialRe = new RegExp('(?<![\\w-])(' + names.map(escRe).join('|') + ')(?![\\w-])', 'g');
     return trialRe;
   }
-  const pubmed = n => 'https://pubmed.ncbi.nlm.nih.gov/?term=' + encodeURIComponent(n + ' trial');
+  // Exact paper per trial from data/trial-links.json (PMID once resolved; otherwise a precise author/year/journal query,
+  // which PubMed opens directly when it matches one paper). Unknown names fall back to a title search.
+  let LINKS = {};
+  const loadLinks = fetch('/data/trial-links.json').then(r => r.ok ? r.json() : null).then(j => { LINKS = j?.trials || {}; trialRe = null; }).catch(() => {});
+  const pubmed = n => {
+    const t = LINKS[n];
+    if (t?.pmid) return 'https://pubmed.ncbi.nlm.nih.gov/' + t.pmid + '/';
+    if (t?.q) return 'https://pubmed.ncbi.nlm.nih.gov/?term=' + encodeURIComponent(t.q);
+    return 'https://pubmed.ncbi.nlm.nih.gov/?term=' + encodeURIComponent('"' + n + '"[tiab] AND (randomized OR trial)');
+  };
   const dailymed = n => 'https://dailymed.nlm.nih.gov/dailymed/search.cfm?labeltype=all&query=' + encodeURIComponent(n);
   // Turn a drug entry name into a label search term; returns '' for class or regimen entries that have no single label.
   const NO_LABEL = /^(oral cephalosporins|newer agents|low-dose|om-89|stent-related|bone protection|hot flush|calcium & magnesium|primary hyperoxaluria|bladder spasm|trimix|daily ssris|lhrh|adt|bep|ep |vip|gem\/cis|ddmvac|nivolumab \+|pembrolizumab \+|lenvatinib \+|enfortumab|durvalumab|atezolizumab|lu-177|avelumab|belzutifan)/i;
@@ -57,7 +66,7 @@ html[data-oracle-theme="dark"] a.ref-link,html[data-oracle-theme="dark"] a.lbl-l
       while ((m = re.exec(text))) {
         if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
         const a = document.createElement('a'); a.className = 'ref-link'; a.href = pubmed(m[1]); a.target = '_blank'; a.rel = 'noopener'; a.textContent = m[1];
-        a.title = 'Open ' + m[1] + ' on PubMed'; frag.appendChild(a); last = m.index + m[1].length;
+        a.title = 'Open ' + m[1] + ' on PubMed'; a.dataset.trial = m[1]; frag.appendChild(a); last = m.index + m[1].length;
       }
       if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
       n.parentNode.replaceChild(frag, n);
@@ -105,6 +114,7 @@ html[data-oracle-theme="dark"] a.ref-link,html[data-oracle-theme="dark"] a.lbl-l
   const schedule = () => { if (!pending) { pending = true; setTimeout(sweep, 120); } };
   function start() {
     sweep();
+    loadLinks.then(() => { document.querySelectorAll('a.ref-link[data-trial]').forEach(a => { a.href = pubmed(a.dataset.trial); }); sweep(); });
     new MutationObserver(muts => { if (muts.some(m => m.addedNodes.length && ![...m.addedNodes].every(n => n.nodeType === 1 && n.matches?.('a.ref-link,a.lbl-link')))) schedule(); })
       .observe(document.body, { childList: true, subtree: true });
   }

@@ -208,5 +208,12 @@ html[data-oracle-theme="dark"] #uroFooter{border-color:#334155;color:#94a3b8}htm
   function run() { try { build(); footer(); } catch (e) { console.warn('home v2', e); } }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true }); else run();
   [800, 1700, 3500, 6000].forEach(t => setTimeout(run, t));
-  const sh = window.showHome; if (typeof sh === 'function' && !sh.__h2) { const w = function () { const r = sh.apply(this, arguments); setTimeout(run, 0); return r; }; w.__h2 = true; window.showHome = w; }
+  // Going Home always lands at the top of the page (other layers scroll after rendering, so re-assert a few times).
+  const toTop = () => { [0, 60, 250, 600].forEach(t => setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }), t)); };
+  const wrapHome = () => {
+    const sh = window.showHome; if (typeof sh !== 'function' || sh.__h2) return;
+    const w = function () { const r = sh.apply(this, arguments); ['onlineAiView', 'bookLabView'].forEach(id => document.getElementById(id)?.classList.add('hidden')); document.querySelectorAll('.uro-sheet').forEach(x => x.remove()); setTimeout(run, 0); toTop(); return r; }; w.__h2 = true; window.showHome = w;
+  };
+  wrapHome(); [1000, 3000, 6500].forEach(t => setTimeout(wrapHome, t));
+  document.addEventListener('click', e => { const el = e.target.closest('[onclick*="showHome"], [data-nav="home"]'); if (el) toTop(); }, true);
 })();
