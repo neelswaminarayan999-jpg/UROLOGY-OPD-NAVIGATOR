@@ -39,6 +39,7 @@ export function score(rec) {
   if (/multicenter|multicentre|prospective|cohort|nationwide|population-based/.test(all + ' ' + t)) s += 1;
   if (/\breview\b/.test(all) && !/systematic/.test(all + t)) s -= 1;
   if (/\b(rat|rats|mice|mouse|murine|in vitro|cell line)\b/.test(t)) s -= 3;
+  if (/\b(rationale|protocol|study design|enrollment characteristics|trial in progress)\b/.test(t)) s -= 3;
   const type = /guideline|consensus/.test(all + ' ' + t) ? 'Guideline / consensus' : /randomi[sz]ed|phase (3|iii)/.test(all + ' ' + t) ? 'Randomised trial'
     : /meta-analysis/.test(all + ' ' + t) ? 'Meta-analysis' : /systematic review/.test(all + ' ' + t) ? 'Systematic review' : /trial/.test(t) ? 'Clinical trial' : 'Study';
   const doi = (rec.articleids || []).find(a => a.idtype === 'doi')?.value || '';
@@ -85,7 +86,9 @@ async function main() {
     for (const id of j.result?.uids || []) { const r = score(j.result[id]); if (r) recs.push(r); }
   }
   recs.sort((a, b) => b.score - a.score);
-  const pool = recs.slice(0, target * 2);
+  // Spread across journals: at most 4 items per journal, so high-volume journals cannot crowd out the rest.
+  const perJournal = {}, spread = recs.filter(r => (perJournal[r.journal] = (perJournal[r.journal] || 0) + 1) <= Number(process.env.NEWS_PER_JOURNAL || 4));
+  const pool = spread.slice(0, target * 2);
   const abs = pool.length ? abstracts(await get(`${EUTILS}efetch.fcgi?db=pubmed&retmode=xml&id=${pool.map(r => r.pmid).join(',')}${TOOL}`, 'text')) : {};
   const chosen = pool.filter(r => (abs[r.pmid] || '').length > 200).slice(0, target);
   console.log(`Chosen ${chosen.length} records with abstracts`);
