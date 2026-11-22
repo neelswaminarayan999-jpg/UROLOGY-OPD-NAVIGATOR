@@ -137,7 +137,12 @@
    "locked": true
   },
   "PSMAfore": {
-   "q": "Morris[1au] AND 2024[dp] AND \"Lancet\"[ta] AND PSMA[ti]"
+   "q": "Morris[1au] AND 2024[dp] AND \"Lancet\"[ta] AND PSMA[ti]",
+   "count": 1,
+   "pmid": "39293462",
+   "title": "(177)Lu-PSMA-617 versus a change of androgen receptor pathway inhibitor therapy for taxane-naive patients with progressive metastatic castration-resistant prostate cancer (PSMAfore): a phase 3, randomised, controlled trial.",
+   "journal": "Lancet",
+   "year": "2024"
   },
   "CARD": {
    "q": "de Wit[1au] AND 2019[dp] AND \"N Engl J Med\"[ta] AND cabazitaxel[ti]",
@@ -464,7 +469,12 @@
    "locked": true
   },
   "MRC TE20": {
-   "q": "Oliver[1au] AND 2005[dp] AND \"Lancet\"[ta] AND carboplatin[ti] AND radiotherapy[ti]"
+   "q": "Oliver[1au] AND 2005[dp] AND \"Lancet\"[ta] AND carboplatin[ti] AND radiotherapy[ti]",
+   "count": 1,
+   "pmid": "16039331",
+   "title": "Radiotherapy versus single-dose carboplatin in adjuvant treatment of stage I seminoma: a randomised trial.",
+   "journal": "Lancet",
+   "year": "2005"
   },
   "CONTACT-03": {
    "q": "Pal[1au] AND 2023[dp] AND \"Lancet\"[ta] AND atezolizumab[ti]",
@@ -521,7 +531,12 @@
    "locked": true
   },
   "ALTAR": {
-   "q": "Harding[1au] AND 2022[dp] AND \"recurrent urinary tract infections\"[ti]"
+   "q": "Harding[1au] AND 2022[dp] AND \"recurrent urinary tract infections\"[ti]",
+   "count": 2,
+   "pmid": "35264408",
+   "title": "Alternative to prophylactic antibiotics for the treatment of recurrent urinary tract infections in women: multicentre, open label, randomised, non-inferiority trial.",
+   "journal": "BMJ",
+   "year": "2022"
   },
   "MERIT": {
    "q": "Hayward[1au] AND 2024[dp] AND \"JAMA Intern Med\"[ta] AND mannose[ti]",
@@ -578,7 +593,12 @@
    "locked": true
   },
   "SUSPEND": {
-   "q": "Pickard[1au] AND 2015[dp] AND \"Lancet\"[ta] AND expulsive[ti]"
+   "q": "Pickard[1au] AND 2015[dp] AND \"Lancet\"[ta] AND expulsive[ti]",
+   "count": 1,
+   "pmid": "25998582",
+   "title": "Medical expulsive therapy in adults with ureteric colic: a multicentre, randomised, placebo-controlled trial.",
+   "journal": "Lancet",
+   "year": "2015"
   },
   "CARES": {
    "q": "White[1au] AND 2018[dp] AND \"N Engl J Med\"[ta] AND febuxostat[ti]",
@@ -635,16 +655,36 @@
    "locked": true
   },
   "TALAPRO-3": {
-   "q": "\"TALAPRO-3\"[tiab] AND talazoparib[tiab]"
+   "q": "\"TALAPRO-3\"[tiab] AND talazoparib[tiab]",
+   "count": 6,
+   "pmid": "37882449",
+   "title": "TALAPRO-3 clinical trial protocol: phase III study of talazoparib plus enzalutamide in metastatic castration-sensitive prostate cancer.",
+   "journal": "Future Oncol",
+   "year": "2024"
   },
   "AMPLITUDE": {
-   "q": "\"AMPLITUDE\"[tiab] AND niraparib[tiab]"
+   "q": "\"AMPLITUDE\"[tiab] AND niraparib[tiab]",
+   "count": 4,
+   "pmid": "41057655",
+   "title": "Niraparib and abiraterone acetate plus prednisone for HRR-deficient metastatic castration-sensitive prostate cancer: a randomized phase 3 trial.",
+   "journal": "Nat Med",
+   "year": "2025"
   },
   "POTOMAC": {
-   "q": "\"POTOMAC\"[tiab] AND durvalumab[tiab]"
+   "q": "\"POTOMAC\"[tiab] AND durvalumab[tiab]",
+   "count": 12,
+   "pmid": "41115436",
+   "title": "Durvalumab in combination with BCG for BCG-naive, high-risk, non-muscle-invasive bladder cancer (POTOMAC): final analysis of a randomised, open-label, phase 3 trial.",
+   "journal": "Lancet",
+   "year": "2025"
   },
   "CREST": {
-   "q": "\"CREST\"[tiab] AND sasanlimab[tiab]"
+   "q": "\"CREST\"[tiab] AND sasanlimab[tiab]",
+   "count": 12,
+   "pmid": "38189180",
+   "title": "CREST: phase III study of sasanlimab and Bacillus Calmette-Guérin for patients with Bacillus Calmette-Guérin-naïve high-risk non-muscle-invasive bladder cancer.",
+   "journal": "Future Oncol",
+   "year": "2024"
   },
   "SunRISe-1": {
    "q": "\"SunRISe-1\"[tiab]",
@@ -656,19 +696,44 @@
    "locked": true
   },
   "THOR-2": {
-   "q": "\"THOR-2\"[tiab] AND erdafitinib[tiab]"
+   "q": "\"THOR-2\"[tiab] AND erdafitinib[tiab]",
+   "count": 3,
+   "pmid": "41062389",
+   "title": "Erdafitinib in Patients with High- and Intermediate-risk Non-muscle-invasive Bladder Cancer: Final Analysis of THOR-2 Study.",
+   "journal": "Eur Urol",
+   "year": "2026"
   },
   "KEYNOTE-905": {
-   "q": "(\"KEYNOTE-905\"[tiab] OR \"EV-303\"[tiab]) AND enfortumab[ti]"
+   "q": "(\"KEYNOTE-905\"[tiab] OR \"EV-303\"[tiab]) AND enfortumab[ti]",
+   "count": 7,
+   "pmid": "41707170",
+   "title": "Perioperative Enfortumab Vedotin and Pembrolizumab in Bladder Cancer.",
+   "journal": "N Engl J Med",
+   "year": "2026"
   },
   "EV-303": {
-   "q": "(\"KEYNOTE-905\"[tiab] OR \"EV-303\"[tiab]) AND enfortumab[ti]"
+   "q": "(\"KEYNOTE-905\"[tiab] OR \"EV-303\"[tiab]) AND enfortumab[ti]",
+   "count": 7,
+   "pmid": "41707170",
+   "title": "Perioperative Enfortumab Vedotin and Pembrolizumab in Bladder Cancer.",
+   "journal": "N Engl J Med",
+   "year": "2026"
   },
   "KEYNOTE-B15": {
-   "q": "(\"KEYNOTE-B15\"[tiab] OR \"EV-304\"[tiab]) AND enfortumab[ti]"
+   "q": "(\"KEYNOTE-B15\"[tiab] OR \"EV-304\"[tiab]) AND enfortumab[ti]",
+   "count": 3,
+   "pmid": "41395562",
+   "title": "Pathologic complete response to enfortumab vedotin plus pembrolizumab in node-positive urothelial carcinoma: a case report.",
+   "journal": "Int Cancer Conf J",
+   "year": "2025"
   },
   "EV-304": {
-   "q": "(\"KEYNOTE-B15\"[tiab] OR \"EV-304\"[tiab]) AND enfortumab[ti]"
+   "q": "(\"KEYNOTE-B15\"[tiab] OR \"EV-304\"[tiab]) AND enfortumab[ti]",
+   "count": 3,
+   "pmid": "41395562",
+   "title": "Pathologic complete response to enfortumab vedotin plus pembrolizumab in node-positive urothelial carcinoma: a case report.",
+   "journal": "Int Cancer Conf J",
+   "year": "2025"
   },
   "IMvigor011": {
    "q": "\"IMvigor011\"[tiab]",
@@ -689,19 +754,44 @@
    "locked": true
   },
   "LITESPARK-011": {
-   "q": "\"LITESPARK-011\"[tiab] AND belzutifan[tiab]"
+   "q": "\"LITESPARK-011\"[tiab] AND belzutifan[tiab]",
+   "count": 8,
+   "pmid": "36752726",
+   "title": "LITESPARK-011: belzutifan plus lenvatinib vs cabozantinib in advanced renal cell carcinoma after anti-PD-1/PD-L1 therapy.",
+   "journal": "Future Oncol",
+   "year": "2023"
   },
   "InPACT": {
-   "q": "\"InPACT\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"InPACT\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])",
+   "count": 9,
+   "pmid": "31160252",
+   "title": "The International Penile Advanced Cancer Trial (InPACT): Rationale and Current Status.",
+   "journal": "Eur Urol Focus",
+   "year": "2019"
   },
   "HERCULES": {
-   "q": "\"HERCULES\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"HERCULES\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])",
+   "count": 15,
+   "pmid": "39436842",
+   "title": "Uremic syndrome with newly diagnosed HIV infection: reflections on a particular case.",
+   "journal": "J Infect Dev Ctries",
+   "year": "2024"
   },
   "PERICLES": {
-   "q": "\"PERICLES\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"PERICLES\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])",
+   "count": 9,
+   "pmid": "37487169",
+   "title": "Atezolizumab With or Without Radiotherapy for Advanced Squamous Cell Carcinoma of the Penis (The PERICLES Study): A Phase II Trial.",
+   "journal": "J Clin Oncol",
+   "year": "2023"
   },
   "ORPHEUS": {
-   "q": "\"ORPHEUS\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "\"ORPHEUS\"[tiab] AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])",
+   "count": 2,
+   "pmid": "38749903",
+   "title": "Retifanlimab in Advanced Penile Squamous Cell Carcinoma: The Phase 2 ORPHEUS Study.",
+   "journal": "Eur Urol Oncol",
+   "year": "2025"
   },
   "EV-103": {
    "q": "\"EV-103\"[tiab]",
@@ -721,22 +811,48 @@
    "locked": true
   },
   "CheckMate-358": {
-   "q": "(\"CheckMate 358\"[tiab] OR \"CheckMate-358\"[tiab]) AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])"
+   "q": "(\"CheckMate 358\"[tiab] OR \"CheckMate-358\"[tiab]) AND (penile[tiab] OR penis[tiab] OR urothelial[tiab] OR bladder[tiab] OR prostate[tiab] OR renal[tiab] OR testicular[tiab])",
+   "count": 0
   },
   "SEMITEP": {
-   "q": "\"SEMITEP\"[tiab] AND seminoma[tiab] AND (trial[tiab] OR carboplatin[tiab] OR etoposide[tiab])"
+   "q": "\"SEMITEP\"[tiab] AND seminoma[tiab] AND (trial[tiab] OR carboplatin[tiab] OR etoposide[tiab])",
+   "count": 3,
+   "pmid": "36793752",
+   "title": "Stage II Seminoma: Why Chemotherapy Should Remain a Standard.",
+   "journal": "Eur Urol Open Sci",
+   "year": "2023"
   },
   "ALFAUR": {
-   "q": "McNeill[1au] AND alfuzosin[ti] AND retention[ti]"
+   "q": "McNeill[1au] AND alfuzosin[ti] AND retention[ti]",
+   "count": 3,
+   "pmid": "10510105",
+   "title": "Sustained-release alfuzosin and trial without catheter after acute urinary retention: a prospective, placebo-controlled.",
+   "journal": "BJU Int",
+   "year": "1999"
   },
   "SOFIA": {
-   "q": "Wagg[1au] AND fesoterodine[ti]"
+   "q": "Wagg[1au] AND fesoterodine[ti]",
+   "count": 7,
+   "pmid": "25673122",
+   "title": "Review of the efficacy and safety of fesoterodine for treating overactive bladder and urgency urinary incontinence in elderly patients.",
+   "journal": "Drugs Aging",
+   "year": "2015"
   },
   "NEPTUNE": {
-   "q": "Drake[1au] AND 2015[dp] AND solifenacin[tiab] AND tamsulosin[tiab]"
+   "q": "Drake[1au] AND 2015[dp] AND solifenacin[tiab] AND tamsulosin[tiab]",
+   "count": 2,
+   "pmid": "25070148",
+   "title": "Long-term safety and efficacy of single-tablet combinations of solifenacin and tamsulosin oral controlled absorption system in men with storage and voiding lower urinary tract symptoms: results from the NEPTUNE Study and NEPTUNE II open-label extension.",
+   "journal": "Eur Urol",
+   "year": "2015"
   },
   "ALLHAT": {
-   "q": "ALLHAT[tiab] AND doxazosin[ti]"
+   "q": "ALLHAT[tiab] AND doxazosin[ti]",
+   "count": 20,
+   "pmid": "11806807",
+   "title": "Comments on ALLHAT and doxazosin.",
+   "journal": "Curr Control Trials Cardiovasc Med",
+   "year": "2001"
   }
  }
 }
