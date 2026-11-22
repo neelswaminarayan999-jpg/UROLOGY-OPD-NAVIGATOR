@@ -1,0 +1,32 @@
+name: Resolve trial links
+# Manual: finds the exact PubMed paper for every trial name in the app and opens a pull request for review.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v13.2-final
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/resolve-trials.mjs
+      - name: Open pull request
+        run: |
+          d=$(date -u +%Y%m%d-%H%M)
+          git config user.name "trial-links-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "trial-links-$d"
+          git add frontend/data/trial-links.json
+          git commit -m "Trial links resolved $d"
+          git push origin "trial-links-$d"
+          gh pr create --base v13.2-final --head "trial-links-$d" --title "Trial links $d" --body-file trials-review.md
+          cat trials-review.md >> "$GITHUB_STEP_SUMMARY"
