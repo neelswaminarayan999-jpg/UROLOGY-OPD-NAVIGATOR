@@ -81,7 +81,7 @@ html[data-oracle-theme="dark"] .uro-sheet .model{background:#1e293b}`;
     try {
       const r = await fetch('/api/viva', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: ctl.signal });
       let j = {}; try { j = await r.json(); } catch { throw new Error(r.status === 404 ? 'Viva mode is not on the server yet.' : 'The server is waking up. Wait 30 seconds and try again.'); }
-      if (!r.ok) throw new Error(r.status === 429 ? 'The free AI quota is used up for now. Try again later or tomorrow.' : (j.error || `Server error ${r.status}`).slice(0, 300));
+      if (!r.ok) throw new Error(j.code === 'daily_limit' ? j.error : r.status === 429 ? 'The free AI quota is used up for now. Try again later or tomorrow.' : (j.error || `Server error ${r.status}`).slice(0, 300));
       if (!j.viva || (!j.viva.vignette && !j.viva.feedback)) throw new Error('The AI returned an empty reply. Try again.');
       return j;
     } catch (e) { if (e.name === 'AbortError') throw new Error('The AI took too long to answer. Try again.'); throw e; }

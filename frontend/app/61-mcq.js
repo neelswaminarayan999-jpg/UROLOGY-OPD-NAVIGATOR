@@ -48,7 +48,7 @@
     try {
       const r = await fetch('/api/mcq', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ topic, reference: reference(topic), count: 5, avoid: pool.filter(q => q.topic === topic).map(q => q.stem) }) });
       let j = {}; try { j = await r.json(); } catch { throw new Error('The server is waking up. Try again in a minute.'); }
-      if (!r.ok) throw new Error(r.status === 429 ? 'The free AI quota is used up for now.' : (j.error || 'Server error ' + r.status));
+      if (!r.ok) throw new Error(j.code === 'daily_limit' ? j.error : r.status === 429 ? 'The free AI quota is used up for now.' : (j.error || 'Server error ' + r.status));
       const seen = new Set(pool.map(q => norm(q.stem)).concat(load(K_BLOCK + 'Stems', [])));
       const fresh = (j.questions || []).filter(q => !seen.has(norm(q.stem))).map(q => ({ ...q, explain: q.explanation, id: 'ai-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), topic, added: today, model: j.model || '' }));
       save(K_EXTRA, extra.concat(fresh).slice(-MAX_EXTRA));
