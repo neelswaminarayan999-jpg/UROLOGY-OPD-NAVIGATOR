@@ -13,6 +13,7 @@ assert.ok(rct.score > obs.score && gl.score > obs.score, 'trials and guidelines 
 assert.equal(score({ uid: '4', title: 'Re: Robotic versus open cystectomy for bladder cancer', source: 'J Urol', pubtype: ['Comment', 'Journal Article'] }), null, 'replies dropped');
 assert.equal(score({ uid: '5', title: 'Editorial comment on a trial of stent omission after ureteroscopy', source: 'J Urol', pubtype: ['Editorial'] }), null, 'editorials dropped');
 assert.ok(score({ uid: '6', title: 'Androgen receptor signalling in a mouse model of castration resistance', source: 'Eur Urol', pubtype: ['Journal Article'] }).score < obs.score + 1, 'animal work ranked down');
+assert.ok(score({ uid: '7', title: 'Study rationale and enrollment characteristics of a randomized trial of adjuvant therapy', source: 'Eur Urol', pubtype: ['Journal Article'] }).score < rct.score, 'protocol/rationale papers ranked below results');
 const xml = '<PubmedArticleSet><PubmedArticle><MedlineCitation><PMID Version="1">111</PMID><Abstract><AbstractText Label="BACKGROUND">Why &amp; how.</AbstractText><AbstractText Label="RESULTS">HR 0.72 <i>p</i>&lt;0.01.</AbstractText></Abstract></MedlineCitation></PubmedArticle><PubmedArticle><MedlineCitation><PMID Version="1">222</PMID></MedlineCitation></PubmedArticle></PubmedArticleSet>';
 const a = abstracts(xml);
 assert.equal(a['111'], 'BACKGROUND: Why & how. RESULTS: HR 0.72 p<0.01.'); assert.equal(a['222'], '');
