@@ -698,6 +698,9 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && (req.url || '').split('?')[0] === '/health') {
+      // A person who lands on /health in a browser (old bookmark, history suggestion) is sent to the app;
+      // scripts and monitors (no text/html Accept) and /health?raw still get the JSON.
+      if (/text\/html/.test(String(req.headers.accept || '')) && !/[?&]raw\b/.test(req.url || '')) { res.writeHead(302, { Location: '/' }); return res.end(); }
       return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.13.0', release: 'V16.13 drug formulary + weekly news', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, dailyLimits: { ai: DAILY.ai, viva: DAILY.viva, mcq: DAILY.mcq, news: DAILY.news }, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
