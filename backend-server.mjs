@@ -89,6 +89,32 @@ function rateAllowed(req) {
   }
   return true;
 }
+/* V16.12 daily AI allowance per user (per IP, per IST calendar day). Keeps the free AI quotas shared fairly once the
+   app is public. Limits are set with env vars; 0 switches a limit off. Counts live in memory, so a server restart
+   (or the free plan sleeping) resets them: a soft fairness limit, not billing. */
+const DAILY = {
+  ai: Number(process.env.DAILY_AI_LIMIT ?? 15),          // AI Lab analyses (the ai-accuracy check uses 12)
+  viva: Number(process.env.DAILY_VIVA_LIMIT ?? 3),       // new vivas started (the answers inside a viva are not counted)
+  vivaAnswer: Number(process.env.DAILY_VIVA_LIMIT ?? 3) * 8, // backstop on viva answer calls
+  mcq: Number(process.env.DAILY_MCQ_LIMIT ?? 20),        // AI MCQ batches (the Monday job needs up to 16)
+  news: Number(process.env.DAILY_NEWS_LIMIT ?? 12)       // news summary batches (the Monday job needs up to 5)
+};
+const dailyCounts = new Map();
+function istDay(now = Date.now()) { return new Date(now + 5.5 * 3600e3).toISOString().slice(0, 10); }
+function dailyAllowed(req, kind) {
+  const limit = DAILY[kind];
+  if (!limit || limit < 0) return { ok: true };
+  const day = istDay(), key = day + '|' + kind + '|' + clientIp(req);
+  const n = dailyCounts.get(key) || 0;
+  if (n >= limit) return { ok: false, limit };
+  dailyCounts.set(key, n + 1);
+  if (dailyCounts.size > 20000) for (const k of dailyCounts.keys()) if (!k.startsWith(day)) dailyCounts.delete(k);
+  return { ok: true, used: n + 1, limit };
+}
+function dailyLimitReply(res, origin, kind, limit) {
+  const what = { ai: 'AI Lab analyses', viva: 'vivas', vivaAnswer: 'viva answers', mcq: 'AI question batches', news: 'news summary batches' }[kind];
+  return json(res, 429, { error: `Daily limit reached: ${limit} ${what} per day while the app runs on free AI. It resets at midnight IST. Offline topics, calculators and MCQ practice still work.`, code: 'daily_limit', kind, limit }, origin);
+}
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let total = 0, chunks = [];
@@ -212,9 +238,45 @@ function validateMcqOutput(text) {
   return { cleaned: JSON.stringify({ questions: qs }), obj: { questions: qs } };
 }
 
+/* V16.13 weekly news: plain-language summaries of new PubMed records (title + abstract sent by tools/weekly-news.mjs). */
+const NEWS_CATS = ['Oncology', 'Stones', 'BPH & LUTS', 'Functional & female', 'Andrology & sexual health', 'Infection', 'Paediatric', 'Transplant & renal', 'Trauma & reconstruction', 'Technology & AI', 'Guidelines', 'Other'];
+function newsPrompt(body) {
+  const items = (Array.isArray(body.items) ? body.items : []).slice(0, 8).map((x, i) => `[${i}] ${String(x.journal || '').slice(0, 80)} · ${String(x.type || '').slice(0, 60)}\nTITLE: ${String(x.title || '').slice(0, 300)}\nABSTRACT: ${String(x.abstract || '').slice(0, 2500)}`).join('\n\n');
+  return `You write a weekly "What's new in urology" digest for urology residents and consultants.
+For each record below write, IN YOUR OWN WORDS (never copy sentences from the abstract):
+- "summary": at most 45 words — design (e.g. RCT, n=…), population, main result with the key number if given.
+- "why": at most 25 words — why it matters for practice or exams; say "early/limited evidence" when appropriate.
+- "category": one of ${NEWS_CATS.join(' | ')}.
+Use only facts stated in that record. If the abstract is missing or too vague, set summary to "" and why to "".
+No hype words (breakthrough, game-changer). No patient identifiers.
+RECORDS:
+${items}
+Return JSON: {"items":[{"index","summary","why","category"}]} with one entry per record.`;
+}
+function newsSchema() {
+  return { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { index: { type: 'integer' }, summary: { type: 'string' }, why: { type: 'string' }, category: { type: 'string' } }, required: ['index', 'summary', 'why', 'category'] } } }, required: ['items'] };
+}
+function validateNewsOutput(text) {
+  let obj; try { obj = JSON.parse(stripJsonFences(text)); } catch { const e = new Error('Provider returned non-JSON content; expected news JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  const list = Array.isArray(obj) ? obj : obj?.items;
+  if (!Array.isArray(list)) { const e = new Error('News response contained no items.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  return { cleaned: JSON.stringify({ items: list }), obj: { items: list } };
+}
+function cleanNews(obj, n) {
+  const out = [];
+  for (const x of (Array.isArray(obj?.items) ? obj.items : [])) {
+    const i = Number(x?.index); if (!Number.isInteger(i) || i < 0 || i >= n) continue;
+    const words = s => String(s || '').trim().split(/\s+/).filter(Boolean);
+    const summary = words(x.summary).slice(0, 60).join(' '), why = words(x.why).slice(0, 35).join(' ');
+    out.push({ index: i, summary, why, category: NEWS_CATS.includes(x?.category) ? x.category : 'Other' });
+  }
+  return out;
+}
+
 function makePrompt(body) {
   if (body.mode === 'viva') return vivaPrompt(body);
   if (body.mode === 'mcq') return mcqPrompt(body);
+  if (body.mode === 'news') return newsPrompt(body);
   const study = String(body.study || 'investigation');
   const ctx = body.context || {};
   const canonical = ['Ca Prostate','Ca Bladder','UTUC','Ca Penis','Ca Testis','Ca Kidney','Urethral Cancer','Adrenal / Neuroendocrine','Urethral Stricture','BPH / Male LUTS','Stone Disease'];
@@ -483,7 +545,7 @@ async function callGemini(body, model = MODEL) {
     contents: [{ role: 'user', parts }],
     generationConfig: {
       responseMimeType: 'application/json',
-      responseSchema: body.mode === 'viva' ? vivaSchema() : body.mode === 'mcq' ? mcqSchema() : outputSchema(),
+      responseSchema: body.mode === 'viva' ? vivaSchema() : body.mode === 'mcq' ? mcqSchema() : body.mode === 'news' ? newsSchema() : outputSchema(),
       thinkingConfig: { thinkingLevel: 'medium' },
       maxOutputTokens: 3500
     }
@@ -493,14 +555,14 @@ async function callGemini(body, model = MODEL) {
   const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
   if (!r.ok) { const err = new Error(`Gemini HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
   const output_text = extractGeminiText(data); if (!output_text) throw new Error('Gemini returned an empty response.');
-  const valid = body.mode === 'viva' ? validateVivaOutput(output_text) : body.mode === 'mcq' ? validateMcqOutput(output_text) : validateOracleOutput(output_text);
+  const valid = body.mode === 'viva' ? validateVivaOutput(output_text) : body.mode === 'mcq' ? validateMcqOutput(output_text) : body.mode === 'news' ? validateNewsOutput(output_text) : validateOracleOutput(output_text);
   return { output_text: valid.cleaned, model, provider: 'Gemini' };
 }
 
 async function callOpenAICompatible(body, cfg) {
   if (!cfg.apiKey) throw new Error(`${cfg.name} is not configured.`);
   const messages = buildCompatMessages(body);
-  const systemSuffix = body.mode === 'mcq' ? '\n\nReturn valid JSON only, no markdown fences: {"questions":[{"stem","options","answer","explanation","section","level"}]}.' : body.mode === 'viva' ? `\n\nReturn valid JSON only, no markdown fences, with exactly these keys: ${VIVA_KEYS.join(', ')}. score is an integer 0-10.` : '\n\nReturn valid JSON only. Do not wrap JSON in markdown fences. The JSON must contain exactly these top-level keys: technical_adequacy, observations, interpretation, differential, urgent_flags, missing_data, uncertainty, suggested_disease, suggested_oracle_values, pathway_link, teaching. pathway_link.requires_clinician_confirmation must be true.';
+  const systemSuffix = body.mode === 'news' ? '\n\nReturn valid JSON only, no markdown fences: {"items":[{"index","summary","why","category"}]}.' : body.mode === 'mcq' ? '\n\nReturn valid JSON only, no markdown fences: {"questions":[{"stem","options","answer","explanation","section","level"}]}.' : body.mode === 'viva' ? `\n\nReturn valid JSON only, no markdown fences, with exactly these keys: ${VIVA_KEYS.join(', ')}. score is an integer 0-10.` : '\n\nReturn valid JSON only. Do not wrap JSON in markdown fences. The JSON must contain exactly these top-level keys: technical_adequacy, observations, interpretation, differential, urgent_flags, missing_data, uncertainty, suggested_disease, suggested_oracle_values, pathway_link, teaching. pathway_link.requires_clinician_confirmation must be true.';
   if (Array.isArray(messages[0]?.content)) messages[0].content = messages[0].content.map((p,i) => i===0 && p.type==='text' ? { ...p, text: p.text + systemSuffix } : p);
   else messages[0].content = String(messages[0].content || '') + systemSuffix;
   const hasImageParts = messages.some(m => Array.isArray(m?.content) && m.content.some(p => p?.type === 'image_url'));
@@ -513,7 +575,7 @@ async function callOpenAICompatible(body, cfg) {
   const request = {
     model,
     messages,
-    temperature: body.mode === 'viva' ? 0.6 : body.mode === 'mcq' ? 0.5 : 0.1,
+    temperature: body.mode === 'viva' ? 0.6 : body.mode === 'mcq' ? 0.5 : body.mode === 'news' ? 0.2 : 0.1,
     max_tokens: 3500,
     response_format: { type: 'json_object' }
   };
@@ -544,7 +606,7 @@ async function callOpenAICompatible(body, cfg) {
 
   const output_text = extractOpenAIText(data);
   if (!output_text) throw new Error(`${cfg.name} returned an empty response.`);
-  const valid = body.mode === 'viva' ? validateVivaOutput(output_text) : body.mode === 'mcq' ? validateMcqOutput(output_text) : validateOracleOutput(output_text);
+  const valid = body.mode === 'viva' ? validateVivaOutput(output_text) : body.mode === 'mcq' ? validateMcqOutput(output_text) : body.mode === 'news' ? validateNewsOutput(output_text) : validateOracleOutput(output_text);
   return { output_text: valid.cleaned, model: data.model || model, provider: cfg.name };
 }
 
@@ -636,10 +698,11 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && (req.url || '').split('?')[0] === '/health') {
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.8.0', release: 'V16.8 MCQ bank', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.13.0', release: 'V16.13 drug formulary + weekly news', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, dailyLimits: { ai: DAILY.ai, viva: DAILY.viva, mcq: DAILY.mcq, news: DAILY.news }, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
+      { const d = dailyAllowed(req, 'ai'); if (!d.ok) return dailyLimitReply(res, origin, 'ai', d.limit); }
       const raw = await readBody(req);
       let body = {}; try { body = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
       return json(res, 200, await callWithFallback(body), origin);
@@ -649,10 +712,22 @@ const server = http.createServer(async (req, res) => {
       const raw = await readBody(req);
       let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
       // Only the viva fields are passed on: no images, no free-form prompt from the browser.
+      { const kind = b.step === 'start' ? 'viva' : 'vivaAnswer'; const d = dailyAllowed(req, kind); if (!d.ok) return dailyLimitReply(res, origin, kind, d.limit); }
       const body = { mode: 'viva', step: b.step === 'start' ? 'start' : 'answer', topic: b.topic, level: b.level, reference: b.reference, history: b.history, vignette: b.vignette, question: b.question, answer: b.answer, question_no: b.question_no, total: b.total };
       const r = await callWithFallback(body);
       let viva = {}; try { viva = JSON.parse(r.output_text); } catch {}
       return json(res, 200, { viva, provider: r.provider, model: r.model, fallback_attempts: r.fallback_attempts }, origin);
+    }
+    if (req.method === 'POST' && req.url === '/api/news') {
+      if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
+      const raw = await readBody(req);
+      let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
+      const items = (Array.isArray(b.items) ? b.items : []).slice(0, 8).map(x => ({ title: x?.title, abstract: x?.abstract, journal: x?.journal, type: x?.type }));
+      if (!items.length || items.some(x => !String(x.title || '').trim())) return json(res, 400, { error: 'Send 1–8 records with titles.' }, origin);
+      { const d = dailyAllowed(req, 'news'); if (!d.ok) return dailyLimitReply(res, origin, 'news', d.limit); }
+      const r = await callWithFallback({ mode: 'news', items });
+      let parsed = {}; try { parsed = JSON.parse(r.output_text); } catch {}
+      return json(res, 200, { items: cleanNews(parsed, items.length), provider: r.provider, model: r.model }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/mcq') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
@@ -660,6 +735,7 @@ const server = http.createServer(async (req, res) => {
       let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
       const reference = String(b.reference || '').slice(0, 12000);
       if (!referenceSections(reference).length) return json(res, 400, { error: 'MCQs are only generated from app guideline text.' }, origin);
+      { const d = dailyAllowed(req, 'mcq'); if (!d.ok) return dailyLimitReply(res, origin, 'mcq', d.limit); }
       const body = { mode: 'mcq', topic: b.topic, reference, avoid: b.avoid, count: b.count };
       const r = await callWithFallback(body);
       let parsed = {}; try { parsed = JSON.parse(r.output_text); } catch {}

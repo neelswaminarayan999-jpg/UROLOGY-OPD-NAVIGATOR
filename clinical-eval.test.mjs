@@ -55,7 +55,7 @@ for (const [re, why] of banned) assert.ok(!re.test(html), `regression: ${why}`);
 // 5. V16: every disease section names its sources and a review date
 {
   const ctx = {}; vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync('frontend/data/clinical.js', 'utf8') + ';this.D=DISEASES;this.S=SOURCES;', ctx);
+  vm.runInContext(fs.readFileSync('frontend/data/clinical.js', 'utf8') + '\n' + fs.readFileSync('frontend/data/formulary.js', 'utf8') + ';this.D=DISEASES;this.S=SOURCES;', ctx);
   let n = 0, oldest = '9999';
   for (const [d, v] of Object.entries(ctx.D)) {
     assert.ok(Array.isArray(v.sources) && v.sources.length, `${d}: disease-level sources missing`);
@@ -98,7 +98,7 @@ for (const [re, why] of banned) assert.ok(!re.test(html), `regression: ${why}`);
 // 7. V16.8 offline MCQ bank: well-formed, one correct answer, cited section exists in the app
 {
   const ctx = {}; vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync('frontend/data/clinical.js', 'utf8') + '\n' + fs.readFileSync('frontend/data/mcq-bank.js', 'utf8') + ';this.D=DISEASES;this.B=MCQ_BANK;', ctx);
+  vm.runInContext(fs.readFileSync('frontend/data/clinical.js', 'utf8') + '\n' + fs.readFileSync('frontend/data/formulary.js', 'utf8') + '\n' + fs.readFileSync('frontend/data/mcq-bank.js', 'utf8') + ';this.D=DISEASES;this.B=MCQ_BANK;', ctx);
   const ids = new Set();
   for (const q of ctx.B) {
     assert.ok(!ids.has(q.id), `MCQ id ${q.id} duplicated`); ids.add(q.id);

@@ -7,6 +7,7 @@ process.env.GEMINI_API_KEY = 'test-gemini';
 process.env.GROQ_API_KEY = 'test-groq';
 process.env.OPENROUTER_API_KEY = 'test-openrouter';
 process.env.AI_TIMEOUT_MS = '5000';
+process.env.DAILY_VIVA_LIMIT = '2';
 
 const valid = {
   technical_adequacy: 'Adequate', observations: [], interpretation: 'Test', differential: [], urgent_flags: [],
@@ -24,6 +25,10 @@ global.fetch = async (url, opts = {}) => {
   const host = u.includes('googleapis') ? 'gemini' : u.includes('groq') ? 'groq' : 'openrouter';
   calls.push(host); lastBody = String(opts.body || '');
   if (host === 'gemini') {
+    if (mode === 'news') return ok({ candidates: [{ content: { parts: [{ text: JSON.stringify({ items: [
+      { index: 0, summary: 'RCT of 400 men: drug X cut progression (HR 0.7).', why: 'May change adjuvant practice.', category: 'Oncology' },
+      { index: 5, summary: 'out of range index', why: '', category: 'Oncology' },
+      { index: 1, summary: 'word '.repeat(90), why: 'ok', category: 'Not a category' }] }) }] } }] });
     if (mode === 'mcq') return ok({ candidates: [{ content: { parts: [{ text: JSON.stringify({ questions: [
       { stem: 'Which biopsy route does EAU prefer for prostate?', options: ['Transperineal', 'Transrectal', 'Transurethral', 'Open'], answer: 0, explanation: 'Lower infection risk.', section: '1. Diagnostic pathway', level: 'intern' },
       { stem: 'A question citing a section that does not exist here', options: ['a', 'b', 'c', 'd'], answer: 1, explanation: 'x', section: '99. Invented', level: 'resident' },
@@ -104,5 +109,23 @@ assert.deepEqual(health.providerOrder, ['gemini', 'groq', 'cerebras', 'openroute
 assert.equal(health.configured.Groq, true);
 assert.ok(!JSON.stringify(health).includes('test-groq'));
 
-console.log('provider order + timeout fallback: PASS');
+// 5b. V16.13 news summaries: only valid indexes kept, long text trimmed, unknown category -> Other, empty request refused.
+mode = 'news';
+res = await post({ items: [{ title: 'Trial A', abstract: 'x' }, { title: 'Trial B', abstract: 'y' }] }, '/api/news');
+assert.equal(res.status, 200); assert.equal(res.json.items.length, 2);
+assert.equal(res.json.items[0].category, 'Oncology'); assert.equal(res.json.items[1].category, 'Other');
+assert.ok(res.json.items[1].summary.split(' ').length <= 60);
+assert.equal((await post({ items: [] }, '/api/news')).status, 400);
+mode = 'gemini-ok';
+
+// 6. V16.12 daily allowance: the 3rd viva started today from the same user gets a clear daily-limit reply.
+assert.equal(health.dailyLimits.viva, 2);
+const start = { step: 'start', topic: 'Ca Prostate', level: 'resident', reference: '## 1. Diagnostic pathway\n- x' };
+assert.notEqual((await post(start, '/api/viva')).status, 429);
+assert.notEqual((await post(start, '/api/viva')).status, 429);
+res = await post(start, '/api/viva');
+assert.equal(res.status, 429); assert.equal(res.json.code, 'daily_limit'); assert.match(res.json.error, /resets at midnight IST/);
+assert.equal((await post({ step: 'answer', topic: 'Ca Prostate', reference: '## 1. Diagnostic pathway\n- x', question: 'Q?', answer: 'A' }, '/api/viva')).status === 429 ? 'limited' : 'ok', 'ok', 'answers inside a viva still allowed');
+
+console.log('provider order + timeout fallback + daily allowance: PASS');
 process.exit(0);
