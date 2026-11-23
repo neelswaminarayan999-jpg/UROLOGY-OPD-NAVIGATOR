@@ -115,6 +115,14 @@ function dailyLimitReply(res, origin, kind, limit) {
   const what = { ai: 'AI Lab analyses', viva: 'vivas', vivaAnswer: 'viva answers', mcq: 'AI question batches', news: 'news summary batches' }[kind];
   return json(res, 429, { error: `Daily limit reached: ${limit} ${what} per day while the app runs on free AI. It resets at midnight IST. Offline topics, calculators and MCQ practice still work.`, code: 'daily_limit', kind, limit }, origin);
 }
+const usageSeen = new Map();
+function usageAllowed(id) { // at most 120 usage lines per device per hour
+  const now = Date.now(), e = usageSeen.get(id) || { n: 0, t: now };
+  if (now - e.t > 3600e3) { e.n = 0; e.t = now; }
+  e.n++; usageSeen.set(id, e);
+  if (usageSeen.size > 50000) usageSeen.clear();
+  return e.n <= 120;
+}
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let total = 0, chunks = [];
@@ -701,7 +709,7 @@ const server = http.createServer(async (req, res) => {
       // A person who lands on /health in a browser (old bookmark, history suggestion) is sent to the app;
       // scripts and monitors (no text/html Accept) and /health?raw still get the JSON.
       if (/text\/html/.test(String(req.headers.accept || '')) && !/[?&]raw\b/.test(req.url || '')) { res.writeHead(302, { Location: '/' }); return res.end(); }
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.13.0', release: 'V16.13 drug formulary + weekly news', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, dailyLimits: { ai: DAILY.ai, viva: DAILY.viva, mcq: DAILY.mcq, news: DAILY.news }, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.17.0', release: 'V16.17 anonymous usage counts', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, dailyLimits: { ai: DAILY.ai, viva: DAILY.viva, mcq: DAILY.mcq, news: DAILY.news }, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
@@ -720,6 +728,19 @@ const server = http.createServer(async (req, res) => {
       const r = await callWithFallback(body);
       let viva = {}; try { viva = JSON.parse(r.output_text); } catch {}
       return json(res, 200, { viva, provider: r.provider, model: r.model, fallback_attempts: r.fallback_attempts }, origin);
+    }
+    if (req.method === 'POST' && req.url === '/api/ping') {
+      // V16.17 anonymous usage counting: a random per-device id (no IP, no personal data) and the feature opened.
+      // Written to the server log as one "USAGE" line, read back with Render's log API for visitor counts.
+      const raw = await readBody(req);
+      let b = {}; try { b = JSON.parse(raw); } catch {}
+      const id = String(b.id || ''), ev = String(b.ev || '');
+      if (/^[a-z0-9-]{8,40}$/.test(id) && /^[a-z_]{2,20}$/.test(ev) && usageAllowed(id)) {
+        const topic = String(b.topic || '').replace(/[^\w &:/,.()-]/g, '').slice(0, 60);
+        const tag = String(b.src || '').replace(/[^\w-]/g, '').slice(0, 20);
+        console.log('USAGE ' + JSON.stringify({ id, ev, topic: topic || undefined, src: tag || undefined, standalone: b.standalone ? 1 : undefined }));
+      }
+      res.writeHead(204, { 'Access-Control-Allow-Origin': '*' }); return res.end();
     }
     if (req.method === 'POST' && req.url === '/api/news') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
