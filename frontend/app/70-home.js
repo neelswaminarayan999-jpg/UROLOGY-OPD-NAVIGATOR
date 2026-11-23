@@ -196,7 +196,7 @@ html[data-oracle-theme="dark"] #uroFooter{border-color:#334155;color:#94a3b8}htm
 <h3>Clinical disclaimer</h3>
 <p>An educational and reference tool for qualified clinicians. It does not replace clinical judgement, the current product label, local protocols or specialist advice. Verify doses, renal and hepatic adjustments and interactions before prescribing. AI features can be wrong and must be checked.</p>
 <h3>Privacy</h3>
-<p>Do not enter patient-identifiable information. AI requests are sent to third-party AI providers without identifiers; offline features keep data on your device.</p>
+<p>Do not enter patient-identifiable information. AI requests are sent to third-party AI providers without identifiers; offline features keep data on your device. The app counts visits anonymously (a random device code and which feature was opened — no name, contact, location or typed text) to measure use and improve it.</p>
 <h3>Third-party material</h3>
 <p>Guideline names, trial names, journals and linked articles belong to their respective owners and are cited for education. Summaries are original wording.</p>
 <h3>Contact</h3>
