@@ -1,0 +1,795 @@
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
+import crypto from 'node:crypto';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const WEB_ROOT = path.resolve(process.env.WEB_ROOT || path.join(__dirname, 'frontend'));
+
+function loadEnv(file) {
+  if (!fs.existsSync(file)) return;
+  for (const raw of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const m = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!m || process.env[m[1]] !== undefined) continue;
+    process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, '');
+  }
+}
+loadEnv(path.join(__dirname, '.env'));
+
+const PORT = Number(process.env.PORT || 8787);
+const HOST = process.env.HOST || '0.0.0.0';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const GEMINI_FALLBACK_MODELS = String(process.env.GEMINI_FALLBACK_MODELS || 'gemini-3.5-flash-lite').split(',').map(x => x.trim()).filter(Boolean);
+const API_KEY = process.env.GEMINI_API_KEY || '';
+const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.8-27b';
+const GROQ_API_BASE_URL = (process.env.GROQ_API_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, '');
+const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY || '';
+const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'gpt-oss-120b';
+const CEREBRAS_API_BASE_URL = (process.env.CEREBRAS_API_BASE_URL || 'https://api.cerebras.ai/v1').replace(/\/$/, '');
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'thinkingmachines/inkling:free';
+const OPENROUTER_FALLBACK_MODELS = String(process.env.OPENROUTER_FALLBACK_MODELS || 'google/gemma-4-31b-it:free,thinkingmachines/inkling-small:free,nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free,openrouter/free').split(',').map(x => x.trim()).filter(Boolean);
+const OPENROUTER_API_BASE_URL = (process.env.OPENROUTER_API_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
+// Image + reasoning calls routinely take 15-40 s; the old 12 s limit aborted good requests.
+const AI_TIMEOUT_MS = Math.max(5000, Number(process.env.AI_TIMEOUT_MS || 60000));
+// Most dependable free providers first. OpenRouter's shared free pool is the last resort.
+const PROVIDER_ORDER = String(process.env.AI_PROVIDER_ORDER || 'gemini,groq,cerebras,openrouter').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
+const GEMINI_API_BASE_URL = (process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
+const MAX_BODY = 32 * 1024 * 1024;
+const RATE_LIMIT = Number(process.env.RATE_LIMIT_PER_10MIN || 30);
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+const buckets = new Map();
+
+function corsHeaders(origin) {
+  const allowed = ALLOWED_ORIGIN === '*' || origin === ALLOWED_ORIGIN;
+  return allowed ? {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGIN === '*' ? '*' : origin,
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
+    'Vary': 'Origin'
+  } : {};
+}
+function json(res, status, body, origin='') {
+  const payload = JSON.stringify(body);
+  res.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    ...corsHeaders(origin)
+  });
+  res.end(payload);
+}
+function clientIp(req) {
+  // Render sits behind Cloudflare, which sets True-Client-IP; clients cannot forge it.
+  // X-Forwarded-For is only appended to by Render's proxy, so its first entry can be faked.
+  const trueClient = String(req.headers['true-client-ip'] || req.headers['cf-connecting-ip'] || '').trim();
+  if (trueClient) return trueClient;
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',').map(x => x.trim()).filter(Boolean);
+  return forwarded[forwarded.length - 1] || req.socket.remoteAddress || 'unknown';
+}
+function allowedOrigin(req) {
+  const origin = String(req.headers.origin || '');
+  return !origin || ALLOWED_ORIGIN === '*' || origin === ALLOWED_ORIGIN;
+}
+function rateAllowed(req) {
+  const now = Date.now();
+  const key = clientIp(req);
+  const tenMin = 10 * 60 * 1000;
+  const recent = (buckets.get(key) || []).filter(t => now - t < tenMin);
+  if (recent.length >= RATE_LIMIT) { buckets.set(key, recent); return false; }
+  recent.push(now); buckets.set(key, recent);
+  if (buckets.size > 5000) {
+    for (const [k, vals] of buckets) if (!vals.some(t => now - t < tenMin)) buckets.delete(k);
+  }
+  return true;
+}
+/* V16.12 daily AI allowance per user (per IP, per IST calendar day). Keeps the free AI quotas shared fairly once the
+   app is public. Limits are set with env vars; 0 switches a limit off. Counts live in memory, so a server restart
+   (or the free plan sleeping) resets them: a soft fairness limit, not billing. */
+const DAILY = {
+  ai: Number(process.env.DAILY_AI_LIMIT ?? 15),          // AI Lab analyses (the ai-accuracy check uses 12)
+  viva: Number(process.env.DAILY_VIVA_LIMIT ?? 3),       // new vivas started (the answers inside a viva are not counted)
+  vivaAnswer: Number(process.env.DAILY_VIVA_LIMIT ?? 3) * 8, // backstop on viva answer calls
+  mcq: Number(process.env.DAILY_MCQ_LIMIT ?? 20),        // AI MCQ batches (the Monday job needs up to 16)
+  news: Number(process.env.DAILY_NEWS_LIMIT ?? 12),      // news summary batches (the Monday job needs up to 5)
+  quiz: Number(process.env.DAILY_QUIZ_LIMIT ?? 5)        // V16.18 online AI quizzes per person
+};
+const dailyCounts = new Map();
+function istDay(now = Date.now()) { return new Date(now + 5.5 * 3600e3).toISOString().slice(0, 10); }
+function dailyAllowed(req, kind) {
+  const limit = DAILY[kind];
+  if (!limit || limit < 0) return { ok: true };
+  const day = istDay(), key = day + '|' + kind + '|' + clientIp(req);
+  const n = dailyCounts.get(key) || 0;
+  if (n >= limit) return { ok: false, limit };
+  dailyCounts.set(key, n + 1);
+  if (dailyCounts.size > 20000) for (const k of dailyCounts.keys()) if (!k.startsWith(day)) dailyCounts.delete(k);
+  return { ok: true, used: n + 1, limit };
+}
+function dailyLimitReply(res, origin, kind, limit) {
+  const what = { ai: 'AI Lab analyses', viva: 'vivas', vivaAnswer: 'viva answers', mcq: 'AI question batches', news: 'news summary batches', quiz: 'AI quizzes' }[kind];
+  return json(res, 429, { error: `Daily limit reached: ${limit} ${what} per day while the app runs on free AI. It resets at midnight IST. Offline topics, calculators and MCQ practice still work.`, code: 'daily_limit', kind, limit }, origin);
+}
+const usageSeen = new Map();
+function usageAllowed(id) { // at most 120 usage lines per device per hour
+  const now = Date.now(), e = usageSeen.get(id) || { n: 0, t: now };
+  if (now - e.t > 3600e3) { e.n = 0; e.t = now; }
+  e.n++; usageSeen.set(id, e);
+  if (usageSeen.size > 50000) usageSeen.clear();
+  return e.n <= 120;
+}
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let total = 0, chunks = [];
+    req.on('data', c => {
+      total += c.length;
+      if (total > MAX_BODY) {
+        // Answer with a clear 413 instead of dropping the connection (the browser only saw "Failed to fetch").
+        req.removeAllListeners('data'); req.resume();
+        const err = new Error(`Upload too large (over ${Math.round(MAX_BODY / 1048576)} MB). Use fewer or smaller images.`);
+        err.status = 413; reject(err); return;
+      }
+      chunks.push(c);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    req.on('error', reject);
+  });
+}
+function extractGeminiText(data) {
+  const parts = [];
+  for (const c of (data?.candidates || [])) {
+    for (const p of (c?.content?.parts || [])) {
+      if (typeof p?.text === 'string') parts.push(p.text);
+    }
+  }
+  return parts.join('\n').trim();
+}
+function stripDataUrl(dataUrl) {
+  const m = String(dataUrl || '').match(/^data:([^;]+);base64,(.+)$/s);
+  return m ? { mimeType: m[1], data: m[2] } : null;
+}
+
+// ---------------- V16.7 Viva mode: a strict senior consultant examines on a synthetic case ----------------
+const VIVA_KEYS = ['case_title','vignette','verdict','score','feedback','model_answer','guideline_section','next_question'];
+const VIVA_LEVELS = { intern: 'an intern / house officer: core facts, safe first steps, red flags', resident: 'a urology resident: guideline-based work-up, staging, risk groups, treatment choice', exam: 'a final-year resident at exit exam (MCh/DNB/FEBU) level: nuances, trial evidence, controversies, complications' };
+function vivaPrompt(body) {
+  const topic = String(body.topic || 'urology').slice(0, 80);
+  const level = VIVA_LEVELS[body.level] || VIVA_LEVELS.resident;
+  const reference = String(body.reference || '').slice(0, 12000);
+  const history = (Array.isArray(body.history) ? body.history : []).slice(-6).map((h, i) =>
+    `Q${i + 1}: ${String(h.q || '').slice(0, 600)}\nCandidate: ${String(h.a || '').slice(0, 1500)}\nYour mark: ${String(h.score ?? '')}/10`).join('\n\n');
+  const total = Math.min(Math.max(Number(body.total) || 5, 3), 8);
+  const number = Number(body.question_no) || 1;
+  const grounding = reference ? `\nVERIFIED REFERENCE CONTENT for ${topic} (this app's EAU 2026-checked text). Base every case detail, mark and model answer on it. Name the section you used in "guideline_section". If a point is not covered, say "not covered by the app reference" in guideline_section and mark only on widely accepted guideline practice.\n${reference}\n` : `\nNo app reference is available for this topic: base marks on current EAU/AUA guideline practice and set guideline_section to "General guideline knowledge (not checked against app content)".\n`;
+  const persona = `You are a strict but fair senior urology consultant taking a viva on ward rounds in an Indian teaching hospital. The candidate is ${level}. Be direct and exacting: reward precision, penalise vague or unsafe answers, and push for the next step ("And then?", "What exactly would you do?"). Never mock or humiliate; correct errors clearly. The case is synthetic and for teaching only: invent no identifiers and use a bed number, not a name.`;
+  if (body.step === 'start') {
+    return `${persona}${grounding}
+TASK: Start a viva on ${topic}. Write a realistic, concise ward-round vignette (Bed ${Math.floor(Math.random() * 20) + 1}, age, presentation, key examination and investigation results). Make it test a decision a ${body.level || 'resident'} must get right. Then ask question 1 of ${total}: one focused question.
+Return JSON with keys ${VIVA_KEYS.join(', ')}. Set verdict, feedback, model_answer, guideline_section to "" and score to 0. Put the vignette in "vignette", a 3–6 word title in "case_title", and the question in "next_question".`;
+  }
+  const last = number >= total;
+  return `${persona}${grounding}
+CASE: ${String(body.vignette || '').slice(0, 2000)}
+${history ? 'EARLIER IN THIS VIVA:\n' + history + '\n' : ''}
+CURRENT QUESTION (Q${number} of ${total}): ${String(body.question || '').slice(0, 800)}
+CANDIDATE'S ANSWER: ${String(body.answer || '').slice(0, 2000) || '(no answer)'}
+TASK: Mark the answer out of 10 (10 = complete, precise and safe; 5 = partly right; 0–2 = wrong or unsafe; any unsafe recommendation caps the mark at 3). Verdict is exactly one of "Correct", "Partly correct", "Incorrect", "Unsafe". In "feedback" (2–4 sentences, speaking to the candidate) say what was right, what was missing or wrong, and why it matters for the patient. In "model_answer" give the answer you expected, as short points. ${last ? 'This was the final question: set next_question to "" and end feedback with one line on the single most important thing to revise.' : `Then ask Q${number + 1} of ${total} in "next_question": build on the case (next step, complication, result of an investigation, or a twist). Do not repeat earlier questions.`}
+Return JSON with keys ${VIVA_KEYS.join(', ')}; repeat case_title and vignette unchanged.`;
+}
+function vivaSchema() {
+  return { type: 'object', properties: { case_title: { type: 'string' }, vignette: { type: 'string' }, verdict: { type: 'string' }, score: { type: 'integer' }, feedback: { type: 'string' }, model_answer: { type: 'string' }, guideline_section: { type: 'string' }, next_question: { type: 'string' } }, required: VIVA_KEYS };
+}
+function validateVivaOutput(text) {
+  let obj; try { obj = JSON.parse(stripJsonFences(text)); } catch { const e = new Error('Provider returned non-JSON content; expected viva JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  if (!obj || typeof obj !== 'object') { const e = new Error('Invalid viva JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  const out = {};
+  for (const k of VIVA_KEYS) { const v = obj[k]; out[k] = k === 'score' ? Math.max(0, Math.min(10, Math.round(Number(v) || 0))) : (Array.isArray(v) ? v.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join('\n') : String(v ?? '')); }
+  if (!out.vignette && !out.feedback) { const e = new Error('Viva response was empty.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  return { cleaned: JSON.stringify(out), obj: out };
+}
+
+// ---------------- V16.8 MCQ generator: new offline questions, grounded in the app's guideline text ----------------
+function referenceSections(reference) { return [...String(reference || '').matchAll(/^## (.+)$/gm)].map(m => m[1].trim()); }
+function mcqPrompt(body) {
+  const topic = String(body.topic || '').slice(0, 80);
+  const reference = String(body.reference || '').slice(0, 12000);
+  const avoid = (Array.isArray(body.avoid) ? body.avoid : []).slice(-40).map(x => '- ' + String(x).slice(0, 160)).join('\n');
+  const n = Math.min(Math.max(Number(body.count) || 5, 1), 8);
+  return `You write single-best-answer MCQs for urology residents, for an offline revision bank.
+TOPIC: ${topic}
+SOURCE (the ONLY material you may use: this app's EAU 2026-checked guideline text):
+${reference}
+
+RULES:
+- Write ${n} new MCQs. Each must test a clinically important decision, threshold, classification or management step stated in the SOURCE.
+- The correct answer must be directly supported by the SOURCE. Do not use facts that are not in it.
+- Exactly 4 options; exactly one correct; three plausible but clearly wrong distractors; no "all of the above" / "none of the above".
+- A distractor must never overlap with, include or be a broader category of the correct answer (wrong: correct "cisplatin-based chemotherapy" with distractor "platinum-based chemotherapy"). Every distractor must be definitely wrong for this exact stem.
+- "answer" is the 0-based index of the correct option.
+- "section" must be copied exactly from one of these SOURCE headings: ${referenceSections(reference).join(' | ')}
+- "explanation": 1–2 sentences on why the answer is right and the key distractor is wrong.
+- "level": one of intern, resident, exam. Mix levels.
+- Use short clinical vignettes (age, key findings) where useful. Use no names or identifiers.
+- Do not repeat or closely paraphrase these existing questions:
+${avoid || '- (none)'}
+Return JSON: {"questions":[{"stem","options","answer","explanation","section","level"}]}`;
+}
+function mcqSchema() {
+  return { type: 'object', properties: { questions: { type: 'array', items: { type: 'object', properties: { stem: { type: 'string' }, options: { type: 'array', items: { type: 'string' } }, answer: { type: 'integer' }, explanation: { type: 'string' }, section: { type: 'string' }, level: { type: 'string' } }, required: ['stem', 'options', 'answer', 'explanation', 'section', 'level'] } } }, required: ['questions'] };
+}
+// Keeps only well-formed questions whose cited section really exists in the reference that was sent.
+function cleanMcqs(obj, reference) {
+  const sections = referenceSections(reference);
+  const list = Array.isArray(obj) ? obj : Array.isArray(obj?.questions) ? obj.questions : [];
+  const out = [];
+  for (const q of list) {
+    const options = Array.isArray(q?.options) ? q.options.map(o => String(o ?? '').trim()) : [];
+    const answer = Number(q?.answer);
+    const stem = String(q?.stem || '').trim(), explanation = String(q?.explanation || '').trim(), section = String(q?.section || '').trim();
+    if (stem.length < 15 || options.length !== 4 || options.some(o => !o) || new Set(options.map(o => o.toLowerCase())).size !== 4) continue;
+    if (!Number.isInteger(answer) || answer < 0 || answer > 3 || !explanation) continue;
+    if (/all of the above|none of the above/i.test(options.join(' '))) continue;
+    if (sections.length && !sections.includes(section)) continue;
+    out.push({ stem: stem.slice(0, 600), options: options.map(o => o.slice(0, 240)), answer, explanation: explanation.slice(0, 600), section, level: ['intern', 'resident', 'exam'].includes(q?.level) ? q.level : 'resident' });
+  }
+  return out;
+}
+function validateMcqOutput(text) {
+  let obj; try { obj = JSON.parse(stripJsonFences(text)); } catch { const e = new Error('Provider returned non-JSON content; expected MCQ JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  const qs = Array.isArray(obj) ? obj : obj?.questions;
+  if (!Array.isArray(qs) || !qs.length) { const e = new Error('MCQ response contained no questions.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  return { cleaned: JSON.stringify({ questions: qs }), obj: { questions: qs } };
+}
+
+/* V16.13 weekly news: plain-language summaries of new PubMed records (title + abstract sent by tools/weekly-news.mjs). */
+const NEWS_CATS = ['Oncology', 'Stones', 'BPH & LUTS', 'Functional & female', 'Andrology & sexual health', 'Infection', 'Paediatric', 'Transplant & renal', 'Trauma & reconstruction', 'Technology & AI', 'Guidelines', 'Other'];
+function newsPrompt(body) {
+  const items = (Array.isArray(body.items) ? body.items : []).slice(0, 8).map((x, i) => `[${i}] ${String(x.journal || '').slice(0, 80)} · ${String(x.type || '').slice(0, 60)}\nTITLE: ${String(x.title || '').slice(0, 300)}\nABSTRACT: ${String(x.abstract || '').slice(0, 2500)}`).join('\n\n');
+  return `You write a weekly "What's new in urology" digest for urology residents and consultants.
+For each record below write, IN YOUR OWN WORDS (never copy sentences from the abstract):
+- "summary": at most 45 words — design (e.g. RCT, n=…), population, main result with the key number if given.
+- "why": at most 25 words — why it matters for practice or exams; say "early/limited evidence" when appropriate.
+- "category": one of ${NEWS_CATS.join(' | ')}.
+Use only facts stated in that record. If the abstract is missing or too vague, set summary to "" and why to "".
+No hype words (breakthrough, game-changer). No patient identifiers.
+RECORDS:
+${items}
+Return JSON: {"items":[{"index","summary","why","category"}]} with one entry per record.`;
+}
+function newsSchema() {
+  return { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { index: { type: 'integer' }, summary: { type: 'string' }, why: { type: 'string' }, category: { type: 'string' } }, required: ['index', 'summary', 'why', 'category'] } } }, required: ['items'] };
+}
+function validateNewsOutput(text) {
+  let obj; try { obj = JSON.parse(stripJsonFences(text)); } catch { const e = new Error('Provider returned non-JSON content; expected news JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  const list = Array.isArray(obj) ? obj : obj?.items;
+  if (!Array.isArray(list)) { const e = new Error('News response contained no items.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  return { cleaned: JSON.stringify({ items: list }), obj: { items: list } };
+}
+function cleanNews(obj, n) {
+  const out = [];
+  for (const x of (Array.isArray(obj?.items) ? obj.items : [])) {
+    const i = Number(x?.index); if (!Number.isInteger(i) || i < 0 || i >= n) continue;
+    const words = s => String(s || '').trim().split(/\s+/).filter(Boolean);
+    const summary = words(x.summary).slice(0, 60).join(' '), why = words(x.why).slice(0, 35).join(' ');
+    out.push({ index: i, summary, why, category: NEWS_CATS.includes(x?.category) ? x.category : 'Other' });
+  }
+  return out;
+}
+
+function makePrompt(body) {
+  if (body.mode === 'viva') return vivaPrompt(body);
+  if (body.mode === 'mcq') return mcqPrompt(body);
+  if (body.mode === 'news') return newsPrompt(body);
+  const study = String(body.study || 'investigation');
+  const ctx = body.context || {};
+  const canonical = ['Ca Prostate','Ca Bladder','UTUC','Ca Penis','Ca Testis','Ca Kidney','Urethral Cancer','Adrenal / Neuroendocrine','Urethral Stricture','BPH / Male LUTS','Stone Disease'];
+  const isUroflow = /uroflow|flow[- ]rate|qmax|q\\s*max|voided volume/i.test(study + ' ' + JSON.stringify(ctx));
+  const specialtyGuardrail = isUroflow ? `
+UROFLOWMETRY-SPECIFIC ACCURACY RULES:
+- Report the exact readable Qmax, Qavg, voided volume, flow pattern and PVR only when present.
+- A low Qmax is an abnormal low-flow finding, but uroflowmetry alone cannot distinguish bladder outlet obstruction (BOO/BPO) from detrusor underactivity (DU) or an under-filled bladder.
+- Do NOT state or imply that Qmax <10 mL/s by itself is diagnostic of significant obstruction.
+- For a voided volume around/above 150 mL, state that the tracing is more interpretable; for volumes <150 mL, recommend repeat uroflowmetry when clinically appropriate.
+- Use the flow curve as supportive information, not as proof of urethral stricture.
+- If the question is BOO vs DU, explain that pressure-flow urodynamics provides the functional distinction when indicated; do not infer BOO from uroflow alone.
+- If a urethral stricture is suggested, require direct supporting evidence such as visible narrowing on urethroscopy/RUG/VCUG rather than low flow alone.
+- Keep interpretation proportional to the data: do not invent prostate size, PVR, symptoms, obstruction grade, stricture length or detrusor contractility.
+` : '';
+  // V16.3: study-specific reasoning rules, so the model names the right confirmatory step.
+  const STUDY_HINTS = {
+    uroflow: 'For a plateau or obstructive curve, weigh urethral stricture (younger age, instrumentation/trauma/catheter history, flat plateau) against benign prostatic obstruction, and name the next confirmatory test: retrograde urethrogram and/or urethroscopy when stricture is suspected, pressure-flow study when BPO vs detrusor underactivity is the question.',
+    pfs: 'Report the bladder outlet obstruction index and bladder contractility index when the pressures allow, and classify obstruction and contractility.',
+    rgu: 'State stricture site, length and calibre, and whether the posterior urethra was assessed (a VCUG/MCUG is needed for near-obliterative disease).',
+    ctstone: 'First check for infection or obstruction that needs urgent drainage before any definitive stone treatment.',
+    scrotal: 'Absent or reduced testicular flow with acute pain is a surgical emergency needing exploration. For an intratesticular mass, state inguinal orchidectomy with AFP, beta-hCG and LDH, and that trans-scrotal biopsy must be avoided.',
+    renalmass: 'Assign the Bosniak v2019 class for cystic lesions; macroscopic fat indicates angiomyolipoma.',
+    adrenal: 'Apply ESE/ENSAT 2023: a homogeneous lesion of 10 HU or less is benign; always recommend hormonal work-up (1 mg dexamethasone suppression test; metanephrines unless 10 HU or less).',
+    cystoscopy: 'For a bladder tumour, state TURBT with detrusor muscle in the specimen, and biopsy of suspicious flat red areas for CIS.'
+  };
+  const studyHint = STUDY_HINTS[study] ? `\nSTUDY-SPECIFIC RULE (${study}): ${STUDY_HINTS[study]}\nIn the interpretation, always name the next confirmatory investigation or step.\n` : `\nIn the interpretation, always name the next confirmatory investigation or step.\n`;
+  const reference = String(body.reference || '').slice(0, 12000);
+  const referenceDisease = String(body.reference_disease || '').slice(0, 60);
+  const grounding = reference ? `
+
+VERIFIED REFERENCE CONTENT (from this app, checked against EAU 2026 / current approvals) for ${referenceDisease}:
+${reference}
+
+GROUNDING RULES:
+- For staging, risk grouping and management statements, prefer this reference over general knowledge.
+- When a teaching point or interpretation relies on it, name the section title in brackets, e.g. [3. TNM staging & risk].
+- If the images/report conflict with the reference, or the reference does not cover the question, say so explicitly in "uncertainty" rather than guessing.
+` : '';
+  return `You are the image/report interpretation assistant inside a urology clinical decision-support and teaching tool. Study: ${study}.
+  
+Patient/context data:
+${JSON.stringify(ctx)}
+
+Analyze only the supplied image(s), written report and structured data. This is clinician-facing support, not autonomous medical care. Do NOT identify a person, make a definitive patient diagnosis, prescribe treatment, or issue a treatment order. Describe visible radiologic/clinical features, extract measurements only when clearly readable, identify important abnormalities and limitations, and suggest which existing Oracle module should be opened for clinician review. Do not invent measurements or facts. Distinguish direct observations from interpretation. ${specialtyGuardrail}${studyHint}${grounding}Return valid JSON matching the requested schema. Canonical Oracle modules: ${canonical.join(', ')}. The clinician must confirm all findings and treatment decisions.`;
+}
+function outputSchema() {
+  const diseases = [
+    'Ca Prostate','Ca Bladder','UTUC','Ca Penis','Ca Testis','Ca Kidney',
+    'Urethral Cancer','Adrenal / Neuroendocrine','Urethral Stricture',
+    'BPH / Male LUTS','Stone Disease','None'
+  ];
+  return {
+    type: 'object',
+    properties: {
+      technical_adequacy: { type: 'string' },
+      observations: { type: 'array', items: { type: 'string' } },
+      interpretation: { type: 'string' },
+      differential: { type: 'array', items: { type: 'string' } },
+      urgent_flags: { type: 'array', items: { type: 'string' } },
+      missing_data: { type: 'array', items: { type: 'string' } },
+      uncertainty: { type: 'array', items: { type: 'string' } },
+      teaching: { type: 'array', items: { type: 'string' } },
+      suggested_disease: { type: 'string', enum: diseases },
+      suggested_oracle_values: {
+        type: 'object',
+        properties: {
+          disease: { type: 'string' },
+          fields: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                value: { type: 'string' }
+              },
+              required: ['id','value']
+            }
+          }
+        },
+        required: ['disease','fields']
+      },
+      pathway_link: {
+        type: 'object',
+        properties: {
+          requires_clinician_confirmation: { type: 'boolean' },
+          suggested_module: { type: 'string' },
+          note: { type: 'string' }
+        },
+        required: ['requires_clinician_confirmation','suggested_module','note']
+      }
+    },
+    required: [
+      'technical_adequacy','observations','interpretation','differential',
+      'urgent_flags','missing_data','uncertainty','teaching',
+      'suggested_disease','suggested_oracle_values','pathway_link'
+    ]
+  };
+}
+
+function extractOpenAIText(data) {
+  const c = data?.choices?.[0]?.message?.content;
+  if (Array.isArray(c)) return c.map(x => typeof x === 'string' ? x : String(x?.text || '')).join('\n').trim();
+  return c || data?.choices?.[0]?.text || data?.output_text || '';
+}
+
+const ORACLE_KEYS = [
+  'technical_adequacy','observations','interpretation','differential','urgent_flags',
+  'missing_data','uncertainty','suggested_disease','suggested_oracle_values','pathway_link','teaching'
+];
+function stripJsonFences(text) {
+  return String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+}
+function readableValue(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') {
+    const t = value.trim();
+    if ((t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']'))) {
+      try { return readableValue(JSON.parse(t)); } catch {}
+    }
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) return value.map(readableValue).filter(Boolean).join('; ');
+  if (typeof value === 'object') {
+    const preferred=['summary','notes','note','finding','findings','text','description','observation','interpretation','value','details','reason'];
+    for (const key of preferred) {
+      if (value[key] != null) {
+        const v=readableValue(value[key]);
+        if(v) return v;
+      }
+    }
+    return Object.entries(value)
+      .map(([k,v])=>{ const x=readableValue(v); return x ? `${k.replace(/_/g,' ')}: ${x}` : ''; })
+      .filter(Boolean).join('; ');
+  }
+  return String(value);
+}
+
+function normalizeOracleObject(obj) {
+  const listKeys = ['observations','differential','urgent_flags','missing_data','uncertainty','teaching'];
+  for (const key of listKeys) {
+    if (obj[key] == null) obj[key] = [];
+    else if (!Array.isArray(obj[key])) obj[key] = [obj[key]];
+    obj[key] = obj[key].map(readableValue).filter(Boolean);
+  }
+  obj.technical_adequacy = readableValue(obj.technical_adequacy) || 'Not stated by provider.';
+  obj.interpretation = readableValue(obj.interpretation) || 'No provider interpretation returned.';
+  if (obj.suggested_oracle_values == null || typeof obj.suggested_oracle_values !== 'object' || Array.isArray(obj.suggested_oracle_values)) {
+    obj.suggested_oracle_values = { disease: 'None', fields: [] };
+  }
+  if (!obj.suggested_oracle_values.disease) obj.suggested_oracle_values.disease = 'None';
+  if (!Array.isArray(obj.suggested_oracle_values.fields)) {
+    obj.suggested_oracle_values.fields = obj.suggested_oracle_values.fields == null ? [] : [{ id: 'unparsed', value: readableValue(obj.suggested_oracle_values.fields) }];
+  }
+  obj.suggested_oracle_values.fields = obj.suggested_oracle_values.fields
+    .filter(Boolean)
+    .map((x,i) => typeof x === 'object'
+      ? { id: String(x.id ?? 'field_'+(i+1)), value: readableValue(x.value ?? x) }
+      : { id: 'field_'+(i+1), value: readableValue(x) });
+  if (!obj.pathway_link || typeof obj.pathway_link !== 'object' || Array.isArray(obj.pathway_link)) {
+    obj.pathway_link = {
+      requires_clinician_confirmation: true,
+      suggested_module: 'None',
+      note: 'No safe Oracle handoff could be established from the provider response.'
+    };
+  }
+  obj.pathway_link.requires_clinician_confirmation = true;
+  if (!obj.pathway_link.suggested_module) obj.pathway_link.suggested_module = 'None';
+  obj.pathway_link.note = readableValue(obj.pathway_link.note) || 'Clinician confirmation required.';
+  if (!obj.suggested_disease) obj.suggested_disease = 'None';
+  return obj;
+}
+
+function validateOracleOutput(text) {
+  const cleaned = stripJsonFences(text);
+  if (/^user\s+safety\s*:/i.test(cleaned) || /safety\s+categories\s*:/i.test(cleaned)) {
+    const e = new Error('Provider returned a safety-classification response instead of Oracle JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e;
+  }
+  let obj;
+  try { obj = JSON.parse(cleaned); }
+  catch { const e = new Error('Provider returned non-JSON content; expected Oracle JSON.'); e.code = 'INVALID_ORACLE_RESPONSE'; throw e; }
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) { const e = new Error('Provider returned an invalid Oracle JSON object.'); e.code='INVALID_ORACLE_RESPONSE'; throw e; }
+  obj = normalizeOracleObject(obj);
+  const missing = ORACLE_KEYS.filter(k => !(k in obj));
+  if (missing.length) {
+    const e = new Error(`Invalid Oracle schema: missing=${missing.join(',')}`);
+    e.code = 'INVALID_ORACLE_RESPONSE'; throw e;
+  }
+  // Free models may append harmless non-Oracle metadata keys. Preserve only the
+  // canonical Oracle contract so provider-specific extras cannot break the handoff.
+  obj = Object.fromEntries(ORACLE_KEYS.map(k => [k, obj[k]]));
+  if (!Array.isArray(obj.observations) || !Array.isArray(obj.differential) || !Array.isArray(obj.urgent_flags) ||
+      !Array.isArray(obj.missing_data) || !Array.isArray(obj.uncertainty) || !Array.isArray(obj.teaching)) {
+    const e = new Error('Invalid Oracle schema: list fields must be arrays.'); e.code='INVALID_ORACLE_RESPONSE'; throw e;
+  }
+  if (!obj.pathway_link || obj.pathway_link.requires_clinician_confirmation !== true) {
+    const e = new Error('Invalid Oracle schema: clinician-confirmation gate is missing or false.'); e.code='INVALID_ORACLE_RESPONSE'; throw e;
+  }
+  return { cleaned: JSON.stringify(obj), obj };
+}
+
+function extractInputMessages(body) {
+  if (Array.isArray(body?.messages) && body.messages.length) return body.messages;
+  if (!Array.isArray(body?.input)) return null;
+  return body.input.map(item => {
+    const role = item?.role === 'system' ? 'system' : item?.role === 'assistant' ? 'assistant' : 'user';
+    const content = Array.isArray(item?.content) ? item.content.map(part => {
+      if (part?.type === 'input_text') return { type: 'text', text: String(part.text || '') };
+      if (part?.type === 'input_image' && part?.image_url) return { type: 'image_url', image_url: { url: String(part.image_url) } };
+      if (part?.type === 'text') return { type: 'text', text: String(part.text || '') };
+      if (part?.type === 'image_url') return part;
+      return null;
+    }).filter(Boolean) : String(item?.content || '');
+    return { role, content };
+  });
+}
+
+function buildCompatMessages(body) {
+  const inputMessages = extractInputMessages(body);
+  if (inputMessages) return inputMessages;
+  const content = [{ type: 'text', text: makePrompt(body) }];
+  if (typeof body.context?.report === 'string' && body.context.report) content.push({ type: 'text', text: 'Written report:\n' + body.context.report });
+  for (const img of (body.images || [])) {
+    if (typeof img === 'string' && img.startsWith('data:image/')) content.push({ type: 'image_url', image_url: { url: img } });
+  }
+  return [{ role: 'user', content }];
+}
+
+async function fetchJsonWithTimeout(url, options, timeoutMs=AI_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (e?.name === 'AbortError') { const err = new Error(`Request timed out after ${Math.round(timeoutMs/1000)} s`); err.status = 408; throw err; }
+    throw e;
+  } finally { clearTimeout(timer); }
+}
+
+async function callGemini(body, model = MODEL) {
+  if (!API_KEY) throw new Error('Gemini is not configured.');
+  const parts = [{ text: makePrompt(body) }];
+  if (Array.isArray(body?.input)) {
+    const texts = [];
+    const inlineImages = [];
+    for (const item of body.input) {
+      if (typeof item?.content === 'string') texts.push(item.content);
+      else if (Array.isArray(item?.content)) {
+        for (const part of item.content) {
+          if (part?.type === 'input_text') texts.push(String(part.text || ''));
+          if (part?.type === 'input_image' && typeof part.image_url === 'string') inlineImages.push(part.image_url);
+        }
+      }
+    }
+    if (texts.length) parts[0] = { text: texts.join('\n\n') };
+    if (!Array.isArray(body.images)) body.images = [];
+    for (const img of inlineImages) if (!body.images.includes(img)) body.images.push(img);
+  }
+  if (typeof body.context?.report === 'string' && body.context.report) parts.push({ text: 'Written report:\n' + body.context.report });
+  for (const img of (body.images || [])) {
+    const x = stripDataUrl(img);
+    if (x && /^image\//i.test(x.mimeType)) parts.push({ inline_data: { mime_type: x.mimeType, data: x.data } });
+  }
+  const request = {
+    contents: [{ role: 'user', parts }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: body.mode === 'viva' ? vivaSchema() : body.mode === 'mcq' ? mcqSchema() : body.mode === 'news' ? newsSchema() : outputSchema(),
+      thinkingConfig: { thinkingLevel: 'medium' },
+      maxOutputTokens: 3500
+    }
+  };
+  const url = `${GEMINI_API_BASE_URL}/models/${encodeURIComponent(model)}:generateContent`;
+  const r = await fetchJsonWithTimeout(url, { method: 'POST', headers: { 'x-goog-api-key': API_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
+  const txt = await r.text(); let data = {}; try { data = JSON.parse(txt); } catch {}
+  if (!r.ok) { const err = new Error(`Gemini HTTP ${r.status}: ${data?.error?.message || txt.slice(0, 500)}`); err.status = r.status; throw err; }
+  const output_text = extractGeminiText(data); if (!output_text) throw new Error('Gemini returned an empty response.');
+  const valid = body.mode === 'viva' ? validateVivaOutput(output_text) : body.mode === 'mcq' ? validateMcqOutput(output_text) : body.mode === 'news' ? validateNewsOutput(output_text) : validateOracleOutput(output_text);
+  return { output_text: valid.cleaned, model, provider: 'Gemini' };
+}
+
+async function callOpenAICompatible(body, cfg) {
+  if (!cfg.apiKey) throw new Error(`${cfg.name} is not configured.`);
+  const messages = buildCompatMessages(body);
+  const systemSuffix = body.mode === 'news' ? '\n\nReturn valid JSON only, no markdown fences: {"items":[{"index","summary","why","category"}]}.' : body.mode === 'mcq' ? '\n\nReturn valid JSON only, no markdown fences: {"questions":[{"stem","options","answer","explanation","section","level"}]}.' : body.mode === 'viva' ? `\n\nReturn valid JSON only, no markdown fences, with exactly these keys: ${VIVA_KEYS.join(', ')}. score is an integer 0-10.` : '\n\nReturn valid JSON only. Do not wrap JSON in markdown fences. The JSON must contain exactly these top-level keys: technical_adequacy, observations, interpretation, differential, urgent_flags, missing_data, uncertainty, suggested_disease, suggested_oracle_values, pathway_link, teaching. pathway_link.requires_clinician_confirmation must be true.';
+  if (Array.isArray(messages[0]?.content)) messages[0].content = messages[0].content.map((p,i) => i===0 && p.type==='text' ? { ...p, text: p.text + systemSuffix } : p);
+  else messages[0].content = String(messages[0].content || '') + systemSuffix;
+  const hasImageParts = messages.some(m => Array.isArray(m?.content) && m.content.some(p => p?.type === 'image_url'));
+  const model = cfg.model;
+  if (!hasImageParts) {
+    for (const m of messages) {
+      if (Array.isArray(m.content)) m.content = m.content.map(p => p?.type === 'text' ? p.text : '').filter(Boolean).join('\n');
+    }
+  }
+  const request = {
+    model,
+    messages,
+    temperature: body.mode === 'viva' ? 0.6 : body.mode === 'mcq' ? 0.5 : body.mode === 'news' ? 0.2 : 0.1,
+    max_tokens: 3500,
+    response_format: { type: 'json_object' }
+  };
+
+  let r, txt = '', data = {};
+  let lastError = null;
+  for (const delay of [0, 1200, 3000]) {
+    if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+    r = await fetchJsonWithTimeout(cfg.url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${cfg.apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://urology-opd-navigator.onrender.com',
+        'X-Title': 'Urology Oracle V14.0'
+      },
+      body: JSON.stringify(request)
+    });
+    txt = await r.text();
+    data = {}; try { data = JSON.parse(txt); } catch {}
+    if (r.ok) break;
+    lastError = new Error(`${cfg.name} HTTP ${r.status}: ${data?.error?.message || data?.error?.metadata?.raw || txt.slice(0, 800)}`);
+    lastError.status = r.status;
+    lastError.providerResponse = data?.error || null;
+    if (![429, 502, 503, 504].includes(r.status)) throw lastError;
+  }
+  if (!r.ok) throw lastError || new Error(`${cfg.name} request failed.`);
+
+  const output_text = extractOpenAIText(data);
+  if (!output_text) throw new Error(`${cfg.name} returned an empty response.`);
+  const valid = body.mode === 'viva' ? validateVivaOutput(output_text) : body.mode === 'mcq' ? validateMcqOutput(output_text) : body.mode === 'news' ? validateNewsOutput(output_text) : validateOracleOutput(output_text);
+  return { output_text: valid.cleaned, model: data.model || model, provider: cfg.name };
+}
+
+const PROVIDERS = [];
+
+function hasImages(body) {
+  if ((body?.images || []).some(x => typeof x === 'string' && x.startsWith('data:image/'))) return true;
+  const messages = extractInputMessages(body);
+  return Array.isArray(messages) && messages.some(m => Array.isArray(m?.content) && m.content.some(p => p?.type === 'image_url' || p?.type === 'input_image'));
+}
+
+function configuredProviderChain(body) {
+  const image = hasImages(body);
+  const chain = [];
+  if (OPENROUTER_API_KEY) {
+    const models = [OPENROUTER_MODEL, ...OPENROUTER_FALLBACK_MODELS].filter((x,i,a) => x && a.indexOf(x) === i);
+    chain.push({ name:'OpenRouter', models, run:model=>callOpenAICompatible(body,{name:'OpenRouter',apiKey:OPENROUTER_API_KEY,model,url:`${OPENROUTER_API_BASE_URL}/chat/completions`}) });
+  }
+  if (GROQ_API_KEY) {
+    const model = image ? GROQ_VISION_MODEL : GROQ_MODEL;
+    chain.push({ name:'Groq', models:[model], run:()=>callOpenAICompatible(body,{name:'Groq',apiKey:GROQ_API_KEY,model,url:`${GROQ_API_BASE_URL}/chat/completions`}) });
+  }
+  if (CEREBRAS_API_KEY && !image) {
+    chain.push({ name:'Cerebras', models:[CEREBRAS_MODEL], run:()=>callOpenAICompatible(body,{name:'Cerebras',apiKey:CEREBRAS_API_KEY,model:CEREBRAS_MODEL,url:`${CEREBRAS_API_BASE_URL}/chat/completions`}) });
+  }
+  if (API_KEY) {
+    const models = [MODEL, ...GEMINI_FALLBACK_MODELS].filter((x,i,a)=>x && a.indexOf(x)===i);
+    chain.push({ name:'Gemini', models, run:model=>callGemini(body,model) });
+  }
+  const rank = p => { const i = PROVIDER_ORDER.indexOf(p.name.toLowerCase()); return i === -1 ? PROVIDER_ORDER.length : i; };
+  return chain.sort((a,b) => rank(a) - rank(b));
+}
+
+async function callWithFallback(body) {
+  const attempts = [];
+  const chain = configuredProviderChain(body);
+  if (!chain.length) {
+    const err = new Error('No AI provider is configured. Set at least one server-side provider key (Gemini, Groq, OpenRouter; Cerebras supports text-only requests).');
+    err.status = 503; err.attempts = []; throw err;
+  }
+  for (const provider of chain) {
+    for (const model of provider.models) {
+      try {
+        const result = provider.name === 'Gemini'
+          ? await provider.run(model)
+          : await provider.run(model);
+        return { ...result, fallback_attempts: attempts, fallback_count: attempts.length };
+      } catch (e) {
+        attempts.push({ provider:provider.name, model, status:e?.status||0, code:e?.code||'', error:String(e?.message||e).slice(0,500) });
+        // Retry another model for transient, routing, model-availability, or schema failures.
+        // Authentication/configuration failures skip the remaining models for this provider,
+        // but do not prevent trying a different configured provider.
+        if (e?.status && ![400,404,408,429,502,503,504].includes(e.status) && e?.code !== 'INVALID_ORACLE_RESPONSE') break;
+      }
+    }
+  }
+  const summary = attempts.map(a=>`${a.provider} / ${a.model}${a.status?` (${a.status})`:''}: ${a.error}`).join(' | ');
+  const err = new Error(`All configured AI providers failed. ${summary}`);
+  err.status = attempts.some(a=>a.status===429)?429:(attempts.some(a=>a.status===503)?503:502);
+  err.attempts = attempts;
+  throw err;
+}
+
+// Static files: built once per file version, gzip-compressed and revalidated with an ETag,
+// so phones do not re-download the 4 MB page on every visit.
+const staticCache = new Map();
+function sendStatic(req, res, headers, file, build, gzipOk) {
+  const st = fs.statSync(file);
+  const key = file;
+  let entry = staticCache.get(key);
+  if (!entry || entry.mtimeMs !== st.mtimeMs || entry.size !== st.size) {
+    const raw = Buffer.from(build());
+    entry = { mtimeMs: st.mtimeMs, size: st.size, raw, gz: zlib.gzipSync(raw, { level: 6 }),
+      etag: '"' + crypto.createHash('sha1').update(raw).digest('base64url').slice(0, 20) + '"' };
+    staticCache.set(key, entry);
+  }
+  const out = { ...headers, ETag: entry.etag };
+  if (String(req.headers['if-none-match'] || '') === entry.etag) { res.writeHead(304, out); return res.end(); }
+  if (gzipOk) { res.writeHead(200, { ...out, 'Content-Encoding': 'gzip', 'Content-Length': entry.gz.length }); return res.end(entry.gz); }
+  res.writeHead(200, { ...out, 'Content-Length': entry.raw.length }); return res.end(entry.raw);
+}
+
+const server = http.createServer(async (req, res) => {
+  const origin = String(req.headers.origin || '');
+  try {
+    if (!allowedOrigin(req)) return json(res, 403, { error: 'Origin is not allowed.' }, origin);
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, corsHeaders(origin));
+      return res.end();
+    }
+    if (req.method === 'GET' && (req.url || '').split('?')[0] === '/health') {
+      // A person who lands on /health in a browser (old bookmark, history suggestion) is sent to the app;
+      // scripts and monitors (no text/html Accept) and /health?raw still get the JSON.
+      if (/text\/html/.test(String(req.headers.accept || '')) && !/[?&]raw\b/.test(req.url || '')) { res.writeHead(302, { Location: '/' }); return res.end(); }
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.18.0', release: 'V16.18 online AI quiz', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, dailyLimits: { ai: DAILY.ai, viva: DAILY.viva, mcq: DAILY.mcq, news: DAILY.news, quiz: DAILY.quiz }, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+    }
+    if (req.method === 'POST' && req.url === '/api/urology-ai') {
+      if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
+      { const d = dailyAllowed(req, 'ai'); if (!d.ok) return dailyLimitReply(res, origin, 'ai', d.limit); }
+      const raw = await readBody(req);
+      let body = {}; try { body = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
+      return json(res, 200, await callWithFallback(body), origin);
+    }
+    if (req.method === 'POST' && req.url === '/api/viva') {
+      if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
+      const raw = await readBody(req);
+      let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
+      // Only the viva fields are passed on: no images, no free-form prompt from the browser.
+      { const kind = b.step === 'start' ? 'viva' : 'vivaAnswer'; const d = dailyAllowed(req, kind); if (!d.ok) return dailyLimitReply(res, origin, kind, d.limit); }
+      const body = { mode: 'viva', step: b.step === 'start' ? 'start' : 'answer', topic: b.topic, level: b.level, reference: b.reference, history: b.history, vignette: b.vignette, question: b.question, answer: b.answer, question_no: b.question_no, total: b.total };
+      const r = await callWithFallback(body);
+      let viva = {}; try { viva = JSON.parse(r.output_text); } catch {}
+      return json(res, 200, { viva, provider: r.provider, model: r.model, fallback_attempts: r.fallback_attempts }, origin);
+    }
+    if (req.method === 'POST' && req.url === '/api/ping') {
+      // V16.17 anonymous usage counting: a random per-device id (no IP, no personal data) and the feature opened.
+      // Written to the server log as one "USAGE" line, read back with Render's log API for visitor counts.
+      const raw = await readBody(req);
+      let b = {}; try { b = JSON.parse(raw); } catch {}
+      const id = String(b.id || ''), ev = String(b.ev || '');
+      if (/^[a-z0-9-]{8,40}$/.test(id) && /^[a-z_]{2,20}$/.test(ev) && usageAllowed(id)) {
+        const topic = String(b.topic || '').replace(/[^\w &:/,.()-]/g, '').slice(0, 60);
+        const tag = String(b.src || '').replace(/[^\w-]/g, '').slice(0, 20);
+        console.log('USAGE ' + JSON.stringify({ id, ev, topic: topic || undefined, src: tag || undefined, standalone: b.standalone ? 1 : undefined }));
+      }
+      res.writeHead(204, { 'Access-Control-Allow-Origin': '*' }); return res.end();
+    }
+    if (req.method === 'POST' && req.url === '/api/news') {
+      if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
+      const raw = await readBody(req);
+      let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
+      const items = (Array.isArray(b.items) ? b.items : []).slice(0, 8).map(x => ({ title: x?.title, abstract: x?.abstract, journal: x?.journal, type: x?.type }));
+      if (!items.length || items.some(x => !String(x.title || '').trim())) return json(res, 400, { error: 'Send 1–8 records with titles.' }, origin);
+      { const d = dailyAllowed(req, 'news'); if (!d.ok) return dailyLimitReply(res, origin, 'news', d.limit); }
+      const r = await callWithFallback({ mode: 'news', items });
+      let parsed = {}; try { parsed = JSON.parse(r.output_text); } catch {}
+      return json(res, 200, { items: cleanNews(parsed, items.length), provider: r.provider, model: r.model }, origin);
+    }
+    if (req.method === 'POST' && req.url === '/api/mcq') {
+      if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
+      const raw = await readBody(req);
+      let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
+      const reference = String(b.reference || '').slice(0, 12000);
+      if (!referenceSections(reference).length) return json(res, 400, { error: 'MCQs are only generated from app guideline text.' }, origin);
+      { const kind = b.quiz ? 'quiz' : 'mcq'; const d = dailyAllowed(req, kind); if (!d.ok) return dailyLimitReply(res, origin, kind, d.limit); }
+      const body = { mode: 'mcq', topic: b.topic, reference, avoid: b.avoid, count: b.count };
+      const r = await callWithFallback(body);
+      let parsed = {}; try { parsed = JSON.parse(r.output_text); } catch {}
+      const questions = cleanMcqs(parsed, reference);
+      return json(res, 200, { questions, rejected: ((parsed.questions || []).length - questions.length), provider: r.provider, model: r.model }, origin);
+    }
+    if (req.method === 'GET') {
+      let urlPath = (req.url || '/').split('?')[0];
+      if (urlPath === '/') urlPath = '/index.html';
+      if (urlPath === '/favicon.ico') urlPath = '/icon.svg';
+      if (!urlPath.startsWith('/') || urlPath.includes('..')) return json(res, 400, { error: 'Invalid path' }, origin);
+      const file = path.resolve(WEB_ROOT, `.${urlPath}`);
+      if (!file.startsWith(WEB_ROOT) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return json(res, 404, { error: 'Not found' }, origin);
+      const ext = path.extname(file).toLowerCase();
+      const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8', '.svg': 'image/svg+xml' };
+      const headers = { 'Content-Type': types[ext] || 'application/octet-stream', 'Cache-Control': 'no-cache', 'Vary': 'Accept-Encoding' };
+      const gzipOk = /\bgzip\b/.test(String(req.headers['accept-encoding'] || ''));
+      if (ext === '.html') {
+        // V16: index.html lists its own scripts; no server-side injection.
+        const html = fs.readFileSync(file, 'utf8');
+        return sendStatic(req, res, headers, file, () => html, gzipOk);
+      }
+      return sendStatic(req, res, headers, file, () => fs.readFileSync(file), gzipOk);
+    }
+    return json(res, 405, { error: 'Method not allowed' }, origin);
+  } catch (e) {
+    const status = Number.isInteger(e?.status) && e.status >= 400 && e.status < 600 ? e.status : 500;
+    return json(res, status, { error: e?.message || String(e), provider: 'Multi-provider fallback', attempts: e?.attempts || undefined }, origin);
+  }
+});
+
+server.listen(PORT, HOST, () => console.log(`Urology Oracle backend listening on ${HOST}:${PORT}`));
