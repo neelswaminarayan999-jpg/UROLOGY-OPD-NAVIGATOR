@@ -64,7 +64,7 @@ try {
   await new Promise(r => setTimeout(r, 400));
   const health = await get('/health');
   assert.equal(health.status, 200);
-  assert.match(health.body, /"version":"16.17.0"/);
+  assert.match(health.body, /"version":"16.18.0"/);
   assert.match(health.body, /"provider":"Multi-provider fallback"/);
   assert.match(health.body, /"configured":\{"Gemini":(true|false),"Groq":(true|false),"Cerebras":(true|false),"OpenRouter":/);
   assert.match(health.body, /"freeTier":true/);

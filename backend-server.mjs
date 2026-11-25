@@ -97,7 +97,8 @@ const DAILY = {
   viva: Number(process.env.DAILY_VIVA_LIMIT ?? 3),       // new vivas started (the answers inside a viva are not counted)
   vivaAnswer: Number(process.env.DAILY_VIVA_LIMIT ?? 3) * 8, // backstop on viva answer calls
   mcq: Number(process.env.DAILY_MCQ_LIMIT ?? 20),        // AI MCQ batches (the Monday job needs up to 16)
-  news: Number(process.env.DAILY_NEWS_LIMIT ?? 12)       // news summary batches (the Monday job needs up to 5)
+  news: Number(process.env.DAILY_NEWS_LIMIT ?? 12),      // news summary batches (the Monday job needs up to 5)
+  quiz: Number(process.env.DAILY_QUIZ_LIMIT ?? 5)        // V16.18 online AI quizzes per person
 };
 const dailyCounts = new Map();
 function istDay(now = Date.now()) { return new Date(now + 5.5 * 3600e3).toISOString().slice(0, 10); }
@@ -112,7 +113,7 @@ function dailyAllowed(req, kind) {
   return { ok: true, used: n + 1, limit };
 }
 function dailyLimitReply(res, origin, kind, limit) {
-  const what = { ai: 'AI Lab analyses', viva: 'vivas', vivaAnswer: 'viva answers', mcq: 'AI question batches', news: 'news summary batches' }[kind];
+  const what = { ai: 'AI Lab analyses', viva: 'vivas', vivaAnswer: 'viva answers', mcq: 'AI question batches', news: 'news summary batches', quiz: 'AI quizzes' }[kind];
   return json(res, 429, { error: `Daily limit reached: ${limit} ${what} per day while the app runs on free AI. It resets at midnight IST. Offline topics, calculators and MCQ practice still work.`, code: 'daily_limit', kind, limit }, origin);
 }
 const usageSeen = new Map();
@@ -709,7 +710,7 @@ const server = http.createServer(async (req, res) => {
       // A person who lands on /health in a browser (old bookmark, history suggestion) is sent to the app;
       // scripts and monitors (no text/html Accept) and /health?raw still get the JSON.
       if (/text\/html/.test(String(req.headers.accept || '')) && !/[?&]raw\b/.test(req.url || '')) { res.writeHead(302, { Location: '/' }); return res.end(); }
-      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.17.0', release: 'V16.17 anonymous usage counts', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, dailyLimits: { ai: DAILY.ai, viva: DAILY.viva, mcq: DAILY.mcq, news: DAILY.news }, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
+      return json(res, 200, { ok: true, service: 'urology-oracle-online-ai', version: '16.18.0', release: 'V16.18 online AI quiz', provider: 'Multi-provider fallback', providerOrder: PROVIDER_ORDER, timeoutMs: AI_TIMEOUT_MS, geminiModels: [MODEL, ...GEMINI_FALLBACK_MODELS], model: OPENROUTER_MODEL, fallbackModels: OPENROUTER_FALLBACK_MODELS, freeTier: true, dailyLimits: { ai: DAILY.ai, viva: DAILY.viva, mcq: DAILY.mcq, news: DAILY.news, quiz: DAILY.quiz }, configured: { Gemini: Boolean(API_KEY), Groq: Boolean(GROQ_API_KEY), Cerebras: Boolean(CEREBRAS_API_KEY), OpenRouter: Boolean(OPENROUTER_API_KEY) }, offlineCore: true, offlineAI: false }, origin);
     }
     if (req.method === 'POST' && req.url === '/api/urology-ai') {
       if (!rateAllowed(req)) return json(res, 429, { error: 'Rate limit reached. Please try again later.' }, origin);
@@ -759,7 +760,7 @@ const server = http.createServer(async (req, res) => {
       let b = {}; try { b = JSON.parse(raw); } catch { return json(res, 400, { error: 'Invalid JSON payload.' }, origin); }
       const reference = String(b.reference || '').slice(0, 12000);
       if (!referenceSections(reference).length) return json(res, 400, { error: 'MCQs are only generated from app guideline text.' }, origin);
-      { const d = dailyAllowed(req, 'mcq'); if (!d.ok) return dailyLimitReply(res, origin, 'mcq', d.limit); }
+      { const kind = b.quiz ? 'quiz' : 'mcq'; const d = dailyAllowed(req, kind); if (!d.ok) return dailyLimitReply(res, origin, kind, d.limit); }
       const body = { mode: 'mcq', topic: b.topic, reference, avoid: b.avoid, count: b.count };
       const r = await callWithFallback(body);
       let parsed = {}; try { parsed = JSON.parse(r.output_text); } catch {}
