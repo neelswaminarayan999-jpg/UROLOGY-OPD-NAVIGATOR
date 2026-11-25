@@ -110,7 +110,7 @@ html[data-oracle-theme="dark"] #newsTicker{background:linear-gradient(90deg,#020
         ['🧭', 'Clinical Oracle', 'Inputs → classification → treatment plan', 'openOracle', 'dark'],
         ['🤖', 'Investigation AI', 'Image or report → interpretation', 'openOnlineAI'],
         ['🎓', 'Viva mode', 'Ward-round viva, marked by AI', 'openViva'],
-        ['✅', 'MCQ practice', 'Offline · new questions weekly', 'openMcq']
+        ['✅', 'MCQ practice', 'Offline bank + online AI quiz', 'openMcq']
       ];
       const sec = t => { const d = document.createElement('div'); d.className = 'h2-sec'; d.textContent = t; return d; };
       const pWrap = document.createElement('div'); pWrap.innerHTML = '';
@@ -118,6 +118,12 @@ html[data-oracle-theme="dark"] #newsTicker{background:linear-gradient(90deg,#020
       const pg = document.createElement('div'); pg.className = 'h2-primary';
       primary.forEach(([ic, t, s, fn, cls]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'h2-p' + (cls ? ' ' + cls : ''); b.innerHTML = `<span class="ic">${ic}</span><b>${esc(t)}</b><span>${esc(s)}</span>`; b.onclick = () => call(fn); pg.appendChild(b); });
       pWrap.appendChild(pg); root.appendChild(pWrap);
+      // Live question count on the MCQ tile, e.g. "174 questions · new every Monday".
+      const mcqTile = [...pg.children].find(b => /MCQ practice/.test(b.textContent));
+      fetch('/data/mcq-shared.json').then(r => r.ok ? r.json() : null).then(j => {
+        const n = (typeof MCQ_BANK !== 'undefined' ? MCQ_BANK.length : 0) + ((j && j.questions) ? j.questions.length : 0);
+        if (mcqTile && n) mcqTile.querySelector('span:last-child').textContent = n + ' questions · new every Monday · AI quiz online';
+      }).catch(() => {});
 
       const tools = [
         ['🧮', 'Scores', 'openCalculators'], ['💊', 'Formulary', 'oracleOpenFormulary'], ['💉', 'Regimens', 'openDrugs'],

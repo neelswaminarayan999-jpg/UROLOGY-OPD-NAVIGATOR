@@ -1,4 +1,4 @@
-/* V16.8 Offline MCQ practice.
+/* V16.8 Offline MCQ practice; V16.18 adds the online AI quiz mode and the question-bank notice.
    - Starter bank: data/mcq-bank.js (written from the app's guideline sections), saved offline with the app.
    - Self-growing: when online, the phone asks /api/mcq for 5 new questions on the topic with the fewest,
      at most twice a day. They are grounded in the same guideline text, checked by the server
@@ -59,14 +59,31 @@
   // V16.9: no automatic per-phone top-up any more: everyone shares the weekly bank. The manual button stays.
 
   // ---------- practice ----------
-  const st = { topic: '', qs: [], i: 0, score: 0, answered: false };
+  const st = { topic: '', qs: [], i: 0, score: 0, answered: false, mode: 'offline', quiz: false };
+  const QUIZ_N = 8;
   function shell(inner) {
     if (typeof window.uroSheetCss === 'function') window.uroSheetCss(); // shared sheet styles from Viva mode
     let v = document.getElementById('mcqView');
     if (!v) { v = document.createElement('div'); v.id = 'mcqView'; v.className = 'uro-sheet'; document.body.appendChild(v); }
-    v.innerHTML = `<div class="vw"><header><div><h2>MCQ practice</h2><div class="sub">Works offline · new questions added automatically when online</div></div><button class="ghost" id="mcqClose">Close</button></header>${inner}</div>`;
+    v.innerHTML = `<div class="vw"><header><div><h2>MCQ practice</h2><div class="sub">Offline question bank · online AI quiz · new questions every Monday</div></div><button class="ghost" id="mcqClose">Close</button></header>${inner}</div>`;
     v.querySelector('#mcqClose').onclick = () => v.remove();
     v.scrollTop = 0; return v;
+  }
+  // Notice: how many questions there are and when the bank was last updated.
+  function bankNotice(pool) {
+    const sh = pool.filter(q => q.src === 'shared');
+    const weeks = [...new Set(sh.map(q => (String(q.id).match(/^w(\d{8})/) || [])[1]).filter(Boolean))].sort();
+    const lastWeek = weeks[weeks.length - 1];
+    const newCount = lastWeek ? sh.filter(q => String(q.id).startsWith('w' + lastWeek)).length : 0;
+    const fmt = d => d ? new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '';
+    const day = new Date().getDay(), toMon = (8 - day) % 7 || 7;
+    return `<div class="card" id="mcqNotice" style="background:linear-gradient(90deg,#0f172a,#1e3a8a);color:#fff;border:0">
+      <div style="font-size:12px;font-weight:900;letter-spacing:.06em;opacity:.85">QUESTION BANK</div>
+      <div style="font-size:26px;font-weight:900;margin:2px 0">${pool.length} questions</div>
+      <div style="font-size:13px;line-height:1.5">${newCount ? `<b>${newCount} new</b> added in the update of ${esc(fmt(lastWeek))}. ` : ''}New questions arrive every Monday — next update in ${toMon} day${toMon > 1 ? 's' : ''}.</div></div>`;
+  }
+  function modeTabs() {
+    return `<div class="chips" style="margin-bottom:4px"><button class="chip${st.mode === 'offline' ? ' on' : ''}" data-mode="offline">📚 Practice (offline)</button><button class="chip${st.mode === 'online' ? ' on' : ''}" data-mode="online">🤖 AI quiz (online)</button></div>`;
   }
   function home(msg) {
     const pool = all(), stats = load(K_STATS, {});
@@ -74,22 +91,42 @@
     const done = t => pool.filter(q => (!t || q.topic === t) && stats[q.id]).length;
     const chip = (t, label) => `<button class="chip${st.topic === t ? ' on' : ''}" data-t="${esc(t)}">${esc(label)} <small>&nbsp;${done(t)}/${count(t)}</small></button>`;
     const ai = pool.filter(q => q.src === 'ai').length, sh = pool.filter(q => q.src === 'shared').length;
-    const v = shell(`${msg ? `<div class="warn">${esc(msg)}</div>` : ''}
-      <div class="card"><b>Topic</b><div class="sub">Numbers show questions attempted / available.</div>
-      <div class="chips">${chip('', 'All topics')}${topics().map(t => chip(t, t)).join('')}</div></div>
-      <button class="go" id="mcqGo">Start ${SESSION} questions</button>
-      <div class="card"><div class="sub">${pool.length - ai - sh} starter questions + ${sh} from the weekly shared bank${sharedBank.updated ? ' (updated ' + esc(sharedBank.updated) + ')' : ''}${ai ? ` + ${ai} added on this phone` : ''}. Unseen and previously missed questions come first.</div>
-      <button class="ghost" id="mcqMore" style="margin-top:8px;width:100%">Add 5 extra questions${st.topic ? ' on ' + esc(st.topic) : ''} (this phone only)</button></div>`);
+    const online = st.mode === 'online';
+    const topicChips = online ? topics().map(t => chip(t, t)).join('') : chip('', 'All topics') + topics().map(t => chip(t, t)).join('');
+    const v = shell(`${msg ? `<div class="warn">${esc(msg)}</div>` : ''}${bankNotice(pool)}${modeTabs()}
+      ${online ? `<div class="card"><b>AI quiz (online)</b><div class="sub">The AI writes ${QUIZ_N} brand-new questions on the topic you choose, from the app's guideline pages, each checked by the server. Takes 30–60 seconds. Up to 5 AI quizzes a day. Questions you get are also saved to this phone for offline practice.</div></div>` : ''}
+      <div class="card"><b>Topic</b><div class="sub">${online ? 'Choose one topic for the AI quiz.' : 'Numbers show questions attempted / available.'}</div>
+      <div class="chips">${topicChips}</div></div>
+      ${online ? `<button class="go" id="mcqQuiz" style="position:sticky;bottom:12px;z-index:5;box-shadow:0 8px 24px rgba(15,23,42,.25)">${navigator.onLine ? (st.topic ? 'Start AI quiz on ' + esc(st.topic) : 'Choose a topic above') : 'You are offline — AI quiz needs internet'}</button>`
+      : `<button class="go" id="mcqGo" style="position:sticky;bottom:12px;z-index:5;box-shadow:0 8px 24px rgba(15,23,42,.25)">Start ${SESSION} questions${st.topic ? ' · ' + esc(st.topic) : ''}</button>
+      <div class="card"><div class="sub">${pool.length - ai - sh} starter questions + ${sh} from the weekly shared bank${ai ? ` + ${ai} AI questions saved on this phone` : ''}. Unseen and previously missed questions come first.</div></div>`}`);
+    v.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { st.mode = b.dataset.mode; if (st.mode === 'online' && !st.topic) st.topic = ''; home(); });
+    const qb = v.querySelector('#mcqQuiz');
+    if (qb) { qb.disabled = !navigator.onLine || !st.topic; qb.onclick = startQuiz; }
     v.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { st.topic = b.dataset.t; home(); });
-    v.querySelector('#mcqGo').onclick = start;
-    v.querySelector('#mcqMore').onclick = async () => {
-      const b = v.querySelector('#mcqMore'); b.disabled = true; b.textContent = navigator.onLine ? 'Writing new questions…' : 'You are offline';
-      if (!navigator.onLine) return;
-      try { const r = await topUp(true, st.topic || ''); home(r.added ? `${r.added} new questions added on ${r.topic}.` : 'No new questions this time (duplicates or failed checks). Try again later.'); }
-      catch (e) { home(e.message); }
-    };
+    const gb = v.querySelector('#mcqGo'); if (gb) gb.onclick = () => { st.quiz = false; start(); };
   }
   function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  async function startQuiz() {
+    const topic = st.topic; if (!topic) return;
+    const v = shell(`<div class="card" style="text-align:center"><div class="sub">AI quiz · ${esc(topic)}</div>
+      <div style="font-size:18px;font-weight:900;margin:10px 0">Writing ${QUIZ_N} new questions…</div>
+      <div class="sub">This takes 30–60 seconds on the free AI. Please keep this screen open.</div></div>`);
+    try {
+      const pool = all();
+      const r = await fetch('/api/mcq', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ topic, reference: reference(topic), count: QUIZ_N, quiz: true, avoid: pool.filter(q => q.topic === topic).map(q => q.stem).slice(-60) }) });
+      let j = {}; try { j = await r.json(); } catch { throw new Error('The server is waking up. Please try again in a minute.'); }
+      if (!r.ok) throw new Error(j.code === 'daily_limit' ? j.error : r.status === 429 ? 'The free AI is busy right now. Please try again in a few minutes.' : (j.error || 'Server error ' + r.status));
+      const today = new Date().toISOString().slice(0, 10);
+      const qs = (j.questions || []).map(q => ({ ...q, explain: q.explanation || q.explain, id: 'ai-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), topic, added: today, model: j.model || '', src: 'ai' }));
+      if (qs.length < 3) throw new Error('The AI did not return enough good questions this time. Please try again.');
+      const seen = new Set(pool.map(q => norm(q.stem)));
+      save(K_EXTRA, load(K_EXTRA, []).concat(qs.filter(q => !seen.has(norm(q.stem))).map(({ src, ...q }) => q)).slice(-MAX_EXTRA));
+      st.quiz = true;
+      st.qs = qs.map(q => { const order = shuffle([0, 1, 2, 3]); return { ...q, opts: order.map(i => q.options[i]), correct: order.indexOf(q.answer) }; });
+      st.i = 0; st.score = 0; show();
+    } catch (e) { home(e.message); }
+  }
   function start() {
     const stats = load(K_STATS, {});
     const pool = all().filter(q => !st.topic || q.topic === st.topic);
@@ -101,7 +138,7 @@
   }
   function show() {
     const q = st.qs[st.i]; st.answered = false;
-    const v = shell(`<div class="card"><div class="sub">Question ${st.i + 1} of ${st.qs.length} · ${esc(q.topic)}${q.src === 'ai' ? ' · <b>AI-generated (this phone)</b>' : q.src === 'shared' ? ' · weekly bank' : ''}</div>
+    const v = shell(`<div class="card"><div class="sub">Question ${st.i + 1} of ${st.qs.length} · ${esc(q.topic)}${st.quiz ? ' · <b>AI quiz (online)</b>' : q.src === 'ai' ? ' · <b>AI-generated (this phone)</b>' : q.src === 'shared' ? ' · weekly bank' : ''}</div>
       <div class="q" style="margin-top:6px">${esc(q.stem)}</div>
       <div id="mcqOpts" style="margin-top:10px">${q.opts.map((o, i) => `<button class="chip" data-i="${i}" style="display:block;width:100%;text-align:left;border-radius:12px;margin:8px 0;padding:12px">${String.fromCharCode(65 + i)}. ${esc(o)}</button>`).join('')}</div>
       <div id="mcqFb"></div></div>`);
@@ -132,11 +169,11 @@
     const v = shell(`<div class="card" style="text-align:center"><div class="sub">${esc(st.topic || 'All topics')}</div>
       <div style="font-size:34px;font-weight:900;margin:6px 0">${st.score}/${n}</div><div><b>${pct >= 80 ? 'Excellent.' : pct >= 60 ? 'Good — revise the sections below.' : 'Revise the sections below and try again.'}</b></div>
       ${miss.length ? `<div class="src" style="margin-top:8px">Revise: ${esc([...new Set(miss.map(q => q.topic + ' → ' + q.section))].join(' · '))}</div>` : ''}</div>
-      <button class="go" id="mcqAgain">Another ${SESSION}</button><button class="ghost" id="mcqHome" style="margin-top:8px;width:100%">Change topic</button>`);
-    v.querySelector('#mcqAgain').onclick = start; v.querySelector('#mcqHome').onclick = () => home();
+      <button class="go" id="mcqAgain">${st.quiz ? 'Another AI quiz on ' + esc(st.topic) : 'Another ' + SESSION}</button><button class="ghost" id="mcqHome" style="margin-top:8px;width:100%">Change topic</button>`);
+    v.querySelector('#mcqAgain').onclick = () => st.quiz ? startQuiz() : start(); v.querySelector('#mcqHome').onclick = () => home();
   }
 
-  window.openMcq = function (topic) { st.topic = (typeof topic === 'string' && topics().includes(topic)) ? topic : ''; home(); loadShared().then(() => { if (document.getElementById('mcqHome') === null && document.getElementById('mcqGo')) home(); }); };
+  window.openMcq = function (topic, mode) { st.mode = mode === 'online' ? 'online' : 'offline'; st.topic = (typeof topic === 'string' && topics().includes(topic)) ? topic : ''; home(); loadShared().then(() => { if (document.getElementById('mcqHome') === null && document.getElementById('mcqGo')) home(); }); };
   window.uroMcqTopUp = topUp;
 
   function tile() {
